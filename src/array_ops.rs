@@ -19,6 +19,9 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
     fn rsplit_ptr(&self, n: usize) -> (*const T, *const T);
     fn rsplit_mut_ptr(&mut self, n: usize) -> (*mut T, *mut T);
 
+    fn each_pin_ref(self: Pin<&Self>) -> [Pin<&T>; N];
+    fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N];
+
     fn fill<F>(fill: F) -> Self
     where
         F: FnMut(usize) -> T + ~const Destruct;
