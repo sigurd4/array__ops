@@ -1,0 +1,23 @@
+name: Docs
+on:
+  schedule:
+    - cron: '29 15 * * *'
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+jobs:
+  doc:
+    name: Docs
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    steps:
+      - uses: actions/checkout@v4
+        name: "Checkout"
+      - uses: dtolnay/rust-toolchain@nightly
+        name: "Install rust nightly"
+      - uses: dtolnay/install@cargo-docs-rs
+        name: "Install cargo docs-rs"
+      - run: cargo docs-rs
+        name: "Run cargo docs-rs"
