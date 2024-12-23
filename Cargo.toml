@@ -10,10 +10,11 @@ keywords = ["array", "util", "ops"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["std"]
-std = ["slice_ops/std"]
+default = ["alloc"]
+alloc = ["slice_ops/alloc"]
+#std = ["alloc"]
 
 [dependencies]
-moddef = "0.2.2"
-array_trait = "1.0.1"
-slice_ops = "0.1.12"
+moddef = "0.2.6"
+array_trait = "1.0.2"
+slice_ops = "0.2.1"

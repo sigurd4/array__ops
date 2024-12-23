@@ -1,31 +1,28 @@
-#![cfg_attr(not(any(feature = "std", test)), no_std)]
+#![cfg_attr(not(test), no_std)]
 
 #![feature(associated_type_defaults)]
 #![feature(const_trait_impl)]
 #![feature(unboxed_closures)]
 #![feature(const_for)]
-#![feature(associated_type_bounds)]
 #![feature(generic_arg_infer)]
 #![feature(maybe_uninit_uninit_array)]
 #![feature(maybe_uninit_array_assume_init)]
 #![feature(const_destruct)]
-//#![feature(effects)]
-#![feature(const_mut_refs)]
-#![feature(const_refs_to_cell)]
-#![feature(const_ptr_write)]
-#![feature(const_maybe_uninit_assume_init)]
 #![feature(associated_const_equality)]
 #![feature(const_swap_nonoverlapping)]
 #![feature(portable_simd)]
 #![feature(const_swap)]
 #![feature(allocator_api)]
-#![cfg_attr(feature = "std", feature(new_uninit))]
+#![cfg_attr(feature = "alloc", feature(new_uninit))]
 #![feature(let_chains)]
-
-#![feature(const_intrinsic_copy)]
+#![feature(ptr_as_ref_unchecked)]
+#![feature(unsized_const_params)]
 #![feature(adt_const_params)]
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 moddef::moddef!(
     flat(pub) mod {

@@ -109,7 +109,7 @@ impl<T, const M: usize, const N: usize> Array2dOps<T, M, N> for [[T; N]; M]
         T: Mul<Rhs> + Copy,
         Rhs: Copy
     {
-        ArrayOps::fill(|r| ArrayOps::fill(|c| self[r % M][c % N]*rhs[r / M][c / N]))
+        ArrayOps::from_fn(|r| ArrayOps::from_fn(|c| self[r % M][c % N]*rhs[r / M][c / N]))
     }
     
     fn into_diagonal(self) -> [T; crate::min_len(M, N)]

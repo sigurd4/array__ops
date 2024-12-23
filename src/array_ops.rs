@@ -1,7 +1,11 @@
-use core::{alloc::Allocator, borrow::{Borrow, BorrowMut}, cmp::Ordering, marker::Destruct, mem::{ManuallyDrop, MaybeUninit}, ops::{Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign}, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
+use core::{alloc::Allocator, pin::Pin, borrow::{Borrow, BorrowMut}, cmp::Ordering, marker::Destruct, mem::{ManuallyDrop, MaybeUninit}, ops::{Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign}, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
 
 use array_trait::Array;
+use private::PartiallyInitGuard;
 use slice_ops::{is_power_of, Padded};
+
+#[cfg(feature = "alloc")]
+use alloc::{alloc::Global, boxed::Box};
 
 use super::*;
 
@@ -19,32 +23,29 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
     fn rsplit_ptr(&self, n: usize) -> (*const T, *const T);
     fn rsplit_mut_ptr(&mut self, n: usize) -> (*mut T, *mut T);
 
-    fn each_pin_ref(self: Pin<&Self>) -> [Pin<&T>; N];
-    fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N];
-
-    fn fill<F>(fill: F) -> Self
+    fn from_fn<F>(fill: F) -> Self
     where
         F: FnMut(usize) -> T + ~const Destruct;
-    fn rfill<F>(fill: F) -> Self
+    fn rfrom_fn<F>(fill: F) -> Self
     where
         F: FnMut(usize) -> T + ~const Destruct;
         
-    #[cfg(feature = "std")]
-    fn fill_boxed<F>(fill: F) -> Box<Self>
+    #[cfg(feature = "alloc")]
+    fn from_fn_boxed<F>(fill: F) -> Box<Self>
     where
         F: FnMut(usize) -> T + ~const Destruct;
-    #[cfg(feature = "std")]
-    fn rfill_boxed<F>(fill: F) -> Box<Self>
+    #[cfg(feature = "alloc")]
+    fn rfrom_fn_boxed<F>(fill: F) -> Box<Self>
     where
         F: FnMut(usize) -> T + ~const Destruct;
         
-    #[cfg(feature = "std")]
-    fn fill_boxed_in<F, A>(fill: F, alloc: A) -> Box<Self, A>
+    #[cfg(feature = "alloc")]
+    fn from_fn_boxed_in<F, A>(fill: F, alloc: A) -> Box<Self, A>
     where
         F: FnMut(usize) -> T + ~const Destruct,
         A: Allocator;
-    #[cfg(feature = "std")]
-    fn rfill_boxed_in<F, A>(fill: F, alloc: A) -> Box<Self, A>
+    #[cfg(feature = "alloc")]
+    fn rfrom_fn_boxed_in<F, A>(fill: F, alloc: A) -> Box<Self, A>
     where
         F: FnMut(usize) -> T + ~const Destruct,
         A: Allocator;
@@ -105,7 +106,7 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
         [(); M - N]:,
         [(); N - M]:;
         
-    fn try_reformulate_length<const M: usize>(self) -> Result<[T; M], Self>;
+    fn try_reformulate_length<const M: usize>(self) -> Result<[T; M], [T; N]>;
     
     fn try_reformulate_length_ref<const M: usize>(&self) -> Option<&[T; M]>;
         
@@ -142,7 +143,7 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
         Map: FnMut<(T, Rhs)> + ~const Destruct,
         T: Copy,
         Rhs: Copy;
-    fn flat_map<Map, O, const M: usize>(self, map: Map) -> [O; N*M]
+    fn flatmap<Map, O, const M: usize>(self, map: Map) -> [O; N*M]
     where
         Map: FnMut<(T,), Output = [O; M]> + ~const Destruct;
     fn map_assign<Map>(&mut self, map: Map)
@@ -502,17 +503,17 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
     /// ```
     fn rchain<const M: usize>(self, rhs: [T; M]) -> [T; N + M];
     
-    fn into_rotate_left(self, n: usize) -> Self;
+    fn into_rotate_left(self, n: usize) -> [T; N];
 
-    fn into_rotate_right(self, n: usize) -> Self;
+    fn into_rotate_right(self, n: usize) -> [T; N];
 
-    fn into_shift_many_left<const M: usize>(self, items: [T; M]) -> ([T; M], Self);
+    fn into_shift_many_left<const M: usize>(self, items: [T; M]) -> ([T; M], [T; N]);
         
-    fn into_shift_many_right<const M: usize>(self, items: [T; M]) -> (Self, [T; M]);
+    fn into_shift_many_right<const M: usize>(self, items: [T; M]) -> ([T; N], [T; M]);
 
-    fn into_shift_left(self, item: T) -> (T, Self);
+    fn into_shift_left(self, item: T) -> (T, [T; N]);
         
-    fn into_shift_right(self, item: T) -> (Self, T);
+    fn into_shift_right(self, item: T) -> ([T; N], T);
 
     fn rotate_left2(&mut self, n: usize);
 
@@ -955,6 +956,8 @@ pub trait ArrayOps<T, const N: usize>: Array + IntoIterator<Item = T>
 
     fn each_ref(&self) -> [&T; N];
     fn each_mut(&mut self) -> [&mut T; N];
+    fn each_pin_ref(self: Pin<&Self>) -> [Pin<&T>; N];
+    fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N];
     
     /// Performs the bit-reverse permutation. Length must be a power of 2.
     /// 
@@ -1502,7 +1505,7 @@ fn bench()
     use std::time::SystemTime;
 
     const N: usize = 1 << 10;
-    let mut a: [usize; N] = ArrayOps::fill(|i| i);
+    let mut a: [usize; N] = ArrayOps::from_fn(|i| i);
     let t0 = SystemTime::now();
     for _ in 0..1000
     {
@@ -1597,132 +1600,97 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         crate::rsplit_mut_ptr(self, mid)
     }
 
-    fn fill<F>(mut fill: F) -> Self
+    fn from_fn<F>(mut fill: F) -> Self
     where
         F: FnMut(usize) -> T + Destruct
     {
         let mut array = MaybeUninit::uninit_array();
-        let mut i = 0;
-        while i < N
+        let mut guard = PartiallyInitGuard::new_left(&mut array);
+
+        while guard.more()
         {
-            array[i] = MaybeUninit::new(fill(i));
-            i += 1;
+            guard.push_by_fn(&mut fill);
         }
-        unsafe {MaybeUninit::array_assume_init(array)}
+
+        guard.done();
+
+        unsafe {
+            MaybeUninit::array_assume_init(array)
+        }
     }
-    fn rfill<F>(mut fill: F) -> Self
+    fn rfrom_fn<F>(mut fill: F) -> Self
     where
         F: FnMut(usize) -> T + Destruct
     {
         let mut array = MaybeUninit::uninit_array();
-        if N > 0
+        let mut guard = PartiallyInitGuard::new_right(&mut array);
+
+        while guard.more()
         {
-            let mut i = N - 1;
-            loop
-            {
-                array[i] = MaybeUninit::new(fill(i));
-                if i == 0
-                {
-                    break
-                }
-                i -= 1;
-            }
+            guard.push_by_fn(&mut fill);
         }
-        unsafe {MaybeUninit::array_assume_init(array)}
+
+        guard.done();
+
+        unsafe {
+            MaybeUninit::array_assume_init(array)
+        }
     }
     
-    #[cfg(feature = "std")]
-    fn fill_boxed<F>(mut fill: F) -> Box<Self>
+    #[cfg(feature = "alloc")]
+    fn from_fn_boxed<F>(fill: F) -> Box<Self>
     where
         F: FnMut(usize) -> T + Destruct
     {
-        let array = Box::new_uninit();
-        let mut array: Box<[<F as FnOnce<(usize,)>>::Output; N]> = unsafe {
-            array.assume_init()
-        };
-        let mut i = 0;
-        while i < N
-        {
-            unsafe {
-                array.as_mut_ptr().add(i).write(fill(i));
-            }
-            i += 1;
-        }
-        array
+        Self::from_fn_boxed_in(fill, Global)
     }
-    #[cfg(feature = "std")]
-    fn rfill_boxed<F>(mut fill: F) -> Box<Self>
+    #[cfg(feature = "alloc")]
+    fn rfrom_fn_boxed<F>(fill: F) -> Box<Self>
     where
         F: FnMut(usize) -> T + Destruct
     {
-        let array = Box::new_uninit();
-        let mut array: Box<[<F as FnOnce<(usize,)>>::Output; N]> = unsafe {
-            array.assume_init()
-        };
-        if N != 0
-        {
-            let mut i = N - 1;
-            loop
-            {
-                unsafe {
-                    array.as_mut_ptr().add(i).write(fill(i));
-                }
-                if i == 0
-                {
-                    break
-                }
-                i -= 1;
-            }
-        }
-        array
+        Self::rfrom_fn_boxed_in(fill, Global)
     }
     
-    #[cfg(feature = "std")]
-    fn fill_boxed_in<F, A>(mut fill: F, alloc: A) -> Box<Self, A>
+    #[cfg(feature = "alloc")]
+    fn from_fn_boxed_in<F, A>(mut fill: F, alloc: A) -> Box<Self, A>
     where
         F: FnMut(usize) -> T + Destruct,
         A: Allocator
     {
-        let array = Box::new_uninit_in(alloc);
-        let mut array: Box<[T; N], A> = unsafe {
-            array.assume_init()
-        };
-        let mut i = 0;
-        while i < N
+        let mut array = private::boxed_array::new_uninit_in(alloc);
+        let mut guard = PartiallyInitGuard::new_left(&mut *array);
+
+        while guard.more()
         {
-            unsafe {
-                array.as_mut_ptr().add(i).write(fill(i));
-            }
-            i += 1;
+            guard.push_by_fn(&mut fill);
         }
-        array
+
+        guard.done();
+
+        unsafe {
+            private::boxed_array::assume_init(array)
+        }
     }
-    #[cfg(feature = "std")]
-    fn rfill_boxed_in<F, A>(mut fill: F, alloc: A) -> Box<Self, A>
+    #[cfg(feature = "alloc")]
+    fn rfrom_fn_boxed_in<F, A>(mut fill: F, alloc: A) -> Box<Self, A>
     where
         F: FnMut(usize) -> T + Destruct,
         A: Allocator
     {
-        let array = Box::new_uninit_in(alloc);
-        let mut array: Box<[T; N], A> = unsafe {
-            array.assume_init()
-        };
-        if N != 0
+        let mut array = private::boxed_array::new_uninit_in(alloc);
+        let mut guard = PartiallyInitGuard::new_right(&mut *array);
+
+        while guard.more()
         {
-            let mut i = N - 1;
-            loop
-            {
-                unsafe {
-                    array.as_mut_ptr().add(i).write(fill(i));
-                }
-                if i == 0
-                {
-                    break
-                }
-                i -= 1;
-            }
+            guard.push_by_fn(&mut fill);
         }
-        array
+
+        guard.done();
+
+        unsafe {
+            private::boxed_array::assume_init(array)
+        }
     }
     
     fn truncate<const M: usize>(self) -> [T; M]
@@ -1766,61 +1734,107 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         crate::rtruncate_mut(self)
     }
 
-    fn resize<const M: usize, F>(self, mut fill: F) -> [T; M]
+    fn resize<const M: usize, F>(mut self, mut fill: F) -> [T; M]
     where
         F: FnMut(usize) -> T + Destruct,
         T: Destruct
     {
-        let mut i = N.min(M);
-        while i < N
+        let overlap = N.min(M);
+
+        if M < N
         {
-            let _ = unsafe {(&self[i] as *const T).read()};
-            i += 1;
+            // Drop truncated elements
+            unsafe {
+                core::ptr::drop_in_place(&mut self[M..N]);
+            }
+        }
+
+        let src = self.as_ptr();
+
+        if M <= N
+        {
+            // If not larger than original, dont make a new uninit, instead read directly from original
+            let array = unsafe {
+                core::ptr::read(src.cast())
+            };
+            core::mem::forget(self);
+            return array;
         }
     
-        let mut dst = unsafe {private::uninit()};
-        let mut ptr = &mut dst as *mut T;
+        // Make new uninit array
+        let mut array = MaybeUninit::uninit_array();
+        let mut dst = (&mut array as *mut MaybeUninit<T>).cast::<T>();
     
-        unsafe {core::ptr::copy_nonoverlapping(core::mem::transmute(&self), ptr, N.min(M))};
+        // Copy over
+        unsafe {core::ptr::copy_nonoverlapping(src, dst, overlap)};
         core::mem::forget(self);
     
+        // Extend with fill
         let mut i = N;
-        ptr = unsafe {ptr.add(N)};
+        dst = unsafe {dst.add(N)};
         while i < M
         {
-            unsafe {core::ptr::write(ptr, fill(i))};
+            unsafe {core::ptr::write(dst, fill(i))};
             i += 1;
-            ptr = unsafe {ptr.add(1)};
+            dst = unsafe {dst.add(1)};
         }
-        dst
+        unsafe {
+            MaybeUninit::array_assume_init(array)
+        }
     }
-    fn rresize<const M: usize, F>(self, mut fill: F) -> [T; M]
+    fn rresize<const M: usize, F>(mut self, mut fill: F) -> [T; M]
     where
         F: FnMut(usize) -> T + Destruct,
         T: Destruct
     {
-        let mut i = 0;
-        while i < N.saturating_sub(M)
+        let trunc = N.saturating_sub(M);
+        let offset = M.saturating_sub(N);
+        let overlap = N.min(M);
+
+        if M < N
         {
-            let _ = unsafe {(&self[i] as *const T).read()};
-            i += 1;
+            // Drop truncated elements
+            unsafe {
+                core::ptr::drop_in_place(&mut self[0..trunc]);
+            }
+        }
+
+        let src = unsafe {
+            self.as_ptr().add(trunc)
+        };
+
+        if M <= N
+        {
+            // If not larger than original, dont make a new uninit, instead read directly from original
+            let array = unsafe {
+                core::ptr::read(src.cast())
+            };
+            core::mem::forget(self);
+            return array;
         }
         
-        let mut dst = unsafe {private::uninit()};
-        let mut ptr = unsafe {(&mut dst as *mut T).add(M.saturating_sub(N))};
-        
-        unsafe {core::ptr::copy_nonoverlapping((&self as *const T).add(N.saturating_sub(M)), ptr, N.min(M))};
+        // Make new uninit array
+        let mut array = MaybeUninit::uninit_array();
+        let mut dst = unsafe {
+            (&mut array as *mut MaybeUninit<T>).cast::<T>().add(offset)
+        };
+    
+        // Copy over
+        unsafe {core::ptr::copy_nonoverlapping(src, dst, overlap)};
         core::mem::forget(self);
     
-        let mut i = M.saturating_sub(N);
+        // Extend with fill
+        let mut i = offset;
         while i > 0
         {
             i -= 1;
-            ptr = unsafe {ptr.sub(1)};
-            unsafe {core::ptr::write(ptr, fill(i))};
+            dst = unsafe {dst.sub(1)};
+            unsafe {core::ptr::write(dst, fill(i))};
         }
     
-        dst
+        unsafe {
+            MaybeUninit::array_assume_init(array)
+        }
     }
 
     fn into_rotate_left(self, n: usize) -> Self
@@ -1888,7 +1902,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         F: FnMut(usize) -> T + Destruct,
         [(); M - N]:
     {
-        let filled: [T; M - N] = ArrayOps::fill(|i| fill(i + N));
+        let filled: [T; M - N] = ArrayOps::from_fn(|i| fill(i + N));
         unsafe {private::merge_transmute(self, filled)}
     }
     fn rextend<const M: usize, F>(self, fill: F) -> [T; M]
@@ -1896,7 +1910,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         F: FnMut(usize) -> T + Destruct,
         [(); M - N]:
     {
-        let filled: [T; M - N] = ArrayOps::rfill(fill);
+        let filled: [T; M - N] = ArrayOps::rfrom_fn(fill);
         unsafe {private::merge_transmute(filled, self)}
     }
     
@@ -1951,24 +1965,6 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         crate::as_collumn_mut(self)
     }
-
-    /*fn into_const_iter(self) -> IntoConstIter<T, N, true>
-    {
-        IntoConstIter::from(self)
-    }
-    fn into_const_iter_reverse(self) -> IntoConstIter<T, N, false>
-    {
-        IntoConstIter::from(self)
-    }
-    
-    fn const_iter(&self) -> ConstIter<'_, T, N>
-    {
-        ConstIter::from(self)
-    }
-    fn const_iter_mut(&mut self) -> ConstIterMut<'_, T, N>
-    {
-        ConstIterMut::from(self)
-    }*/
     
     fn map_<Map>(self, mut map: Map) -> [Map::Output; N]
     where
@@ -1976,7 +1972,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         let ptr = &self as *const T;
     
-        let dst = ArrayOps::fill(|i| unsafe {
+        let dst = ArrayOps::from_fn(|i| unsafe {
             map(ptr.add(i).read())
         });
     
@@ -1999,7 +1995,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         let ptr0 = &self as *const T;
         let ptr1 = &rhs as *const Rhs;
     
-        let dst = ArrayOps::fill(|i| unsafe {
+        let dst = ArrayOps::from_fn(|i| unsafe {
             map(
                 ptr0.add(i).read(),
                 ptr1.add(i).read()
@@ -2019,7 +2015,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         self.map_(|x| rhs.map_(|y| map(x, y)))
     }
-    fn flat_map<Map, O, const M: usize>(self, map: Map) -> [O; N*M]
+    fn flatmap<Map, O, const M: usize>(self, map: Map) -> [O; N*M]
     where
         Map: FnMut<(T,), Output = [O; M]> + Destruct
     {
@@ -2061,7 +2057,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         let ptr = &self as *const T;
     
-        let dst = ArrayOps::fill(|i| unsafe {
+        let dst = ArrayOps::from_fn(|i| unsafe {
             (i, ptr.add(i).read())
         });
     
@@ -2078,7 +2074,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         let ptr = self.as_ptr();
         
-        let dst = ArrayOps::fill(|i| ArrayOps::fill(|j| if i == j && i < N
+        let dst = ArrayOps::from_fn(|i| ArrayOps::from_fn(|j| if i == j && i < N
             {
                 unsafe {
                     ptr.add(i).read()
@@ -2099,13 +2095,13 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     where
         T: Copy
     {
-        ArrayOps::fill(|i| ArrayOps::fill(|j| self[if i >= j {i - j} else {j - i}]))
+        ArrayOps::from_fn(|i| ArrayOps::from_fn(|j| self[if i >= j {i - j} else {j - i}]))
     }
     fn hankel_matrix<const M: usize>(&self, r: &[T; M]) -> [[T; M]; N]
     where
         T: Copy
     {
-        ArrayOps::fill(|i| ArrayOps::fill(|j| if i + j < N
+        ArrayOps::from_fn(|i| ArrayOps::from_fn(|j| if i + j < N
         {
             self[i + j]
         }
@@ -2768,7 +2764,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         T: MulAssign<Rhs> + Sub + Copy,
         Rhs: Copy
     {
-        ArrayOps::fill(|i| {
+        ArrayOps::from_fn(|i| {
             let mut m_p = self[(i + 1) % N];
             let mut m_m = self[(i + (N - 1)) % N];
     
@@ -2818,7 +2814,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         let (left, right) = crate::rsplit_ptr(self, N % M);
     
         unsafe {(
-            ArrayOps::fill(|i| &*left.add(i).cast()),
+            ArrayOps::from_fn(|i| &*left.add(i).cast()),
             &*right.cast()
         )}
     }
@@ -2830,7 +2826,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
         let (left, right) = crate::rsplit_mut_ptr(self, N % M);
     
         unsafe {(
-            ArrayOps::fill(|i| &mut *left.add(i).cast()),
+            ArrayOps::from_fn(|i| &mut *left.add(i).cast()),
             &mut *right.cast()
         )}
     }
@@ -2852,7 +2848,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     
         unsafe {(
             &*left.cast(),
-            ArrayOps::fill(|i| &*right.add(i).cast())
+            ArrayOps::from_fn(|i| &*right.add(i).cast())
         )}
     }
     fn rspread_chunks_mut<const M: usize>(&mut self) -> (&mut [T; N % M], [&mut [Padded<T, M>; N / M]; M])
@@ -2864,7 +2860,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     
         unsafe {(
             &mut *left.cast(),
-            ArrayOps::fill(|i| &mut *right.add(i).cast())
+            ArrayOps::from_fn(|i| &mut *right.add(i).cast())
         )}
     }
     fn spread_chunks_exact<const M: usize>(self) -> [[T; N / M]; M]
@@ -2882,7 +2878,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         let ptr = self as *const T;
         
-        ArrayOps::fill(|i| unsafe {&*ptr.add(i).cast()})
+        ArrayOps::from_fn(|i| unsafe {&*ptr.add(i).cast()})
     }
     fn spread_chunks_exact_mut<const M: usize>(&mut self) -> [&mut [Padded<T, M>; N / M]; M]
     where
@@ -2891,7 +2887,7 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
     {
         let ptr = self as *mut T;
         
-        ArrayOps::fill(|i| unsafe {&mut *ptr.add(i).cast()})
+        ArrayOps::from_fn(|i| unsafe {&mut *ptr.add(i).cast()})
     }
     
     fn chunks<const M: usize>(self) -> ([[T; M]; N / M], [T; N % M])
@@ -3012,18 +3008,28 @@ impl<T, const N: usize> /*const*/ ArrayOps<T, N> for [T; N]
 
     fn each_ref(&self) -> [&T; N]
     {
-        let ptr = self as *const T;
-        ArrayOps::fill(|i| {
-            let y = unsafe {&*ptr.add(i)};
-            y
+        ArrayOps::from_fn(|i| {
+            &self[i]
         })
     }
     fn each_mut(&mut self) -> [&mut T; N]
     {
-        let ptr = self as *mut T;
-        ArrayOps::fill(|i| {
-            let y = unsafe {&mut *ptr.add(i)};
-            y
+        ArrayOps::from_fn(|i| unsafe {
+            (&mut self[i] as *mut T).as_mut_unchecked()
+        })
+    }
+    fn each_pin_ref(self: Pin<&Self>) -> [Pin<&T>; N]
+    {
+        ArrayOps::from_fn(|i| unsafe {
+            self.map_unchecked(|this| {
+                &this[i]
+            })
+        })
+    }
+    fn each_pin_mut(mut self: Pin<&mut Self>) -> [Pin<&mut T>; N]
+    {
+        ArrayOps::from_fn(|i| unsafe {
+            Pin::new_unchecked(&mut (self.as_mut().get_unchecked_mut() as *mut Self).as_mut_unchecked()[i])
         })
     }
     
