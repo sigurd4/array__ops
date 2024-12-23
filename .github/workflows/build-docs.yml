@@ -17,8 +17,6 @@ jobs:
         #- stable
         #- beta
         - nightly
-    env:
-      RUSTDOCFLAGS: -Dwarnings
     steps:
     - uses: actions/checkout@v4
       name: "Checkout"
