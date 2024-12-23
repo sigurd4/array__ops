@@ -10,14 +10,29 @@ jobs:
   doc:
     name: Docs
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+        #- stable
+        #- beta
+        - nightly
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
-      - uses: actions/checkout@v4
-        name: "Checkout"
-      - uses: dtolnay/rust-toolchain@nightly
-        name: "Install rust nightly"
-      - uses: dtolnay/install@cargo-docs-rs
-        name: "Install cargo docs-rs"
-      - run: cargo docs-rs
-        name: "Run cargo docs-rs"
+    - uses: actions/checkout@v4
+      name: "Checkout"
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        profile: "minimal"
+        toolchain: "${{ matrix.rust }}"
+        override: true
+        name: "Install Rust ${{ matrix.rust }}"
+    - uses: "actions-rs/cargo@v1"
+      with:
+        command: "check"
+      name: "Run `cargo check`"
+    - uses: dtolnay/install@cargo-docs-rs
+      name: "Install cargo docs-rs"
+    - run: cargo docs-rs
+      name: "Run `cargo docs-rs`"
