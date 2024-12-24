@@ -38,6 +38,10 @@ pub trait Array2dOps<T, const M: usize, const N: usize>: ArrayOps<[T; N], M>
         T: ~const Destruct;
     fn diagonal_ref(&self) -> [&T; crate::min_len(M, N)];
     fn diagonal_mut(&mut self) -> [&mut T; crate::min_len(M, N)];
+
+    fn flatten(self) -> [T; M*N];
+    fn flatten_ref(&self) -> &[T; M*N];
+    fn flatten_mut(&mut self) -> &mut [T; M*N];
 }
 
 pub const fn transpose<T, const M: usize, const N: usize>(matrix: [[T; N]; M]) -> [[T; M]; N]
@@ -150,5 +154,24 @@ impl<T, const M: usize, const N: usize> Array2dOps<T, M, N> for [[T; N]; M]
     fn diagonal_mut(&mut self) -> [&mut T; crate::min_len(M, N)]
     {
         crate::diagonal_mut(self)
+    }
+    
+    fn flatten(self) -> [T; M*N]
+    {
+        unsafe {
+            private::transmute_unchecked_size(self)
+        }
+    }
+    fn flatten_ref(&self) -> &[T; M*N]
+    {
+        unsafe {
+            core::mem::transmute(self)
+        }
+    }
+    fn flatten_mut(&mut self) -> &mut [T; M*N]
+    {
+        unsafe {
+            core::mem::transmute(self)
+        }
     }
 }

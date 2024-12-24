@@ -1,5 +1,5 @@
 #![cfg_attr(not(test), no_std)]
-
+#![allow(async_fn_in_trait)]
 #![feature(associated_type_defaults)]
 #![feature(const_trait_impl)]
 #![feature(unboxed_closures)]
@@ -15,7 +15,11 @@
 #![feature(allocator_api)]
 #![cfg_attr(feature = "alloc", feature(new_uninit))]
 #![feature(let_chains)]
+#![feature(const_array_each_ref)]
 #![feature(ptr_as_ref_unchecked)]
+#![feature(async_fn_traits)]
+#![feature(maybe_uninit_slice)]
+#![feature(future_join)]
 #![feature(unsized_const_params)]
 #![feature(adt_const_params)]
 #![feature(const_closures)]
@@ -26,6 +30,8 @@ extern crate alloc;
 
 moddef::moddef!(
     flat(pub) mod {
+        join,
+        form,
         array_2d_ops,
         array_nd_ops,
         array_ops,
@@ -175,14 +181,14 @@ mod tests {
             4, // Matematikk R2
         ];
 
-        let gpa_uni: f32 = GRADES_UNI.map_(|(pts, grade)| (pts*grade as u8) as u16)
+        let gpa_uni: f32 = GRADES_UNI.map(|(pts, grade)| (pts*grade as u8) as u16)
             .sum_from(0) as f32
-            /GRADES_UNI.map_(const |(pts, _)| pts as u16)
+            /GRADES_UNI.map(const |(pts, _)| pts as u16)
             .sum_from(0) as f32;
 
         println!("{}", gpa_uni);
 
-        let gpa_vgs: f32 = GRADES_VGS.map_(|grade| grade as u16)
+        let gpa_vgs: f32 = GRADES_VGS.map(|grade| grade as u16)
             .sum_from(0) as f32
             /GRADES_VGS.len() as f32;
             
@@ -197,7 +203,7 @@ mod tests {
         
         assert_eq!(<[[[u8; 2]; N]; M]>::DIMENSIONS, [M, N, 2]);
 
-        let a: [[[u8; 2]; N]; M] = ArrayNdOps::fill_nd(|i| i.map_(|i| i as u8));
+        let a: [[[u8; 2]; N]; M] = ArrayNdOps::fill_nd(|i| i.map(|i| i as u8));
 
         let t0 = SystemTime::now();
         for m in 0..M
