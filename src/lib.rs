@@ -20,8 +20,8 @@
 #![feature(async_fn_traits)]
 #![feature(maybe_uninit_slice)]
 #![feature(future_join)]
-#![feature(unsized_const_params)]
 #![feature(adt_const_params)]
+#![feature(unsized_const_params)]
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]
 
@@ -30,14 +30,12 @@ extern crate alloc;
 
 moddef::moddef!(
     flat(pub) mod {
+        from_fn
+    },
+    pub mod {
         join,
-        form,
-        array_2d_ops,
-        array_nd_ops,
-        array_ops,
-        array_simd_ops,
-        square_array_2d_ops,
-        collumn_array_ops,
+        ops,
+        form
     },
     mod private
 );
@@ -74,12 +72,9 @@ pub const fn max_len(a: usize, b: usize) -> usize
 
 #[cfg(test)]
 mod tests {
-    use std::time::SystemTime;
-
-    use array_trait::ArrayNd;
     use slice_ops::Padded;
 
-    use super::*;
+    use crate::ops::*;
 
     #[test]
     fn bit_rev()
@@ -195,7 +190,7 @@ mod tests {
         println!("{}", gpa_vgs);
     }
 
-    #[test]
+    /*#[test]
     fn benchmark()
     {
         const N: usize = 64;
@@ -223,7 +218,7 @@ mod tests {
         }
         let t = t0.elapsed().unwrap();
         println!("t = {:?}", t); //10.5832ms
-    }
+    }*/
 
     #[test]
     fn reduce()
@@ -259,11 +254,11 @@ mod tests {
         println!("Alignment padded x3 String = {}", core::mem::align_of::<Padded<String, 3>>());
 
         println!("str: {:?}", str);
-        println!("spread: {:?}", str.spread_chunks_ref::<3>());
+        println!("spread: {:?}", str.spread_ref::<3>());
         println!("chunks: {:?}", str.chunks_ref::<3>());
 
         assert_eq!(
-            str.spread_chunks::<3>(),
+            str.spread::<3>(),
             (
                 [
                     ['a', 'd', 'g', 'j', 'm', 'p', 's', 'v'],

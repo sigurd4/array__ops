@@ -1,6 +1,6 @@
 use core::mem::MaybeUninit;
 
-use crate::ArrayForm;
+use crate::form::ArrayForm;
 
 use super::Dir;
 
@@ -70,9 +70,21 @@ where
     where
         F: FnOnce(A::Elem) -> U
     {
+        self.enumerate_map(|_, x| mapper(x))
+    }
+    pub fn try_map<F, E>(&mut self, mapper: F) -> Result<(), E>
+    where
+        F: FnOnce(A::Elem) -> Result<U, E>
+    {
+        self.try_enumerate_map(|_, x| mapper(x))
+    }
+    pub fn enumerate_map<F>(&mut self, mapper: F)
+    where
+        F: FnOnce(usize, A::Elem) -> U
+    {
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
-            core::ptr::write(dst, MaybeUninit::new(mapper(A::read_assume_init_elem(&mut self.src, j))))
+            core::ptr::write(dst, MaybeUninit::new(mapper(j, A::read_assume_init_elem(&mut self.src, j))))
         };
         match D
         {
@@ -89,14 +101,14 @@ where
             }
         }
     }
-    pub fn try_map<F, E>(&mut self, mapper: F) -> Result<(), E>
+    pub fn try_enumerate_map<F, E>(&mut self, mapper: F) -> Result<(), E>
     where
-        F: FnOnce(A::Elem) -> Result<U, E>
+        F: FnOnce(usize, A::Elem) -> Result<U, E>
     {
         assert!(!self.err);
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
-            let result = mapper(A::read_assume_init_elem(&mut self.src, j));
+            let result = mapper(j, A::read_assume_init_elem(&mut self.src, j));
             match result
             {
                 Err(error) => {

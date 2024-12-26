@@ -1,4 +1,4 @@
-use crate::ArrayForm;
+use crate::form::ArrayForm;
 
 use super::Dir;
 
@@ -50,6 +50,11 @@ where
                 Dir::Right => N,
             }
         }
+    }
+
+    pub const fn index(&self) -> usize
+    {
+        self.i
     }
     
     pub const fn more(&self) -> bool

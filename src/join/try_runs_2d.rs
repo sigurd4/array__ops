@@ -1,7 +1,5 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
-use crate::ArrayOps;
-
 use super::MaybeDone;
 
 pub struct TryRuns2D<T, U, E, const M: usize, const N: usize>

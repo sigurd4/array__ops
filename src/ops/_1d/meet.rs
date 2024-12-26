@@ -1,0 +1,655 @@
+use core::{ops::AsyncFn, marker::Destruct};
+
+use array_trait::Array;
+
+use crate::{private::guard, Actions, ArrayForm, TryActions};
+
+use self::guard::PartialEmptyGuard;
+
+use super::Visit;
+
+#[const_trait]
+pub trait Meet<T, const N: usize>: Array<Item = T>
+{
+    /// Visits each element once, from left to right.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// 
+    /// x.visit_with(|&a, b| {
+    ///     assert_eq!(a, b)
+    /// }, y);
+    /// ```
+    fn meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, from left to right.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [0; 8];
+    /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// 
+    /// x.visit_mut_with(|a, b| {
+    ///     *a += b
+    /// }, y);
+    /// 
+    /// assert_eq!(x, [1, 2, 3, 4, 5, 6, 7, 8]);
+    /// ```
+    fn meet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Visits each element once, from left to right, or short-circuits if visitor returns error.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
+    /// 
+    /// let result = x.try_visit_with(|&a, b| {
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     assert_eq!(a, b);
+    ///     Ok(())
+    /// });
+    /// 
+    /// assert_eq!(result, Err(-1));
+    /// ```
+    fn try_meet_each<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, from left to right, or short-circuits if visitor returns error.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [0; 8];
+    /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
+    /// 
+    /// let result = x.try_visit_mut_with(|a, b| {
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     *a = b;
+    ///     Ok(())
+    /// }, y);
+    /// 
+    /// assert_eq!(result, Err(-1));
+    /// assert_eq!(x, [1, 2, 3, 4, 0, 0, 0, 0])
+    /// ```
+    fn try_meet_each_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+        
+    /// Visits each element once, from right to left.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// let y = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// 
+    /// x.rvisit_with(|&a, b| {
+    ///     assert_eq!(a, b)
+    /// }, y);
+    /// ```
+    fn rmeet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, from right to left.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [0; 8];
+    /// let y = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// 
+    /// x.rvisit_mut_with(|a, b| {
+    ///     *a = b;
+    /// }, y);
+    /// 
+    /// assert_eq!(x, [8, 7, 6, 5, 4, 3, 2, 1]);
+    /// ```
+    fn rmeet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Visits each element once, from right to left, or short-circuits if visitor returns error.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// let y = [-4, -3, -2, -1, 4, 3, 2, 1];
+    /// 
+    /// let result = x.try_rvisit_with(|&a, b| {
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     assert_eq!(a, b);
+    ///     Ok(())
+    /// });
+    /// 
+    /// assert_eq!(result, Err(-1));
+    /// ```
+    fn try_rmeet_each<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, from right to left, or short-circuits if visitor returns error.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [0; 8];
+    /// let y = [-4, -3, -2, -1, 4, 3, 2, 1];
+    /// 
+    /// let result = x.try_rvisit_mut_with(|a, b| {
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     *a = b;
+    ///     Ok(())
+    /// });
+    /// 
+    /// assert_eq!(result, Err(-1));
+    /// assert_eq!(x, [0, 0, 0, 0, 4, 3, 2, 1])
+    /// ```
+    fn try_rmeet_each_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+        
+    /// Visits each element once, asyncronously.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// 
+    /// # tokio_test::block_on(async {
+    /// x.visit_async_with(async |&a, b| {
+    ///     assert_eq!(x[a - 1], a)
+    ///     assert_eq!(y[b - 1], b)
+    ///     assert_eq!(a, b);
+    /// }, y).await;
+    /// # })
+    /// ```
+    async fn meet_each_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, asyncronously.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// let y = [-7, -5, -3, -1, 1, 3, 5, 7];
+    /// 
+    /// # tokio_test::block_on(async {
+    /// x.visit_mut_async_with(async |a, b| {
+    ///     *a += b
+    /// }, y).await;
+    /// 
+    /// assert_eq!(x, [1, 2, 3, 4, 5, 6, 7, 8]);
+    /// # })
+    /// ```
+    async fn meet_each_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a mut T, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    /// Visits each element once, asyncronously, or short-circuits if visitor returns error.
+    /// 
+    /// # Warning
+    /// 
+    /// When any of the tasks return an error, all other tasks will be ignored. The tasks are not nessecarily stopped, and may still be running in the background.
+    /// 
+    /// If you want to wait for all tasks to complete, keep polling the future until it returns an [Ok](core::result::Result).
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
+    /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
+    /// 
+    /// # tokio_test::block_on(async {
+    /// let result = x.try_visit_async_with(async |&a, b| {
+    ///     assert_eq!(x[a - 1], a);
+    ///     assert_eq!(y[b - 1], b);
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     assert_eq!(a, b);
+    ///     Ok(())
+    /// }, y).await;
+    /// 
+    /// assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
+    /// # })
+    /// ```
+    async fn try_meet_each_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    /// Mutably visits each element once, asyncronously, or short-circuits if visitor returns error.
+    /// 
+    /// # Warning
+    /// 
+    /// When any of the tasks return an error, all other tasks will be ignored. The tasks are not nessecarily stopped, and may still be running in the background.
+    /// 
+    /// If you want to wait for all tasks to complete, keep polling the future until it returns an [Ok](core::result::Result).
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use array__ops::*;
+    /// 
+    /// let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
+    /// let y = [-7, -5, -3, -1, -1, -2, -3, -4];
+    /// 
+    /// # tokio_test::block_on(async {
+    /// let result = x.try_visit_mut_async_with(async |a, b| {
+    ///     if b < 0
+    ///     {
+    ///         return Err(b)
+    ///     }
+    ///     *a += b;
+    ///     Ok(())
+    /// }, y).await;
+    /// 
+    /// assert_eq!(x[..4], [1, 2, 3, 4]);
+    /// assert!(x[4] == 5 || x[4] == 4);
+    /// assert!(x[5] == 6 || x[5] == 3);
+    /// assert!(x[6] == 7 || x[6] == 2);
+    /// assert!(x[7] == 8 || x[7] == 1);
+    /// assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
+    /// # })
+    /// ```
+    async fn try_meet_each_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+
+    fn meet_all<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) + ~const Destruct,
+        T: 'a;
+    fn meet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) + ~const Destruct,
+        T: 'a;
+    fn try_meet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_meet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+        
+    fn rmeet_all<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) + ~const Destruct,
+        T: 'a;
+    fn rmeet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) + ~const Destruct,
+        T: 'a;
+    fn try_rmeet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_rmeet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+        
+    async fn meet_all_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a T, Rhs) + ~const Destruct,
+        T: 'a;
+    async fn meet_all_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a mut T, Rhs) + ~const Destruct,
+        T: 'a;
+    async fn try_meet_all_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    async fn try_meet_all_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+}
+
+impl<T, const N: usize> Meet<T, N> for [T; N]
+{
+    fn meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem),
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_left(rhs);
+        while guard.more()
+        {
+            visitor(
+                &self[guard.index()],
+                guard.pop()
+            );
+        }
+        guard.done();
+    }
+    fn meet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem),
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_left(rhs);
+        while guard.more()
+        {
+            visitor(
+                &mut self[guard.index()],
+                guard.pop()
+            );
+        }
+        guard.done();
+    }
+    fn try_meet_each<'a, E, F, Rhs>(&'a self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_left(rhs);
+        while guard.more()
+        {
+            visitor(
+                &self[guard.index()],
+                guard.pop()
+            )?;
+        }
+        guard.done();
+        Ok(())
+    }
+    fn try_meet_each_mut<'a, E, F, Rhs>(&'a mut self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_left(rhs);
+        while guard.more()
+        {
+            visitor(
+                &mut self[guard.index()],
+                guard.pop()
+            )?;
+        }
+        guard.done();
+        Ok(())
+    }
+        
+    fn rmeet_each<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem),
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_right(rhs);
+        while guard.more()
+        {
+            visitor(
+                &self[guard.index()],
+                guard.pop()
+            );
+        }
+        guard.done();
+    }
+    fn rmeet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem),
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_right(rhs);
+        while guard.more()
+        {
+            visitor(
+                &mut self[guard.index()],
+                guard.pop()
+            );
+        }
+        guard.done();
+    }
+    fn try_rmeet_each<'a, E, F, Rhs>(&'a self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_right(rhs);
+        while guard.more()
+        {
+            visitor(
+                &self[guard.index()],
+                guard.pop()
+            )?;
+        }
+        guard.done();
+        Ok(())
+    }
+    fn try_rmeet_each_mut<'a, E, F, Rhs>(&'a mut self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        let mut guard = PartialEmptyGuard::new_right(rhs);
+        while guard.more()
+        {
+            visitor(
+                &mut self[guard.index()],
+                guard.pop()
+            )?;
+        }
+        guard.done();
+        Ok(())
+    }
+        
+    async fn meet_each_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a T, Rhs::Elem),
+        T: 'a
+    {
+        self.zip_ref_with(rhs, |x, y| visitor(x, y)).join_actions().await;
+    }
+    async fn meet_each_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a mut T, Rhs::Elem),
+        T: 'a
+    {
+        self.zip_mut_with(rhs, |x, y| visitor(x, y)).join_actions().await;
+    }
+    async fn try_meet_each_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.zip_ref_with(rhs, |x, y| visitor(x, y)).try_join_actions().await;
+    }
+    async fn try_meet_each_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(&'a mut T, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.zip_mut_with(rhs, |x, y| visitor(x, y)).try_join_actions().await;
+    }
+
+    fn meet_all<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs),
+        T: 'a
+    {
+        self.visit(|x| visitor(x, rhs))
+    }
+    fn meet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs),
+        T: 'a
+    {
+        self.visit_mut(|x| visitor(x, rhs))
+    }
+    fn try_meet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_visit(|x| visitor(x, rhs))
+    }
+    fn try_meet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_visit_mut(|x| visitor(x, rhs))
+    }
+        
+    fn rmeet_all<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs),
+        T: 'a
+    {
+        self.rvisit(|x| visitor(x, rhs))
+    }
+    fn rmeet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs),
+        T: 'a
+    {
+        self.rvisit_mut(|x| visitor(x, rhs))
+    }
+    fn try_rmeet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_rvisit(|x| visitor(x, rhs))
+    }
+    fn try_rmeet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(&'a mut T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_rvisit_mut(|x| visitor(x, rhs))
+    }
+        
+    async fn meet_all_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a T, Rhs),
+        T: 'a
+    {
+        self.visit_async(|x| visitor(x, rhs)).await
+    }
+    async fn meet_all_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a mut T, Rhs),
+        T: 'a
+    {
+        self.visit_mut_async(|x| visitor(x, rhs)).await
+    }
+    async fn try_meet_all_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_visit_async(|x| visitor(x, rhs)).await
+    }
+    async fn try_meet_all_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(&'a mut T, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_visit_mut_async(|x| visitor(x, rhs)).await
+    }
+}

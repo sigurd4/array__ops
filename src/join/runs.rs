@@ -1,7 +1,5 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
-use crate::ArrayOps;
-
 use super::MaybeDone;
 
 pub struct Runs<T, U, const N: usize>
@@ -34,7 +32,6 @@ where
         let mut done = true;
 
         let mut i = 0;
-        
         while i < N
         {
             let task = unsafe {

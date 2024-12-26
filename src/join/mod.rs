@@ -2,9 +2,11 @@ use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
 moddef::moddef!(
     flat(pub) mod {
+        actions_2d,
         actions,
         divide_and_conquer,
         runs,
+        try_actions_2d,
         runs_2d,
         try_actions,
         try_runs,

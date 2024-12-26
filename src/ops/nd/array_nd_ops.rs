@@ -1,4 +1,4 @@
-use core::{borrow::{Borrow, BorrowMut}, ops::{Deref, DerefMut}, marker::Destruct, mem::{MaybeUninit, ManuallyDrop}};
+use core::{ops::{Deref, DerefMut}, marker::Destruct, mem::{MaybeUninit, ManuallyDrop}};
 
 use array_trait::{ArrayNd, Array};
 

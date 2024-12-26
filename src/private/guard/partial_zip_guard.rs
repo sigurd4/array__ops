@@ -1,6 +1,6 @@
 use core::mem::MaybeUninit;
 
-use crate::ArrayForm;
+use crate::form::ArrayForm;
 
 use super::Dir;
 
@@ -79,9 +79,16 @@ where
     where
         F: FnOnce(A::Elem, B::Elem) -> U
     {
+        self.enumerate_zip(|_, x, y| zipper(x, y));
+    }
+    pub fn enumerate_zip<F>(&mut self, zipper: F)
+    where
+        F: FnOnce(usize, A::Elem, B::Elem) -> U
+    {
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
             core::ptr::write(dst, MaybeUninit::new(zipper(
+                j,
                 A::read_assume_init_elem(&self.lhs, j),
                 B::read_assume_init_elem(&self.rhs, j)
             )))
@@ -105,10 +112,17 @@ where
     where
         F: FnOnce(A::Elem, B::Elem) -> Result<U, E>
     {
+        self.try_enumerate_zip(|_, x, y| zipper(x, y))
+    }
+    pub fn try_enumerate_zip<F, E>(&mut self, zipper: F) -> Result<(), E>
+    where
+        F: FnOnce(usize, A::Elem, B::Elem) -> Result<U, E>
+    {
         assert!(!self.err);
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
             let result = zipper(
+                j,
                 A::read_assume_init_elem(&self.lhs, j),
                 B::read_assume_init_elem(&self.rhs, j)
             );

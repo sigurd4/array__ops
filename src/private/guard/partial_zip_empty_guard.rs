@@ -1,4 +1,4 @@
-use crate::ArrayForm;
+use crate::form::ArrayForm;
 
 use super::Dir;
 
@@ -72,8 +72,15 @@ where
 
     pub fn pop(&mut self) -> (A::Elem, B::Elem)
     {
+        self.pop_with(|x, y| (x, y))
+    }
+
+    pub fn pop_with<F>(&mut self, zipper: F) -> F::Output
+    where
+        F: FnOnce<(A::Elem, B::Elem)>
+    {
         let f = |j| unsafe {
-            (
+            zipper(
                 A::read_assume_init_elem(&self.lhs, j),
                 B::read_assume_init_elem(&self.rhs, j)
             )

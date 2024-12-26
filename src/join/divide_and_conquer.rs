@@ -1,10 +1,8 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
-use crate::ArrayOps;
-
 use super::MaybeDone;
 
-pub struct DivideAndConquer<T, F, const N: usize>
+pub struct FutureDivideAndConquer<T, F, const N: usize>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {
@@ -13,7 +11,7 @@ where
     reduce: F
 }
 
-impl<T, F, const N: usize> DivideAndConquer<T, F, N>
+impl<T, F, const N: usize> FutureDivideAndConquer<T, F, N>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {
@@ -27,7 +25,7 @@ where
     }
 }
 
-impl<T, F, const N: usize> Future for DivideAndConquer<T, F, N>
+impl<T, F, const N: usize> Future for FutureDivideAndConquer<T, F, N>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {

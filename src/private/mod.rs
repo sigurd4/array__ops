@@ -1,5 +1,3 @@
-use core::marker::{ConstParamTy, Destruct};
-
 moddef::moddef!(
     pub(crate) mod {
         guard,
@@ -16,18 +14,18 @@ pub(crate) struct Pair<L, R>
 
 impl<L, R> Pair<L, R>
 {
-    pub const fn new(left: L, right: R) -> Self
+    pub(crate) const fn new(left: L, right: R) -> Self
     {
         Self {left, right}
     }
 
-    pub const fn unpack(self) -> (L, R)
+    pub(crate) const fn unpack(self) -> (L, R)
     {
         unsafe {
-            let mut left_right: (L, R) = uninit();
-
-            core::ptr::copy_nonoverlapping(&self.left as *const L, &mut left_right.0 as *mut L, 1);
-            core::ptr::copy_nonoverlapping(&self.right as *const R, &mut left_right.1 as *mut R, 1);
+            let mut left_right = unsafe {(
+                core::ptr::read(&self.left),
+                core::ptr::read(&self.right)
+            )};
 
             core::mem::forget(self);
 
@@ -35,13 +33,15 @@ impl<L, R> Pair<L, R>
         }
     }
 
-    pub const fn pack(left_right: (L, R)) -> Self
+    pub(crate) const fn pack(left_right: (L, R)) -> Self
     {
         unsafe {
-            let mut pair: Self = uninit();
-
-            core::ptr::copy_nonoverlapping(&left_right.0 as *const L, &mut pair.left as *mut L, 1);
-            core::ptr::copy_nonoverlapping(&left_right.1 as *const R, &mut pair.right as *mut R, 1);
+            let pair =  unsafe {
+                Self {
+                    left: core::ptr::read(&left_right.0),
+                    right: core::ptr::read(&left_right.1)
+                }
+            };
 
             core::mem::forget(left_right);
 
@@ -49,13 +49,13 @@ impl<L, R> Pair<L, R>
         }
     }
     
-    pub const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
+    pub(crate) const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
     {
         unsafe {
-            let mut left_right: (ManuallyDrop<L>, ManuallyDrop<R>) = uninit();
-
-            core::ptr::copy_nonoverlapping(&self.left as *const L, (&mut left_right.0 as *mut ManuallyDrop<L>).cast(), 1);
-            core::ptr::copy_nonoverlapping(&self.right as *const R, (&mut left_right.1 as *mut ManuallyDrop<R>).cast(), 1);
+            let mut left_right = unsafe {(
+                ManuallyDrop::new(core::ptr::read(&self.left)),
+                ManuallyDrop::new(core::ptr::read(&self.right))
+            )};
 
             core::mem::forget(self);
 

@@ -30,15 +30,14 @@ where
         let mut done = true;
 
         let mut i = 0;
-        
         while i < N
         {
-            done &= unsafe {
+            let task = unsafe {
                 self.as_mut()
                     .map_unchecked_mut(|join| &mut join.tasks[i])
-                    .poll(cx)
-                    .is_ready()
             };
+            done &= task.poll(cx)
+                .is_ready();
             i += 1;
         }
 
