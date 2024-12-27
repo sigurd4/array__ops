@@ -82,14 +82,6 @@ mod tests {
     use crate::ops::*;
 
     #[test]
-    fn bit_rev()
-    {
-        let mut a = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        a.digit_rev_permutation::<3>();
-        println!("{:?}", a)
-    }
-
-    #[test]
     fn kronecker()
     {
         let a = [1, 2, 3];
