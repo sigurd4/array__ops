@@ -133,3 +133,16 @@ pub(crate) const unsafe fn transmute<A, B>(from: A) -> B
     );
     core::intrinsics::transmute_unchecked(from)
 }
+
+pub(crate) const unsafe fn uninit_extend_transmute<A, B>(from: A) -> MaybeUninit<B>
+{
+    union AB<A, B>
+    {
+        from: ManuallyDrop<A>,
+        to: ManuallyDrop<MaybeUninit<B>>
+    }
+
+    unsafe {
+        ManuallyDrop::into_inner(AB {from: ManuallyDrop::new(from)}.to)
+    }
+}

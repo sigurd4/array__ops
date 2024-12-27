@@ -72,6 +72,7 @@ mod private
         type _Elem;
         type _MaybeUninit: _ArrayForm<N, _T = MaybeUninit<Self::_T>>;
 
+        fn as_ptr(&self) -> *const Self::_T;
         fn each_elem(self) -> [Self::_Elem; N];
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem;
         fn copy_elem(&self, i: usize) -> Self::_Elem
@@ -100,6 +101,10 @@ mod private
         type _Elem = T;
         type _MaybeUninit = [MaybeUninit<T>; N];
 
+        fn as_ptr(&self) -> *const Self::_T
+        {
+            self.as_slice().as_ptr()
+        }
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self
@@ -160,6 +165,10 @@ mod private
         type _Elem = &'a T;
         type _MaybeUninit = &'a [MaybeUninit<T>; N];
 
+        fn as_ptr(&self) -> *const Self::_T
+        {
+            self.as_slice().as_ptr()
+        }
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_ref()
@@ -220,6 +229,10 @@ mod private
         type _Elem = &'a mut T;
         type _MaybeUninit = &'a mut [MaybeUninit<T>; N];
 
+        fn as_ptr(&self) -> *const Self::_T
+        {
+            self.as_slice().as_ptr()
+        }
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_mut()
@@ -286,6 +299,10 @@ mod private
         type _Elem = Pin<&'a T>;
         type _MaybeUninit = Pin<&'a [MaybeUninit<T>; N]>;
 
+        fn as_ptr(&self) -> *const Self::_T
+        {
+            self.as_slice().as_ptr()
+        }
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_pin_ref()
@@ -350,6 +367,10 @@ mod private
         type _Elem = Pin<&'a mut T>;
         type _MaybeUninit = Pin<&'a mut [MaybeUninit<T>; N]>;
 
+        fn as_ptr(&self) -> *const Self::_T
+        {
+            self.as_slice().as_ptr()
+        }
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_pin_mut()
