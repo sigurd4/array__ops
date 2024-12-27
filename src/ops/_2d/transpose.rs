@@ -1,4 +1,8 @@
+use core::mem::MaybeUninit;
+
 use array_trait::Array;
+
+use super::ArrayTransposeAssign;
 
 #[const_trait]
 pub trait ArrayTranspose<T, const M: usize, const N: usize>: Array<Item = [T; N]>
@@ -27,14 +31,92 @@ pub trait ArrayTranspose<T, const M: usize, const N: usize>: Array<Item = [T; N]
     fn transpose(self) -> [[T; M]; N];
 }
 
-impl<T, const M: usize, const N: usize> ArrayTranspose<T, M, N> for [[T; N]; M]
+impl<T, const M: usize, const N: usize> const ArrayTranspose<T, M, N> for [[T; N]; M]
 {
     fn transpose(self) -> [[T; M]; N]
     {
-        let transposed = crate::from_fn(|i| crate::from_fn(|j| unsafe {
-            core::ptr::read(&self[j][i])
-        }));
+        // Transposes in-place
+        // Even though the matrices have different dimensions, they have equal size, which makes this trick possible.
+
+        let mut transposed = unsafe {
+            (&self as *const Self).cast::<[[T; M]; N]>().read()
+        };
         core::mem::forget(self);
+
+        if N == M
+        {
+            let square = unsafe {
+                (&mut transposed as *mut [[T; M]; N]).cast::<[[T; N]; N]>().as_mut_unchecked()
+            };
+            square.transpose_assign();
+            return transposed
+        }
+
+        let ptr = transposed[0].as_mut_ptr();
+
+        let m = unsafe {
+            core::slice::from_raw_parts_mut(ptr, M * N)
+        };
+        let mut visited = [[false; N]; M];
+        let visited = unsafe {
+            core::slice::from_raw_parts_mut(visited[0].as_mut_ptr(), M * N)
+        };
+        let mut c = 0;
+        while c < M * N
+        {
+            if !visited[c]
+            {
+                let mut a = c;
+                loop
+                {
+                    a = if a == N * M - 1
+                    {
+                        N * M - 1
+                    }
+                    else
+                    {
+                        (M * a) % (N * M - 1)
+                    };
+                    visited[a] = true;
+                    if a == c
+                    {
+                        break
+                    }
+                    unsafe {
+                        m.swap_unchecked(a, c);
+                    }
+                }
+            }
+            c += 1
+        }
+
         transposed
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use super::ArrayTranspose;
+
+    #[test]
+    fn transpose()
+    {
+        let a = [
+            [1, 2, 3],
+            [4, 5, 6]
+        ];
+        let a_t = a.transpose();
+
+        println!("{:?}", a_t);
+
+        assert_eq!(
+            a_t,
+            [
+                [1, 4],
+                [2, 5],
+                [3, 6]
+            ]
+        );
     }
 }

@@ -20,6 +20,7 @@
 #![feature(async_fn_traits)]
 #![feature(maybe_uninit_slice)]
 #![feature(future_join)]
+#![feature(slice_swap_unchecked)]
 #![feature(adt_const_params)]
 #![feature(arbitrary_self_types)]
 #![feature(unsized_const_params)]
@@ -27,7 +28,6 @@
 #![feature(generic_const_exprs)]
 
 /// TODO:
-/// - poll each / poll all
 /// - do transmute in-place, transmuted
 
 #[cfg(feature = "alloc")]
