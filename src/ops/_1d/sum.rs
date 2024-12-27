@@ -2,6 +2,8 @@ use core::ops::AddAssign;
 
 use array_trait::Array;
 
+use super::{DivideAndConquer, Fold, Reduce};
+
 #[const_trait]
 pub trait Sum<T, const N: usize>: Array<Item = T>
 {

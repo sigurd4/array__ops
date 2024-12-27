@@ -2,7 +2,7 @@ use core::future::Future;
 
 use array_trait::Array;
 
-use crate::{Actions, Runs, TryActions, TryRuns};
+use crate::join::{Actions, Runs, TryActions, TryRuns};
 
 #[const_trait]
 pub trait ArrayJoin<T, const N: usize>: Array<Item = T>
@@ -30,14 +30,14 @@ impl<T, const N: usize> ArrayJoin<T, N> for [T; N]
     where
         T: Future<Output = ()>
     {
-        Actions::new(self)
+        Actions::new(self).await
     }
 
     async fn try_join_actions<E>(self) -> Result<(), E>
     where
         T: Future<Output = Result<(), E>>
     {
-        TryActions::new(self)
+        TryActions::new(self).await
     }
 
     async fn join_runs(self) -> [T::Output; N]

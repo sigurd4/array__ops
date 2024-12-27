@@ -1,10 +1,8 @@
-use core::ops::{AddAssign, Div, Mul, Neg};
-
-use array_trait::Array;
+use core::ops::{AddAssign, Div, Mul};
 
 use crate::private;
 
-use super::{ArrayMulDot, MapAssign};
+use super::{ArrayMagnitude, ArrayMul, ArrayMulDot};
 
 #[const_trait]
 pub trait ArrayProj<T, const N: usize>: ArrayMulDot<T, N>

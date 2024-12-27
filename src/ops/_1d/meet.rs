@@ -1,12 +1,10 @@
-use core::{ops::AsyncFn, marker::Destruct};
+use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use crate::{private::guard, Actions, ArrayForm, TryActions};
+use crate::form::ArrayForm;
 
-use self::guard::PartialEmptyGuard;
-
-use super::Visit;
+use super::EnumerateMeet;
 
 #[const_trait]
 pub trait Meet<T, const N: usize>: Array<Item = T>
@@ -51,6 +49,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) + ~const Destruct,
         T: 'a;
+    fn meet_each_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    fn meet_each_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+
     /// Visits each element once, from left to right, or short-circuits if visitor returns error.
     /// 
     /// # Example
@@ -104,6 +113,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    fn try_meet_each_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_meet_each_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
         
     /// Visits each element once, from right to left.
     /// 
@@ -145,6 +164,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) + ~const Destruct,
         T: 'a;
+    fn rmeet_each_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    fn rmeet_each_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+        
     /// Visits each element once, from right to left, or short-circuits if visitor returns error.
     /// 
     /// # Example
@@ -198,6 +228,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    fn try_rmeet_each_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_rmeet_each_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
         
     /// Visits each element once, asyncronously.
     /// 
@@ -245,6 +285,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: AsyncFn(&'a mut T, Rhs::Elem) + ~const Destruct,
         T: 'a;
+    async fn meet_each_pin_async<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+    async fn meet_each_pin_mut_async<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a mut T>, Rhs::Elem) + ~const Destruct,
+        T: 'a;
+        
     /// Visits each element once, asyncronously, or short-circuits if visitor returns error.
     /// 
     /// # Warning
@@ -320,6 +371,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: ArrayForm<N>,
         F: AsyncFn(&'a mut T, Rhs::Elem) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    async fn try_meet_each_pin_async<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    async fn try_meet_each_pin_mut_async<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E> + ~const Destruct,
+        T: 'a;
 
     fn meet_all<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where
@@ -331,6 +392,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: Copy,
         F: FnMut(&'a mut T, Rhs) + ~const Destruct,
         T: 'a;
+    fn meet_all_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) + ~const Destruct,
+        T: 'a;
+    fn meet_all_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) + ~const Destruct,
+        T: 'a;
+        
     fn try_meet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
@@ -340,6 +412,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     where
         Rhs: Copy,
         F: FnMut(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_meet_all_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_meet_all_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) -> Result<(), E> + ~const Destruct,
         T: 'a;
         
     fn rmeet_all<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
@@ -352,6 +434,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: Copy,
         F: FnMut(&'a mut T, Rhs) + ~const Destruct,
         T: 'a;
+    fn rmeet_all_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) + ~const Destruct,
+        T: 'a;
+    fn rmeet_all_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) + ~const Destruct,
+        T: 'a;
+        
     fn try_rmeet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
@@ -361,6 +454,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     where
         Rhs: Copy,
         F: FnMut(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_rmeet_all_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_rmeet_all_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) -> Result<(), E> + ~const Destruct,
         T: 'a;
         
     async fn meet_all_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
@@ -373,6 +476,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         Rhs: Copy,
         F: AsyncFn(&'a mut T, Rhs) + ~const Destruct,
         T: 'a;
+    async fn meet_all_pin_async<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a T>, Rhs) + ~const Destruct,
+        T: 'a;
+    async fn meet_all_pin_mut_async<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a mut T>, Rhs) + ~const Destruct,
+        T: 'a;
+
     async fn try_meet_all_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
@@ -382,6 +496,16 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     where
         Rhs: Copy,
         F: AsyncFn(&'a mut T, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    async fn try_meet_all_pin_async<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a T>, Rhs) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    async fn try_meet_all_pin_mut_async<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a mut T>, Rhs) -> Result<(), E> + ~const Destruct,
         T: 'a;
 }
 
@@ -393,15 +517,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a T, Rhs::Elem),
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_left(rhs);
-        while guard.more()
-        {
-            visitor(
-                &self[guard.index()],
-                guard.pop()
-            );
-        }
-        guard.done();
+        self.enumerate_meet_each(rhs, |_, x, y| visitor(x, y))
     }
     fn meet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
     where
@@ -409,49 +525,56 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs::Elem),
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_left(rhs);
-        while guard.more()
-        {
-            visitor(
-                &mut self[guard.index()],
-                guard.pop()
-            );
-        }
-        guard.done();
+        self.enumerate_meet_each_mut(rhs, |_, x, y| visitor(x, y))
     }
-    fn try_meet_each<'a, E, F, Rhs>(&'a self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    fn meet_each_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_meet_each_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn meet_each_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_meet_each_pin_mut(rhs, |_, x, y| visitor(x, y))
+    }
+
+    fn try_meet_each<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: ArrayForm<N>,
         F: FnMut(&'a T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_left(rhs);
-        while guard.more()
-        {
-            visitor(
-                &self[guard.index()],
-                guard.pop()
-            )?;
-        }
-        guard.done();
-        Ok(())
+        self.try_enumerate_meet_each(rhs, |_, x, y| visitor(x, y))
     }
-    fn try_meet_each_mut<'a, E, F, Rhs>(&'a mut self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    fn try_meet_each_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_left(rhs);
-        while guard.more()
-        {
-            visitor(
-                &mut self[guard.index()],
-                guard.pop()
-            )?;
-        }
-        guard.done();
-        Ok(())
+        self.try_enumerate_meet_each_mut(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_meet_each_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_each_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_meet_each_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_each_pin_mut(rhs, |_, x, y| visitor(x, y))
     }
         
     fn rmeet_each<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
@@ -460,15 +583,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a T, Rhs::Elem),
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_right(rhs);
-        while guard.more()
-        {
-            visitor(
-                &self[guard.index()],
-                guard.pop()
-            );
-        }
-        guard.done();
+        self.enumerate_rmeet_each(rhs, |_, x, y| visitor(x, y))
     }
     fn rmeet_each_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
     where
@@ -476,49 +591,56 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs::Elem),
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_right(rhs);
-        while guard.more()
-        {
-            visitor(
-                &mut self[guard.index()],
-                guard.pop()
-            );
-        }
-        guard.done();
+        self.enumerate_rmeet_each_mut(rhs, |_, x, y| visitor(x, y))
     }
-    fn try_rmeet_each<'a, E, F, Rhs>(&'a self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    fn rmeet_each_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_rmeet_each_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn rmeet_each_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_rmeet_each_pin_mut(rhs, |_, x, y| visitor(x, y))
+    }
+
+    fn try_rmeet_each<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: ArrayForm<N>,
         F: FnMut(&'a T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_right(rhs);
-        while guard.more()
-        {
-            visitor(
-                &self[guard.index()],
-                guard.pop()
-            )?;
-        }
-        guard.done();
-        Ok(())
+        self.try_enumerate_rmeet_each(rhs, |_, x, y| visitor(x, y))
     }
-    fn try_rmeet_each_mut<'a, E, F, Rhs>(&'a mut self, mut rhs: Rhs, mut visitor: F) -> Result<(), E>
+    fn try_rmeet_each_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: ArrayForm<N>,
         F: FnMut(&'a mut T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        let mut guard = PartialEmptyGuard::new_right(rhs);
-        while guard.more()
-        {
-            visitor(
-                &mut self[guard.index()],
-                guard.pop()
-            )?;
-        }
-        guard.done();
-        Ok(())
+        self.try_enumerate_rmeet_each_mut(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_rmeet_each_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rmeet_each_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_rmeet_each_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: FnMut(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rmeet_each_pin_mut(rhs, |_, x, y| visitor(x, y))
     }
         
     async fn meet_each_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
@@ -527,7 +649,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a T, Rhs::Elem),
         T: 'a
     {
-        self.zip_ref_with(rhs, |x, y| visitor(x, y)).join_actions().await;
+        self.enumerate_meet_each_async(rhs, |_, x, y| visitor(x, y)).await
     }
     async fn meet_each_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
     where
@@ -535,15 +657,32 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a mut T, Rhs::Elem),
         T: 'a
     {
-        self.zip_mut_with(rhs, |x, y| visitor(x, y)).join_actions().await;
+        self.enumerate_meet_each_mut_async(rhs, |_, x, y| visitor(x, y)).await
     }
+    async fn meet_each_pin_async<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_meet_each_pin_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn meet_each_pin_mut_async<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a mut T>, Rhs::Elem),
+        T: 'a
+    {
+        self.enumerate_meet_each_pin_mut_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+
     async fn try_meet_each_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
         Rhs: ArrayForm<N>,
         F: AsyncFn(&'a T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        self.zip_ref_with(rhs, |x, y| visitor(x, y)).try_join_actions().await;
+        self.try_enumerate_meet_each_async(rhs, |_, x, y| visitor(x, y)).await
     }
     async fn try_meet_each_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
@@ -551,7 +690,23 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a mut T, Rhs::Elem) -> Result<(), E>,
         T: 'a
     {
-        self.zip_mut_with(rhs, |x, y| visitor(x, y)).try_join_actions().await;
+        self.try_enumerate_meet_each_mut_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn try_meet_each_pin_async<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_each_pin_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn try_meet_each_pin_mut_async<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: ArrayForm<N>,
+        F: AsyncFn(Pin<&'a mut T>, Rhs::Elem) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_each_pin_mut_async(rhs, |_, x, y| visitor(x, y)).await
     }
 
     fn meet_all<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
@@ -560,7 +715,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a T, Rhs),
         T: 'a
     {
-        self.visit(|x| visitor(x, rhs))
+        self.enumerate_meet_all(rhs, |_, x, y| visitor(x, y))
     }
     fn meet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
     where
@@ -568,15 +723,32 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs),
         T: 'a
     {
-        self.visit_mut(|x| visitor(x, rhs))
+        self.enumerate_meet_all_mut(rhs, |_, x, y| visitor(x, y))
     }
+    fn meet_all_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_meet_all_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn meet_all_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_meet_all_pin_mut(rhs, |_, x, y| visitor(x, y))
+    }
+
     fn try_meet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
         F: FnMut(&'a T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_visit(|x| visitor(x, rhs))
+        self.try_enumerate_meet_all(rhs, |_, x, y| visitor(x, y))
     }
     fn try_meet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
@@ -584,7 +756,23 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_visit_mut(|x| visitor(x, rhs))
+        self.try_enumerate_meet_all_mut(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_meet_all_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_all_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_meet_all_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_all_pin_mut(rhs, |_, x, y| visitor(x, y))
     }
         
     fn rmeet_all<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
@@ -593,7 +781,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a T, Rhs),
         T: 'a
     {
-        self.rvisit(|x| visitor(x, rhs))
+        self.enumerate_rmeet_all(rhs, |_, x, y| visitor(x, y))
     }
     fn rmeet_all_mut<'a, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F)
     where
@@ -601,15 +789,32 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs),
         T: 'a
     {
-        self.rvisit_mut(|x| visitor(x, rhs))
+        self.enumerate_rmeet_all_mut(rhs, |_, x, y| visitor(x, y))
     }
+    fn rmeet_all_pin<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_rmeet_all_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn rmeet_all_pin_mut<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F)
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_rmeet_all_pin_mut(rhs, |_, x, y| visitor(x, y))
+    }
+
     fn try_rmeet_all<'a, E, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
         F: FnMut(&'a T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_rvisit(|x| visitor(x, rhs))
+        self.try_enumerate_rmeet_all(rhs, |_, x, y| visitor(x, y))
     }
     fn try_rmeet_all_mut<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, mut visitor: F) -> Result<(), E>
     where
@@ -617,7 +822,23 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: FnMut(&'a mut T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_rvisit_mut(|x| visitor(x, rhs))
+        self.try_enumerate_rmeet_all_mut(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_rmeet_all_pin<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rmeet_all_pin(rhs, |_, x, y| visitor(x, y))
+    }
+    fn try_rmeet_all_pin_mut<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, mut visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: FnMut(Pin<&'a mut T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rmeet_all_pin_mut(rhs, |_, x, y| visitor(x, y))
     }
         
     async fn meet_all_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
@@ -626,7 +847,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a T, Rhs),
         T: 'a
     {
-        self.visit_async(|x| visitor(x, rhs)).await
+        self.enumerate_meet_all_async(rhs, |_, x, y| visitor(x, y)).await
     }
     async fn meet_all_mut_async<'a, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F)
     where
@@ -634,15 +855,32 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a mut T, Rhs),
         T: 'a
     {
-        self.visit_mut_async(|x| visitor(x, rhs)).await
+        self.enumerate_meet_all_mut_async(rhs, |_, x, y| visitor(x, y)).await
     }
+    async fn meet_all_pin_async<'a, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_meet_all_pin_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn meet_all_pin_mut_async<'a, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F)
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a mut T>, Rhs),
+        T: 'a
+    {
+        self.enumerate_meet_all_pin_mut_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+
     async fn try_meet_all_async<'a, E, F, Rhs>(&'a self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
         Rhs: Copy,
         F: AsyncFn(&'a T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_visit_async(|x| visitor(x, rhs)).await
+        self.try_enumerate_meet_all_async(rhs, |_, x, y| visitor(x, y)).await
     }
     async fn try_meet_all_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
     where
@@ -650,6 +888,22 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         F: AsyncFn(&'a mut T, Rhs) -> Result<(), E>,
         T: 'a
     {
-        self.try_visit_mut_async(|x| visitor(x, rhs)).await
+        self.try_enumerate_meet_all_mut_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn try_meet_all_pin_async<'a, E, F, Rhs>(self: Pin<&'a Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_all_pin_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+    async fn try_meet_all_pin_mut_async<'a, E, F, Rhs>(self: Pin<&'a mut Self>, rhs: Rhs, visitor: F) -> Result<(), E>
+    where
+        Rhs: Copy,
+        F: AsyncFn(Pin<&'a mut T>, Rhs) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_meet_all_pin_mut_async(rhs, |_, x, y| visitor(x, y)).await
     }
 }

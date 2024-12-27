@@ -2,8 +2,10 @@ use core::ops::MulAssign;
 
 use array_trait::Array;
 
+use super::{DivideAndConquer, Fold, Reduce};
+
 #[const_trait]
-pub trait Sum<T, const N: usize>: Array<Item = T>
+pub trait Product<T, const N: usize>: Array<Item = T>
 {
     fn try_product(self) -> Option<T>
     where
@@ -16,7 +18,7 @@ pub trait Sum<T, const N: usize>: Array<Item = T>
         T: MulAssign;
 }
 
-impl<T, const N: usize> Sum<T, N> for [T; N]
+impl<T, const N: usize> Product<T, N> for [T; N]
 {
     fn try_product(self) -> Option<T>
     where

@@ -2,6 +2,8 @@ use core::mem::MaybeUninit;
 
 use array_trait::Array;
 
+use super::Split;
+
 #[const_trait]
 pub trait ArrayChain<T, const N: usize>: Array<Item = T>
 {
@@ -43,7 +45,7 @@ impl<T, const N: usize> const ArrayChain<T, N> for [T; N]
             private::merge_transmute(self, rhs)
         }*/
         let mut chain = MaybeUninit::uninit_array();
-        let (left, right) = chain.rsplit_ptr_mut(M);
+        let (left, right) = chain.rsplit_mut_ptr(M);
         unsafe {
             core::ptr::copy_nonoverlapping(self.as_ptr(), left.cast(), N);
             core::ptr::copy_nonoverlapping(rhs.as_ptr(), right.cast(), M);
@@ -61,7 +63,7 @@ impl<T, const N: usize> const ArrayChain<T, N> for [T; N]
             private::merge_transmute(rhs, self)
         }*/
         let mut chain = MaybeUninit::uninit_array();
-        let (left, right) = chain.split_ptr_mut(M);
+        let (left, right) = chain.split_mut_ptr(M);
         unsafe {
             core::ptr::copy_nonoverlapping(lhs.as_ptr(), left.cast(), M);
             core::ptr::copy_nonoverlapping(self.as_ptr(), right.cast(), N);

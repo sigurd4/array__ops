@@ -1,4 +1,4 @@
-use super::Reduce;
+use super::{DivideAndConquer, Reduce};
 
 #[const_trait]
 pub trait Minmax<T, const N: usize>: Reduce<T, N>

@@ -1,8 +1,10 @@
-use core::{ops::AsyncFn, marker::Destruct};
+use core::pin::Pin;
 
 use array_trait::Array;
 
-use crate::{ArrayForm, Runs2D, TryRuns2D};
+use crate::form::ArrayForm;
+
+use super::ZipOuterWith;
 
 #[const_trait]
 pub trait ZipOuter<T, const N: usize>: Array<Item = T>
@@ -12,6 +14,9 @@ pub trait ZipOuter<T, const N: usize>: Array<Item = T>
         T: Copy,
         Z: ArrayForm<M, Elem: Copy>;
     fn zip_outer_ref<Z, const M: usize>(&self, other: &Z) -> [[(&T, Z::Elem); M]; N]
+    where
+        Z: ArrayForm<M, Elem: Copy>;
+    fn zip_outer_pin_ref<Z, const M: usize>(self: Pin<&Self>, other: &Z) -> [[(Pin<&T>, Z::Elem); M]; N]
     where
         Z: ArrayForm<M, Elem: Copy>;
 }
@@ -30,5 +35,11 @@ impl<T, const N: usize> ZipOuter<T, N> for [T; N]
         Z: ArrayForm<M, Elem: Copy>
     {
         self.zip_outer_ref_with(other, const |x, y| (x, y))
+    }
+    fn zip_outer_pin_ref<Z, const M: usize>(self: Pin<&Self>, other: &Z) -> [[(Pin<&T>, Z::Elem); M]; N]
+    where
+        Z: ArrayForm<M, Elem: Copy>
+    {
+        self.zip_outer_pin_ref_with(other, const |x, y| (x, y))
     }
 }

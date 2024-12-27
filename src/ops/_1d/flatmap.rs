@@ -1,4 +1,4 @@
-use core::{marker::Destruct, ops::AsyncFn};
+use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
@@ -33,6 +33,16 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
         Map: FnMut<(&'a mut T,), Output = [U; M]> + ~const Destruct,
         T: 'a,
         [(); N*M]:;
+    fn flatmap_pin_ref<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a T>,), Output = [U; M]> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    fn flatmap_pin_mut<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a mut T>,), Output = [U; M]> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
 
     fn rflatmap<Map, U, const M: usize>(self, mapper: Map) -> [U; N*M]
     where
@@ -46,6 +56,16 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
     fn rflatmap_mut<'a, Map, U, const M: usize>(&'a mut self, mapper: Map) -> [U; N*M]
     where
         Map: FnMut<(&'a mut T,), Output = [U; M]> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    fn rflatmap_pin_ref<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a T>,), Output = [U; M]> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    fn rflatmap_pin_mut<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a mut T>,), Output = [U; M]> + ~const Destruct,
         T: 'a,
         [(); N*M]:;
 
@@ -63,6 +83,16 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
         Map: AsyncFn(&'a mut T) -> [U; M] + ~const Destruct,
         T: 'a,
         [(); N*M]:;
+    async fn flatmap_pin_ref_async<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: AsyncFn(Pin<&'a T>) -> [U; M] + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    async fn flatmap_pin_mut_async<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: AsyncFn(Pin<&'a mut T>) -> [U; M] + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
         
     fn try_flatmap<Map, U, E, const M: usize>(self, mapper: Map) -> Result<[U; N*M], E>
     where
@@ -75,6 +105,14 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
     where
         Map: FnMut(&'a mut T) -> Result<[U; M], E> + ~const Destruct,
         T: 'a;
+    fn try_flatmap_pin_ref<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a T>) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a;
+    fn try_flatmap_pin_mut<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a mut T>) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a;
 
     fn try_rflatmap<Map, U, E, const M: usize>(self, mapper: Map) -> Result<[U; N*M], E>
     where
@@ -86,6 +124,14 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
     fn try_rflatmap_mut<'a, Map, U, E, const M: usize>(&'a mut self, mapper: Map) -> Result<[U; N*M], E>
     where
         Map: FnMut(&'a mut T) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a;
+    fn try_rflatmap_pin_ref<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a T>) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a;
+    fn try_rflatmap_pin_mut<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a mut T>) -> Result<[U; M], E> + ~const Destruct,
         T: 'a;
         
     async fn try_flatmap_async<Map, U, E, const M: usize>(self, mapper: Map) -> Result<[U; N*M], E>
@@ -100,6 +146,16 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
     async fn try_flatmap_mut_async<'a, Map, U, E, const M: usize>(&'a mut self, mapper: Map) -> Result<[U; N*M], E>
     where
         Map: AsyncFn(&'a mut T) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    async fn try_flatmap_pin_ref_async<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: AsyncFn(Pin<&'a T>) -> Result<[U; M], E> + ~const Destruct,
+        T: 'a,
+        [(); N*M]:;
+    async fn try_flatmap_pin_mut_async<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: AsyncFn(Pin<&'a mut T>) -> Result<[U; M], E> + ~const Destruct,
         T: 'a,
         [(); N*M]:;
 }
@@ -129,6 +185,22 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.enumerate_flatmap_mut(|_, x| mapper(x))
     }
+    fn flatmap_pin_ref<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mut mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a T>,), Output = [U; M]>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_flatmap_pin_ref(|_, x| mapper(x))
+    }
+    fn flatmap_pin_mut<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mut mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a mut T>,), Output = [U; M]>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_flatmap_pin_mut(|_, x| mapper(x))
+    }
 
     fn rflatmap<Map, U, const M: usize>(self, mut mapper: Map) -> [U; N*M]
     where
@@ -153,15 +225,31 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.enumerate_rflatmap_mut(|_, x| mapper(x))
     }
+    fn rflatmap_pin_ref<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mut mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a T>,), Output = [U; M]>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_rflatmap_pin_ref(|_, x| mapper(x))
+    }
+    fn rflatmap_pin_mut<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mut mapper: Map) -> [U; N*M]
+    where
+        Map: FnMut<(Pin<&'a mut T>,), Output = [U; M]>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_rflatmap_pin_mut(|_, x| mapper(x))
+    }
     
-    async fn flatmap_async<Map, U, const M: usize>(self, mut mapper: Map) -> [U; N*M]
+    async fn flatmap_async<Map, U, const M: usize>(self, mapper: Map) -> [U; N*M]
     where
         Map: AsyncFn(T) -> [U; M],
         [(); N*M]:
     {
         self.enumerate_flatmap_async(|_, x| mapper(x)).await
     }
-    async fn flatmap_ref_async<'a, Map, U, const M: usize>(&'a self, mut mapper: Map) -> [U; N*M]
+    async fn flatmap_ref_async<'a, Map, U, const M: usize>(&'a self, mapper: Map) -> [U; N*M]
     where
         Map: AsyncFn(&'a T) -> [U; M],
         T: 'a,
@@ -169,13 +257,29 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.enumerate_flatmap_ref_async(|_, x| mapper(x)).await
     }
-    async fn flatmap_mut_async<'a, Map, U, const M: usize>(&'a mut self, mut mapper: Map) -> [U; N*M]
+    async fn flatmap_mut_async<'a, Map, U, const M: usize>(&'a mut self, mapper: Map) -> [U; N*M]
     where
         Map: AsyncFn(&'a mut T) -> [U; M],
         T: 'a,
         [(); N*M]:
     {
         self.enumerate_flatmap_mut_async(|_, x| mapper(x)).await
+    }
+    async fn flatmap_pin_ref_async<'a, Map, U, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: AsyncFn(Pin<&'a T>) -> [U; M],
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_flatmap_pin_ref_async(|_, x| mapper(x)).await
+    }
+    async fn flatmap_pin_mut_async<'a, Map, U, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> [U; N*M]
+    where
+        Map: AsyncFn(Pin<&'a mut T>) -> [U; M],
+        T: 'a,
+        [(); N*M]:
+    {
+        self.enumerate_flatmap_pin_mut_async(|_, x| mapper(x)).await
     }
     
     fn try_flatmap<Map, U, E, const M: usize>(self, mut mapper: Map) -> Result<[U; N*M], E>
@@ -198,6 +302,20 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.try_enumerate_flatmap_mut(|_, x| mapper(x))
     }
+    fn try_flatmap_pin_ref<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mut mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a T>) -> Result<[U; M], E>,
+        T: 'a
+    {
+        self.try_enumerate_flatmap_pin_ref(|_, x| mapper(x))
+    }
+    fn try_flatmap_pin_mut<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mut mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a mut T>) -> Result<[U; M], E>,
+        T: 'a
+    {
+        self.try_enumerate_flatmap_pin_mut(|_, x| mapper(x))
+    }
 
     fn try_rflatmap<Map, U, E, const M: usize>(self, mut mapper: Map) -> Result<[U; N*M], E>
     where
@@ -219,15 +337,29 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.try_enumerate_rflatmap_mut(|_, x| mapper(x))
     }
+    fn try_rflatmap_pin_ref<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mut mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a T>) -> Result<[U; M], E>,
+        T: 'a
+    {
+        self.try_enumerate_rflatmap_pin_ref(|_, x| mapper(x))
+    }
+    fn try_rflatmap_pin_mut<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mut mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: FnMut(Pin<&'a mut T>) -> Result<[U; M], E>,
+        T: 'a
+    {
+        self.try_enumerate_rflatmap_pin_mut(|_, x| mapper(x))
+    }
     
-    async fn try_flatmap_async<Map, U, E, const M: usize>(self, mut mapper: Map) -> Result<[U; N*M], E>
+    async fn try_flatmap_async<Map, U, E, const M: usize>(self, mapper: Map) -> Result<[U; N*M], E>
     where
         Map: AsyncFn(T) -> Result<[U; M], E>,
         [(); N*M]:
     {
         self.try_enumerate_flatmap_async(|_, x| mapper(x)).await
     }
-    async fn try_flatmap_ref_async<'a, Map, U, E, const M: usize>(&'a self, mut mapper: Map) -> Result<[U; N*M], E>
+    async fn try_flatmap_ref_async<'a, Map, U, E, const M: usize>(&'a self, mapper: Map) -> Result<[U; N*M], E>
     where
         Map: AsyncFn(&'a T) -> Result<[U; M], E>,
         T: 'a,
@@ -235,12 +367,28 @@ impl<T, const N: usize> Flatmap<T, N> for [T; N]
     {
         self.try_enumerate_flatmap_ref_async(|_, x| mapper(x)).await
     }
-    async fn try_flatmap_mut_async<'a, Map, U, E, const M: usize>(&'a mut self, mut mapper: Map) -> Result<[U; N*M], E>
+    async fn try_flatmap_mut_async<'a, Map, U, E, const M: usize>(&'a mut self, mapper: Map) -> Result<[U; N*M], E>
     where
         Map: AsyncFn(&'a mut T) -> Result<[U; M], E>,
         T: 'a,
         [(); N*M]:
     {
         self.try_enumerate_flatmap_mut_async(|_, x| mapper(x)).await
+    }
+    async fn try_flatmap_pin_ref_async<'a, Map, U, E, const M: usize>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: AsyncFn(Pin<&'a T>) -> Result<[U; M], E>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.try_enumerate_flatmap_pin_ref_async(|_, x| mapper(x)).await
+    }
+    async fn try_flatmap_pin_mut_async<'a, Map, U, E, const M: usize>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N*M], E>
+    where
+        Map: AsyncFn(Pin<&'a mut T>) -> Result<[U; M], E>,
+        T: 'a,
+        [(); N*M]:
+    {
+        self.try_enumerate_flatmap_pin_mut_async(|_, x| mapper(x)).await
     }
 }

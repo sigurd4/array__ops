@@ -1,8 +1,10 @@
-use core::ops::{AddAssign, Mul};
+use core::ops::Mul;
 
 use array_trait::Array;
 
-use crate::{private::guard::PartialZipEmptyGuard, ArrayForm};
+use crate::form::ArrayForm;
+
+use super::ZipOuterWith;
 
 #[const_trait]
 pub trait ArrayMulOuter<T, const N: usize>: Array<Item = T>
@@ -11,6 +13,7 @@ pub trait ArrayMulOuter<T, const N: usize>: Array<Item = T>
     where
         T: Mul<Rhs::Elem> + Copy,
         Rhs: ArrayForm<M, Elem: Copy>;
+
     async fn mul_outer_async<Rhs, const M: usize>(&self, rhs: &Rhs) -> [[<T as Mul<Rhs::Elem>>::Output; M]; N]
     where
         T: Mul<Rhs::Elem> + Copy,
@@ -26,6 +29,7 @@ impl<T, const N: usize> ArrayMulOuter<T, N> for [T; N]
     {
         self.zip_outer_with(rhs, Mul::mul)
     }
+    
     async fn mul_outer_async<Rhs, const M: usize>(&self, rhs: &Rhs) -> [[<T as Mul<Rhs::Elem>>::Output; M]; N]
     where
         T: Mul<Rhs::Elem> + Copy,

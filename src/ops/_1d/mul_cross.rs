@@ -1,8 +1,8 @@
-use core::ops::{AddAssign, Mul, MulAssign, Sub};
+use core::ops::{MulAssign, Sub};
 
 use array_trait::Array;
 
-use crate::{ArrayForm};
+use crate::form::ArrayForm;
 
 // TODO: Add mul_cross_all in MxN matrix
 #[const_trait]
@@ -27,6 +27,7 @@ pub trait ArrayMulCross<T, const N: usize>: Array<Item = T>
     where
         T: MulAssign<Rhs::Elem> + Sub + Copy,
         Rhs: ArrayForm<N, Elem: Copy>;
+
     async fn mul_cross_async<Rhs>(&self, rhs: [&Rhs; N - 2]) -> [<T as Sub>::Output; N]
     where
         T: MulAssign<Rhs::Elem> + Sub + Copy,
@@ -47,8 +48,8 @@ impl<T, const N: usize> ArrayMulCross<T, N> for [T; N]
             let mut n = 2;
             while n < N
             {
-                m_p *= rhs[n - 2][(i + n) % N];
-                m_m *= rhs[n - 2][(i + (N - n)) % N];
+                m_p *= rhs[n - 2].copy_elem((i + n) % N);
+                m_m *= rhs[n - 2].copy_elem((i + (N - n)) % N);
                 
                 n += 1;
             }
@@ -56,6 +57,7 @@ impl<T, const N: usize> ArrayMulCross<T, N> for [T; N]
             m_p - m_m
         })
     }
+    
     async fn mul_cross_async<Rhs>(&self, rhs: [&Rhs; N - 2]) -> [<T as Sub>::Output; N]
     where
         T: MulAssign<Rhs::Elem> + Sub + Copy,
@@ -68,8 +70,8 @@ impl<T, const N: usize> ArrayMulCross<T, N> for [T; N]
             let mut n = 2;
             while n < N
             {
-                m_p *= rhs[n - 2][(i + n) % N];
-                m_m *= rhs[n - 2][(i + (N - n)) % N];
+                m_p *= rhs[n - 2].copy_elem((i + n) % N);
+                m_m *= rhs[n - 2].copy_elem((i + (N - n)) % N);
                 
                 n += 1;
             }

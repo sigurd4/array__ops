@@ -4,6 +4,8 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
+use super::Meet;
+
 #[const_trait]
 pub trait ZipAssignWith<T, const N: usize>: Array<Item = T>
 {
@@ -35,7 +37,7 @@ impl<T, const N: usize> ZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: FnMut(T, Rhs::Elem) -> T
     {
-        self.visit_mut_with(rhs, |x, y| unsafe {
+        self.meet_each_mut(rhs, |x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(value, y))
         });
@@ -46,7 +48,7 @@ impl<T, const N: usize> ZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: AsyncFn(T, Rhs::Elem) -> T
     {
-        self.visit_mut_async_with(rhs, async |x, y| unsafe {
+        self.meet_each_mut_async(rhs, async |x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(value, y).await)
         }).await
@@ -57,7 +59,7 @@ impl<T, const N: usize> ZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: FnMut(T, Rhs::Elem) -> Result<T, E>
     {
-        self.try_visit_mut_with(rhs, |x, y| unsafe {
+        self.try_meet_each_mut(rhs, |x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(value, y)?);
             Ok(())
@@ -69,7 +71,7 @@ impl<T, const N: usize> ZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: AsyncFn(T, Rhs::Elem) -> Result<T, E>
     {
-        self.try_visit_mut_async_with(rhs, async |x, y| unsafe {
+        self.try_meet_each_mut_async(rhs, async |x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(value, y).await?);
             Ok(())

@@ -59,6 +59,6 @@ impl<T, const N: usize> ArraySubAssign<T, N> for [T; N]
         T: SubAssign<Rhs::Elem>,
         Rhs: ArrayForm<N>
     {
-        self.meet_all_mut_async(rhs, async |x, rhs| x.sub_assign(rhs)).await
+        self.meet_each_mut_async(rhs, async |x, rhs| x.sub_assign(rhs)).await
     }
 }

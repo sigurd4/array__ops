@@ -1,5 +1,7 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
+use crate::ops::Map;
+
 use super::MaybeDone;
 
 pub struct Runs2D<T, U, const M: usize, const N: usize>

@@ -1,8 +1,8 @@
-use core::marker::Destruct;
+use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
 
-use crate::private::guard::PartialEmptyGuard;
+use crate::{ops::Isolate, private::guard::PartialEmptyGuard};
 
 #[const_trait]
 pub trait ArrayDiagonal<T, const M: usize, const N: usize>: Array<Item = [T; N]>
@@ -12,14 +12,16 @@ pub trait ArrayDiagonal<T, const M: usize, const N: usize>: Array<Item = [T; N]>
         T: ~const Destruct;
     fn diagonal_ref(&self) -> [&T; crate::min_len(M, N)];
     fn diagonal_mut(&mut self) -> [&mut T; crate::min_len(M, N)];
+    fn diagonal_pin_ref(self: Pin<&Self>) -> [Pin<&T>; crate::min_len(M, N)];
+    fn diagonal_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; crate::min_len(M, N)];
 }
 
 impl<T, const M: usize, const N: usize> ArrayDiagonal<T, M, N> for [[T; N]; M]
 {
     fn diagonal(self) -> [T; crate::min_len(M, N)]
     {
-        let mut guard = PartialEmptyGuard::new(self);
-        crate::from_fn(|n| guard.pop()[n])
+        let mut guard = PartialEmptyGuard::new_left(self);
+        crate::from_fn(move |n| guard.pop().isolate(n))
     }
     fn diagonal_ref(&self) -> [&T; crate::min_len(M, N)]
     {
@@ -29,6 +31,18 @@ impl<T, const M: usize, const N: usize> ArrayDiagonal<T, M, N> for [[T; N]; M]
     {
         crate::from_fn(|n| unsafe {
             (&mut self[n][n] as *mut T).as_mut_unchecked()
+        })
+    }
+    fn diagonal_pin_ref(self: Pin<&Self>) -> [Pin<&T>; crate::min_len(M, N)]
+    {
+        crate::from_fn(|n| unsafe {
+            self.map_unchecked(|pin| &pin[n][n])
+        })
+    }
+    fn diagonal_pin_mut(mut self: Pin<&mut Self>) -> [Pin<&mut T>; crate::min_len(M, N)]
+    {
+        crate::from_fn(|n| unsafe {
+            (&mut self as *mut Pin<&mut Self>).as_mut_unchecked().as_mut().map_unchecked_mut(|pin| &mut pin[n][n])
         })
     }
 }

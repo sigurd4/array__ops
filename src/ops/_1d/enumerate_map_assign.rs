@@ -1,6 +1,6 @@
 use core::{ops::AsyncFn, marker::Destruct};
 
-use super::{Enumerate, MapAssign};
+use super::{Enumerate, EnumerateVisit, MapAssign};
 
 #[const_trait]
 pub trait EnumerateMapAssign<T, const N: usize>: Enumerate<T, N> + MapAssign<T, N>

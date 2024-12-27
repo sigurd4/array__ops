@@ -59,6 +59,6 @@ impl<T, const N: usize> ArrayShrAssign<T, N> for [T; N]
         T: ShrAssign<Rhs::Elem>,
         Rhs: ArrayForm<N>
     {
-        self.meet_all_mut_async(rhs, async |x, rhs| x.shr_assign(rhs)).await
+        self.meet_each_mut_async(rhs, async |x, rhs| x.shr_assign(rhs)).await
     }
 }

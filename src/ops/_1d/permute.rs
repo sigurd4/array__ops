@@ -1,7 +1,7 @@
 use array_trait::Array;
 
 #[const_trait]
-pub trait ArrayPermute<T, const N: usize>: Array<T, N>
+pub trait ArrayPermute<T, const N: usize>: Array<Item = T>
 {
     /// Performs the bit-reverse permutation. Length must be a power of 2.
     /// 

@@ -20,13 +20,13 @@ impl<T, const N: usize> ArrayShrAssign<T, N> for [T; N]
     where
         T: Not<Output = T>
     {
-        self.map_assign(|x| -x)
+        self.map_assign(|x| !x)
     }
 
     async fn not_assign_all_async(&mut self)
     where
         T: Not<Output = T>
     {
-        self.map_assign_async(async |x| -x).await
+        self.map_assign_async(async |x| !x).await
     }
 }

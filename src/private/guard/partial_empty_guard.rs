@@ -54,7 +54,12 @@ where
 
     pub const fn index(&self) -> usize
     {
-        self.i
+        assert!(self.more());
+        match D
+        {
+            Dir::Left => self.i,
+            Dir::Right => self.i - 1
+        }
     }
     
     pub const fn more(&self) -> bool
@@ -68,19 +73,18 @@ where
 
     pub fn pop(&mut self) -> A::Elem
     {
+        assert!(self.more());
         let f = |j| unsafe {
             A::read_assume_init_elem(&self.src, j)
         };
         match D
         {
             Dir::Left => {
-                assert!(self.i < N);
                 let value = f(self.i);
                 self.i += 1;
                 value
             },
             Dir::Right => {
-                assert!(self.i > 0);
                 self.i -= 1;
                 f(self.i)
             }

@@ -64,10 +64,12 @@ pub trait Map<T, const N: usize>: Array<Item = T>
         T: 'a;
     async fn map_pin_ref_async<'a, Map>(self: Pin<&'a Self>, mapper: Map) -> [Map::Output; N]
     where
-        Map: AsyncFn<(Pin<&'a T>,)> + ~const Destruct;
+        Map: AsyncFn<(Pin<&'a T>,)> + ~const Destruct,
+        T: 'a;
     async fn map_pin_mut_async<'a, Map>(self: Pin<&'a mut Self>, mapper: Map) -> [Map::Output; N]
     where
-        Map: AsyncFn<(Pin<&'a mut T>,)> + ~const Destruct;
+        Map: AsyncFn<(Pin<&'a mut T>,)> + ~const Destruct,
+        T: 'a;
         
     // TODO: use Result trait
     fn try_map<Map, U, E>(self, mapper: Map) -> Result<[U; N], E>
@@ -248,14 +250,14 @@ impl<T, const N: usize> Map<T, N> for [T; N]
     {
         self.try_enumerate_map_mut(|_, x| mapper(x))
     }
-    fn try_map_pin_ref<'a, Map, U, E>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N], E>
+    fn try_map_pin_ref<'a, Map, U, E>(self: Pin<&'a Self>, mut mapper: Map) -> Result<[U; N], E>
     where
         Map: FnMut(Pin<&'a T>) -> Result<U, E>,
         T: 'a
     {
         self.try_enumerate_map_pin_ref(|_, x| mapper(x))
     }
-    fn try_map_pin_mut<'a, Map, U, E>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N], E>
+    fn try_map_pin_mut<'a, Map, U, E>(self: Pin<&'a mut Self>, mut mapper: Map) -> Result<[U; N], E>
     where
         Map: FnMut(Pin<&'a mut T>) -> Result<U, E>,
         T: 'a
@@ -283,14 +285,14 @@ impl<T, const N: usize> Map<T, N> for [T; N]
     {
         self.try_enumerate_rmap_mut(|_, x| mapper(x))
     }
-    fn try_rmap_pin_ref<'a, Map, U, E>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N], E>
+    fn try_rmap_pin_ref<'a, Map, U, E>(self: Pin<&'a Self>, mut mapper: Map) -> Result<[U; N], E>
     where
         Map: FnMut(Pin<&'a T>) -> Result<U, E>,
         T: 'a
     {
         self.try_enumerate_rmap_pin_ref(|_, x| mapper(x))
     }
-    fn try_rmap_pin_mut<'a, Map, U, E>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N], E>
+    fn try_rmap_pin_mut<'a, Map, U, E>(self: Pin<&'a mut Self>, mut mapper: Map) -> Result<[U; N], E>
     where
         Map: FnMut(Pin<&'a mut T>) -> Result<U, E>,
         T: 'a

@@ -1,4 +1,4 @@
-use core::{marker::Destruct, mem::MaybeUninit};
+use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
 
@@ -26,12 +26,8 @@ pub trait Truncate<T, const N: usize>: Array<Item = T>
     fn rtruncate_ref<const M: usize>(&self) -> &[T; M]
     where
         [(); N - M]:;
-    fn try_truncate_ref<const M: usize>(&self) -> Option<&[T; M]>
-    where
-        T: ~const Destruct;
-    fn try_rtruncate_ref<const M: usize>(&self) -> Option<&[T; M]>
-    where
-        T: ~const Destruct;
+    fn try_truncate_ref<const M: usize>(&self) -> Option<&[T; M]>;
+    fn try_rtruncate_ref<const M: usize>(&self) -> Option<&[T; M]>;
         
     fn truncate_mut<const M: usize>(&mut self) -> &mut [T; M]
     where
@@ -39,12 +35,26 @@ pub trait Truncate<T, const N: usize>: Array<Item = T>
     fn rtruncate_mut<const M: usize>(&mut self) -> &mut [T; M]
     where
         [(); N - M]:;
-    fn try_truncate_mut<const M: usize>(&mut self) -> Option<&mut [T; M]>
+    fn try_truncate_mut<const M: usize>(&mut self) -> Option<&mut [T; M]>;
+    fn try_rtruncate_mut<const M: usize>(&mut self) -> Option<&mut [T; M]>;
+
+    fn truncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[T; M]>
     where
-        T: ~const Destruct;
-    fn try_rtruncate_mut<const M: usize>(&mut self) -> Option<&mut [T; M]>
+        [(); N - M]:;
+    fn rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[T; M]>
     where
-        T: ~const Destruct;
+        [(); N - M]:;
+    fn try_truncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>;
+    fn try_rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>;
+
+    fn truncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [T; M]>
+    where
+        [(); N - M]:;
+    fn rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [T; M]>
+    where
+        [(); N - M]:;
+    fn try_truncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>;
+    fn try_rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>;
 }
 
 impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
@@ -75,18 +85,11 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
                 core::ptr::drop_in_place(&mut self[M..N]);
             }
         }
-        let mut trunc = MaybeUninit::uninit_array();
-        unsafe {
-            core::ptr::copy_nonoverlapping(
-                self.as_ptr(),
-                trunc.as_mut_ptr().cast(),
-                M
-            );
-        }
+        let trunc = unsafe {
+            self.as_ptr().cast::<[T; M]>().read()
+        };
         core::mem::forget(self);
-        unsafe {
-            Some(MaybeUninit::array_assume_init(trunc))
-        }
+        Some(trunc)
     }
     fn try_rtruncate<const M: usize>(mut self) -> Option<[T; M]>
     {
@@ -100,18 +103,11 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
                 core::ptr::drop_in_place(&mut self[0..N - M]);
             }
         }
-        let mut trunc = MaybeUninit::uninit_array();
-        unsafe {
-            core::ptr::copy_nonoverlapping(
-                self.as_ptr().add(N - M),
-                trunc.as_mut_ptr().cast(),
-                M
-            );
-        }
+        let trunc = unsafe {
+            self.as_ptr().add(N - M).cast::<[T; M]>().read()
+        };
         core::mem::forget(self);
-        unsafe {
-            Some(MaybeUninit::array_assume_init(trunc))
-        }
+        Some(trunc)
     }
     
     fn truncate_ref<const M: usize>(&self) -> &[T; M]
@@ -177,6 +173,80 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         }
         unsafe {
             Some(self.as_mut_ptr().add(N - M).cast::<[T; M]>().as_mut_unchecked())
+        }
+    }
+
+    fn truncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[T; M]>
+    where
+        [(); N - M]:
+    {
+        unsafe {
+            self.map_unchecked(|pin| pin.truncate_ref())
+        }
+    }
+    fn rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[T; M]>
+    where
+        [(); N - M]:
+    {
+        unsafe {
+            self.map_unchecked(|pin| pin.rtruncate_ref())
+        }
+    }
+    fn try_truncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>
+    {
+        if M > N
+        {
+            return None
+        }
+        unsafe {
+            Some(self.map_unchecked(|pin| pin.try_truncate_ref().unwrap()))
+        }
+    }
+    fn try_rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>
+    {
+        if M > N
+        {
+            return None
+        }
+        unsafe {
+            Some(self.map_unchecked(|pin| pin.try_rtruncate_ref().unwrap()))
+        }
+    }
+
+    fn truncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [T; M]>
+    where
+        [(); N - M]:
+    {
+        unsafe {
+            self.map_unchecked_mut(|pin| pin.truncate_mut())
+        }
+    }
+    fn rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [T; M]>
+    where
+        [(); N - M]:
+    {
+        unsafe {
+            self.map_unchecked_mut(|pin| pin.rtruncate_mut())
+        }
+    }
+    fn try_truncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>
+    {
+        if M > N
+        {
+            return None
+        }
+        unsafe {
+            Some(self.map_unchecked_mut(|pin| pin.try_truncate_mut().unwrap()))
+        }
+    }
+    fn try_rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>
+    {
+        if M > N
+        {
+            return None
+        }
+        unsafe {
+            Some(self.map_unchecked_mut(|pin| pin.try_rtruncate_mut().unwrap()))
         }
     }
 }

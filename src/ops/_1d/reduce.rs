@@ -1,4 +1,4 @@
-use core::marker::Destruct;
+use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
 
@@ -29,6 +29,12 @@ pub trait Reduce<T, const N: usize>: Array<Item = T>
     fn reduce_mut<'a, F>(&'a mut self, reduce: F) -> Option<&'a mut T>
     where
         F: FnMut(&'a mut T, &'a mut T) -> &'a mut T + ~const Destruct;
+    fn reduce_pin_ref<'a, F>(self: Pin<&'a Self>, reduce: F) -> Option<Pin<&'a T>>
+    where
+        F: FnMut(Pin<&'a T>, Pin<&'a T>) -> Pin<&'a T> + ~const Destruct;
+    fn reduce_pin_mut<'a, F>(self: Pin<&'a mut Self>, reduce: F) -> Option<Pin<&'a mut T>>
+    where
+        F: FnMut(Pin<&'a mut T>, Pin<&'a mut T>) -> Pin<&'a mut T> + ~const Destruct;
 }
 
 impl<T, const N: usize> Reduce<T, N> for [T; N]
@@ -48,6 +54,18 @@ impl<T, const N: usize> Reduce<T, N> for [T; N]
     fn reduce_mut<'a, F>(&'a mut self, reduce: F) -> Option<&'a mut T>
     where
         F: FnMut(&'a mut T, &'a mut T) -> &'a mut T
+    {
+        PartialEmptyGuard::new_left(self).reduce(reduce)
+    }
+    fn reduce_pin_ref<'a, F>(self: Pin<&'a Self>, reduce: F) -> Option<Pin<&'a T>>
+    where
+        F: FnMut(Pin<&'a T>, Pin<&'a T>) -> Pin<&'a T>
+    {
+        PartialEmptyGuard::new_left(self).reduce(reduce)
+    }
+    fn reduce_pin_mut<'a, F>(self: Pin<&'a mut Self>, reduce: F) -> Option<Pin<&'a mut T>>
+    where
+        F: FnMut(Pin<&'a mut T>, Pin<&'a mut T>) -> Pin<&'a mut T>
     {
         PartialEmptyGuard::new_left(self).reduce(reduce)
     }

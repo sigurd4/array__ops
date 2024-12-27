@@ -1,8 +1,8 @@
-use core::{marker::Destruct, mem::MaybeUninit, ops::AsyncFn};
+use core::pin::Pin;
 
 use array_trait::Array;
 
-use crate::{private::guard::PartialZipGuard, ArrayForm, Runs, TryRuns};
+use crate::form::ArrayForm;
 
 use super::ZipWith;
 
@@ -33,6 +33,12 @@ pub trait Zip<T, const N: usize>: Array<Item = T>
     fn zip_mut<Z>(&mut self, other: Z) -> [(&mut T, Z::Elem); N]
     where
         Z: ArrayForm<N>;
+    fn zip_pin_ref<Z>(self: Pin<&Self>, other: Z) -> [(Pin<&T>, Z::Elem); N]
+    where
+        Z: ArrayForm<N>;
+    fn zip_pin_mut<Z>(self: Pin<&mut Self>, other: Z) -> [(Pin<&mut T>, Z::Elem); N]
+    where
+        Z: ArrayForm<N>;
 }
 
 impl<T, const N: usize> Zip<T, N> for [T; N]
@@ -54,5 +60,17 @@ impl<T, const N: usize> Zip<T, N> for [T; N]
         Z: ArrayForm<N>
     {
         self.zip_mut_with(other, const |x, y| (x, y))
+    }
+    fn zip_pin_ref<Z>(self: Pin<&Self>, other: Z) -> [(Pin<&T>, Z::Elem); N]
+    where
+        Z: ArrayForm<N>
+    {
+        self.zip_pin_ref_with(other, const |x, y| (x, y))
+    }
+    fn zip_pin_mut<Z>(self: Pin<&mut Self>, other: Z) -> [(Pin<&mut T>, Z::Elem); N]
+    where
+        Z: ArrayForm<N>
+    {
+        self.zip_pin_mut_with(other, const |x, y| (x, y))
     }
 }

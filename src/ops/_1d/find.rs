@@ -1,6 +1,11 @@
 use array_trait::Array;
+use slice_ops::SliceOps;
 
 use core::ops::AsyncFn;
+
+use crate::join::TryActions;
+
+use super::EnumerateMap;
 
 #[const_trait]
 pub trait Find<T, const N: usize>: Array<Item = T>
@@ -125,14 +130,14 @@ pub trait Find<T, const N: usize>: Array<Item = T>
         B: PartialEq,
         T: 'a;
 
-    fn find_async(&self, x: &T) -> Option<usize>
+    async fn find_async(&self, x: &T) -> Option<usize>
     where
         T: PartialEq;
-    fn find_by_async<'a, F>(&'a self, f: F) -> Option<usize>
+    async fn find_by_async<'a, F>(&'a self, f: F) -> Option<usize>
     where
         F: AsyncFn(&'a T) -> bool /*+ ~const Destruct*/,
         T: 'a;
-    fn find_by_key_async<'a, B, F>(&'a self, b: &B, f: F) -> Option<usize>
+    async fn find_by_key_async<'a, B, F>(&'a self, b: &B, f: F) -> Option<usize>
     where
         F: AsyncFn(&'a T) -> B /*+ ~const Destruct*/,
         B: PartialEq,
@@ -185,25 +190,45 @@ impl<T, const N: usize> Find<T, N> for [T; N]
         self.as_slice().rfind_by_key(b, f)
     }
 
-    fn find_async(&self, x: &T) -> Option<usize>
+    async fn find_async(&self, needle: &T) -> Option<usize>
     where
         T: PartialEq
     {
-        todo!()
+        self.find_by_async(async |x| x == needle).await
     }
-    fn find_by_async<'a, F>(&'a self, f: F) -> Option<usize>
+    async fn find_by_async<'a, F>(&'a self, f: F) -> Option<usize>
     where
         F: AsyncFn(&'a T) -> bool /*+ ~const Destruct*/,
         T: 'a
     {
-        todo!()
+        let ff = async |i, x| {
+            if f(x).await
+            {
+                Err(i)
+            }
+            else
+            {
+                Ok(())
+            }
+        };
+        TryActions::new(self.enumerate_map_ref(|i, x| ff(i, x))).await.err()
     }
-    fn find_by_key_async<'a, B, F>(&'a self, b: &B, f: F) -> Option<usize>
+    async fn find_by_key_async<'a, B, F>(&'a self, b: &B, f: F) -> Option<usize>
     where
         F: AsyncFn(&'a T) -> B /*+ ~const Destruct*/,
         B: PartialEq,
         T: 'a
     {
-        todo!()
+        let ff = async |i, x| {
+            if f(x).await == *b
+            {
+                Err(i)
+            }
+            else
+            {
+                Ok(())
+            }
+        };
+        TryActions::new(self.enumerate_map_ref(|i, x| ff(i, x))).await.err()
     }
 }

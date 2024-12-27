@@ -1,43 +1,52 @@
 use array_trait::Array;
 
-use crate::MutForm;
+use crate::form::MutForm;
 
 #[const_trait]
 pub trait ArrayShift<T, const N: usize>: Array<Item = T>
 {
-    fn shift_many_left<const M: usize, I>(&mut self, items: I)
+    fn shift_many_left<'a, const M: usize, I>(&mut self, items: I)
     where
-        I: MutForm<[T; M]>;
-    fn shift_many_right<const M: usize, I>(&mut self, items: I)
+        I: ~const MutForm<'a, [T; M]>,
+        T: 'a;
+    fn shift_many_right<'a, const M: usize, I>(&mut self, items: I)
     where
-        I: MutForm<[T; M]>;
+        I: ~const MutForm<'a, [T; M]>,
+        T: 'a;
     
-    fn shift_left<I>(&mut self, item: I)
+    fn shift_left<'a, I>(&mut self, item: I)
     where
-        I: MutForm<T>;
-    fn shift_right<I>(&mut self, item: I)
+        I: ~const MutForm<'a, T>,
+        T: 'a;
+    fn shift_right<'a, I>(&mut self, item: I)
     where
-        I: MutForm<T>;
+        I: ~const MutForm<'a, T>,
+        T: 'a;
 }
 
-impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
+impl<T, const N: usize> ArrayShift<T, N> for [T; N]
 {
-    fn shift_many_left<const M: usize, I>(&mut self, mut items: I)
+    fn shift_many_left<'a, const M: usize, I>(&mut self, mut items: I)
     where
-        I: MutForm<[T; M]>
+        I: MutForm<'a, [T; M]>,
+        T: 'a
     {
+        let items_mut = items.as_mut();
         if M == N
         {
-            core::mem::swap(self, items.get_mut());
+            core::mem::swap(
+                self,
+                unsafe {
+                    items_mut.as_mut_ptr().cast::<[T; N]>().as_mut_unchecked()
+                }
+            );
         }
         else
         {
             let dst = self.as_mut_ptr();
-            let src = items.get_mut().as_mut_ptr();
+            let src = items_mut.as_mut_ptr();
             if M < N
             {
-                let shift = || unsafe {
-                };
                 if I::IS_MUT
                 {
                     let buffer = unsafe {
@@ -50,11 +59,11 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N - M
                         );
                         core::ptr::copy_nonoverlapping(
-                            shift,
+                            src,
                             dst.add(N - M),
                             M
                         );
-                        core::ptr::write(items, buffer);
+                        core::ptr::write(items_mut, buffer);
                     }
                 }
                 else
@@ -69,7 +78,7 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N - M
                         );
                         core::ptr::copy_nonoverlapping(
-                            shift,
+                            src,
                             dst.add(N - M),
                             M
                         );
@@ -108,7 +117,7 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N
                         );
                         core::ptr::drop_in_place(
-                            &mut items.get_mut()[0..M - N]
+                            &mut items_mut[0..M - N]
                         );
                     }
                     core::mem::forget(items);
@@ -116,22 +125,27 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
             }
         }
     }
-    fn shift_many_right<const M: usize, I>(&mut self, mut items: I)
+    fn shift_many_right<'a, const M: usize, I>(&mut self, mut items: I)
     where
-        I: MutForm<[T; M]>
+        I: MutForm<'a, [T; M]>,
+        T: 'a
     {
+        let items_mut = items.as_mut();
         if M == N
         {
-            core::mem::swap(self, items.get_mut());
+            core::mem::swap(
+                self,
+                unsafe {
+                    items_mut.as_mut_ptr().cast::<[T; N]>().as_mut_unchecked()
+                }
+            );
         }
         else
         {
             let dst = self.as_mut_ptr();
-            let src = items.get_mut().as_mut_ptr();
+            let src = items_mut.as_mut_ptr();
             if M < N
             {
-                let shift = || unsafe {
-                };
                 if I::IS_MUT
                 {
                     let buffer = unsafe {
@@ -144,11 +158,11 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N - M
                         );
                         core::ptr::copy_nonoverlapping(
-                            shift,
+                            src,
                             dst,
                             M
                         );
-                        core::ptr::write(items, buffer);
+                        core::ptr::write(items_mut, buffer);
                     }
                 }
                 else
@@ -163,7 +177,7 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N - M
                         );
                         core::ptr::copy_nonoverlapping(
-                            shift,
+                            src,
                             dst,
                             M
                         );
@@ -202,7 +216,7 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
                             N
                         );
                         core::ptr::drop_in_place(
-                            &mut items.get_mut()[M - N..N]
+                            &mut items_mut[M - N..N]
                         );
                     }
                     core::mem::forget(items);
@@ -211,16 +225,36 @@ impl<T, const N: usize> const ArrayShift<T, N> for [T; N]
         }
     }
     
-    fn shift_left<I>(&mut self, item: I)
+    fn shift_left<'a, I>(&mut self, mut item: I)
     where
-        I: MutForm<T>
+        I: MutForm<'a, T>,
+        T: 'a
     {
-        self.shift_many_left([item]);
+        if I::IS_MUT
+        {
+            self.shift_many_left(core::array::from_mut(item.as_mut()));
+        }
+        else
+        {
+            self.shift_many_left(unsafe {
+                [item.read()]
+            });
+        }
     }
-    fn shift_right<I>(&mut self, item: I)
+    fn shift_right<'a, I>(&mut self, mut item: I)
     where
-        I: MutForm<T>
+        I: MutForm<'a, T>,
+        T: 'a
     {
-        self.shift_many_right([item]);
+        if I::IS_MUT
+        {
+            self.shift_many_right(core::array::from_mut(item.as_mut()));
+        }
+        else
+        {
+            self.shift_many_right(unsafe {
+                [item.read()]
+            });
+        }
     }
 }

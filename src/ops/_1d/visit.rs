@@ -1,10 +1,8 @@
-use core::{marker::Destruct, ops::AsyncFn};
+use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use crate::{Actions, TryActions};
-
-use super::{ArrayJoin, Map};
+use super::EnumerateVisit;
 
 #[const_trait]
 pub trait Visit<T, const N: usize>: Array<Item = T>
@@ -51,6 +49,15 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: FnMut(&'a mut T) + ~const Destruct,
         T: 'a;
+    fn visit_pin<'a, F>(self: Pin<&'a Self>, visitor: F)
+    where
+        F: FnMut(Pin<&'a T>) + ~const Destruct,
+        T: 'a;
+    fn visit_pin_mut<'a, F>(self: Pin<&'a mut Self>, visitor: F)
+    where
+        F: FnMut(Pin<&'a mut T>) + ~const Destruct,
+        T: 'a;
+
     /// Visits each element once, from left to right, or short-circuits if visitor returns error.
     /// 
     /// # Example
@@ -106,6 +113,14 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: FnMut(&'a mut T) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    fn try_visit_pin<'a, E, F>(self: Pin<&'a Self>, visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_visit_pin_mut<'a, E, F>(self: Pin<&'a mut Self>, visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a mut T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
         
     /// Visits each element once, from right to left.
     /// 
@@ -149,6 +164,15 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: FnMut(&'a mut T) + ~const Destruct,
         T: 'a;
+    fn rvisit_pin<'a, F>(self: Pin<&'a Self>, visitor: F)
+    where
+        F: FnMut(Pin<&'a T>) + ~const Destruct,
+        T: 'a;
+    fn rvisit_pin_mut<'a, F>(self: Pin<&'a mut Self>, visitor: F)
+    where
+        F: FnMut(Pin<&'a mut T>) + ~const Destruct,
+        T: 'a;
+        
     /// Visits each element once, from right to left, or short-circuits if visitor returns error.
     /// 
     /// # Example
@@ -204,6 +228,14 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: FnMut(&'a mut T) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    fn try_rvisit_pin<'a, E, F>(self: Pin<&'a Self>, visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    fn try_rvisit_pin_mut<'a, E, F>(self: Pin<&'a mut Self>, visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a mut T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
         
     /// Visits each element once, asyncronously.
     /// 
@@ -245,6 +277,15 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: AsyncFn(&'a mut T) + ~const Destruct,
         T: 'a;
+    async fn visit_pin_async<'a, F>(self: Pin<&'a Self>, visitor: F)
+    where
+        F: AsyncFn(Pin<&'a T>) + ~const Destruct,
+        T: 'a;
+    async fn visit_pin_mut_async<'a, F>(self: Pin<&'a mut Self>, visitor: F)
+    where
+        F: AsyncFn(Pin<&'a mut T>) + ~const Destruct,
+        T: 'a;
+
     /// Visits each element once, asyncronously, or short-circuits if visitor returns error.
     /// 
     /// # Warning
@@ -313,6 +354,14 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
     where
         F: AsyncFn(&'a mut T) -> Result<(), E> + ~const Destruct,
         T: 'a;
+    async fn try_visit_pin_async<'a, E, F>(self: Pin<&'a Self>, visitor: F) -> Result<(), E>
+    where
+        F: AsyncFn(Pin<&'a T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
+    async fn try_visit_pin_mut_async<'a, E, F>(self: Pin<&'a mut Self>, visitor: F) -> Result<(), E>
+    where
+        F: AsyncFn(Pin<&'a mut T>) -> Result<(), E> + ~const Destruct,
+        T: 'a;
 }
 
 impl<T, const N: usize> Visit<T, N> for [T; N]
@@ -322,54 +371,57 @@ impl<T, const N: usize> Visit<T, N> for [T; N]
         F: FnMut(&'a T),
         T: 'a
     {
-        let mut i = 0;
-        while i < N
-        {
-            visitor(&self[i]);
-            i += 1;
-        }
+        self.enumerate_visit(|_, x| visitor(x))
     }
     fn visit_mut<'a, F>(&'a mut self, mut visitor: F)
     where
         F: FnMut(&'a mut T),
         T: 'a
     {
-        let mut i = 0;
-        while i < N
-        {
-            visitor(unsafe {
-                core::mem::transmute::<&mut T, &mut T>(&mut self[i])
-            });
-            i += 1;
-        }
+        self.enumerate_visit_mut(|_, x| visitor(x))
     }
+    fn visit_pin<'a, F>(self: Pin<&'a Self>, mut visitor: F)
+    where
+        F: FnMut(Pin<&'a T>),
+        T: 'a
+    {
+        self.enumerate_visit_pin(|_, x| visitor(x))
+    }
+    fn visit_pin_mut<'a, F>(self: Pin<&'a mut Self>, mut visitor: F)
+    where
+        F: FnMut(Pin<&'a mut T>),
+        T: 'a
+    {
+        self.enumerate_visit_pin_mut(|_, x| visitor(x))
+    }
+
     fn try_visit<'a, E, F>(&'a self, mut visitor: F) -> Result<(), E>
     where
         F: FnMut(&'a T) -> Result<(), E>,
         T: 'a
     {
-        let mut i = 0;
-        while i < N
-        {
-            visitor(&self[i])?;
-            i += 1;
-        }
-        Ok(())
+        self.try_enumerate_visit(|_, x| visitor(x))
     }
     fn try_visit_mut<'a, E, F>(&'a mut self, mut visitor: F) -> Result<(), E>
     where
         F: FnMut(&'a mut T) -> Result<(), E>,
         T: 'a
     {
-        let mut i = 0;
-        while i < N
-        {
-            visitor(unsafe {
-                core::mem::transmute::<&mut T, &mut T>(&mut self[i])
-            })?;
-            i += 1;
-        }
-        Ok(())
+        self.try_enumerate_visit_mut(|_, x| visitor(x))
+    }
+    fn try_visit_pin<'a, E, F>(self: Pin<&'a Self>, mut visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_visit_pin(|_, x| visitor(x))
+    }
+    fn try_visit_pin_mut<'a, E, F>(self: Pin<&'a mut Self>, mut visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a mut T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_visit_pin_mut(|_, x| visitor(x))
     }
         
     fn rvisit<'a, F>(&'a self, mut visitor: F)
@@ -377,54 +429,57 @@ impl<T, const N: usize> Visit<T, N> for [T; N]
         F: FnMut(&'a T),
         T: 'a
     {
-        let mut i = N;
-        while i > 0
-        {
-            i -= 1;
-            visitor(&self[i]);
-        }
+        self.enumerate_rvisit(|_, x| visitor(x))
     }
     fn rvisit_mut<'a, F>(&'a mut self, mut visitor: F)
     where
         F: FnMut(&'a mut T),
         T: 'a
     {
-        let mut i = N;
-        while i > 0
-        {
-            i -= 1;
-            visitor(unsafe {
-                core::mem::transmute::<&mut T, &mut T>(&mut self[i])
-            });
-        }
+        self.enumerate_rvisit_mut(|_, x| visitor(x))
     }
+    fn rvisit_pin<'a, F>(self: Pin<&'a Self>, mut visitor: F)
+    where
+        F: FnMut(Pin<&'a T>),
+        T: 'a
+    {
+        self.enumerate_rvisit_pin(|_, x| visitor(x))
+    }
+    fn rvisit_pin_mut<'a, F>(self: Pin<&'a mut Self>, mut visitor: F)
+    where
+        F: FnMut(Pin<&'a mut T>),
+        T: 'a
+    {
+        self.enumerate_rvisit_pin_mut(|_, x| visitor(x))
+    }
+
     fn try_rvisit<'a, E, F>(&'a self, mut visitor: F) -> Result<(), E>
     where
         F: FnMut(&'a T) -> Result<(), E>,
         T: 'a
     {
-        let mut i = N;
-        while i > 0
-        {
-            i -= 1;
-            visitor(&self[i])?;
-        }
-        Ok(())
+        self.try_enumerate_rvisit(|_, x| visitor(x))
     }
     fn try_rvisit_mut<'a, E, F>(&'a mut self, mut visitor: F) -> Result<(), E>
     where
         F: FnMut(&'a mut T) -> Result<(), E>,
         T: 'a
     {
-        let mut i = N;
-        while i > 0
-        {
-            i -= 1;
-            visitor(unsafe {
-                core::mem::transmute::<&mut T, &mut T>(&mut self[i])
-            })?;
-        }
-        Ok(())
+        self.try_enumerate_rvisit_mut(|_, x| visitor(x))
+    }
+    fn try_rvisit_pin<'a, E, F>(self: Pin<&'a Self>, mut visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rvisit_pin(|_, x| visitor(x))
+    }
+    fn try_rvisit_pin_mut<'a, E, F>(self: Pin<&'a mut Self>, mut visitor: F) -> Result<(), E>
+    where
+        F: FnMut(Pin<&'a mut T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_rvisit_pin_mut(|_, x| visitor(x))
     }
     
     async fn visit_async<'a, F>(&'a self, visitor: F)
@@ -432,27 +487,56 @@ impl<T, const N: usize> Visit<T, N> for [T; N]
         F: AsyncFn(&'a T),
         T: 'a
     {
-        self.map_ref(|x| visitor(x)).join_actions().await
+        self.enumerate_visit_async(|_, x| visitor(x)).await
     }
     async fn visit_mut_async<'a, F>(&'a mut self, visitor: F)
     where
         F: AsyncFn(&'a mut T),
         T: 'a
     {
-        self.map_mut(|x| visitor(x)).join_actions().await
+        self.enumerate_visit_mut_async(|_, x| visitor(x)).await
     }
+    async fn visit_pin_async<'a, F>(self: Pin<&'a Self>, visitor: F)
+    where
+        F: AsyncFn(Pin<&'a T>),
+        T: 'a
+    {
+        self.enumerate_visit_pin_async(|_, x| visitor(x)).await
+    }
+    async fn visit_pin_mut_async<'a, F>(self: Pin<&'a mut Self>, visitor: F)
+    where
+        F: AsyncFn(Pin<&'a mut T>),
+        T: 'a
+    {
+        self.enumerate_visit_pin_mut_async(|_, x| visitor(x)).await
+    }
+
     async fn try_visit_async<'a, E, F>(&'a self, visitor: F) -> Result<(), E>
     where
         F: AsyncFn(&'a T) -> Result<(), E>,
         T: 'a
     {
-        self.map_ref(|x| visitor(x)).try_join_actions().await
+        self.try_enumerate_visit_async(|_, x| visitor(x)).await
     }
     async fn try_visit_mut_async<'a, E, F>(&'a mut self, visitor: F) -> Result<(), E>
     where
         F: AsyncFn(&'a mut T) -> Result<(), E>,
         T: 'a
     {
-        self.map_mut(|x| visitor(x)).try_join_actions().await
+        self.try_enumerate_visit_mut_async(|_, x| visitor(x)).await
+    }
+    async fn try_visit_pin_async<'a, E, F>(self: Pin<&'a Self>, visitor: F) -> Result<(), E>
+    where
+        F: AsyncFn(Pin<&'a T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_visit_pin_async(|_, x| visitor(x)).await
+    }
+    async fn try_visit_pin_mut_async<'a, E, F>(self: Pin<&'a mut Self>, visitor: F) -> Result<(), E>
+    where
+        F: AsyncFn(Pin<&'a mut T>) -> Result<(), E>,
+        T: 'a
+    {
+        self.try_enumerate_visit_pin_mut_async(|_, x| visitor(x)).await
     }
 }

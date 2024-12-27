@@ -2,7 +2,7 @@ use core::{ops::AsyncFn, marker::Destruct};
 
 use crate::form::ArrayForm;
 
-use super::{Enumerate, ZipAssignWith};
+use super::{Enumerate, EnumerateMeet, ZipAssignWith};
 
 #[const_trait]
 pub trait EnumerateZipAssignWith<T, const N: usize>: Enumerate<T, N> + ZipAssignWith<T, N>
@@ -35,7 +35,7 @@ impl<T, const N: usize> EnumerateZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: FnMut(usize, T, Rhs::Elem) -> T
     {
-        self.enumerate_visit_mut_with(rhs, |i, x, y| unsafe {
+        self.enumerate_meet_each_mut(rhs, |i, x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(i, value, y))
         });
@@ -46,7 +46,7 @@ impl<T, const N: usize> EnumerateZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: AsyncFn(usize, T, Rhs::Elem) -> T
     {
-        self.enumerate_visit_mut_async_with(rhs, async |i, x, y| unsafe {
+        self.enumerate_meet_each_mut_async(rhs, async |i, x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(i, value, y).await)
         }).await
@@ -57,7 +57,7 @@ impl<T, const N: usize> EnumerateZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: FnMut(usize, T, Rhs::Elem) -> Result<T, E>
     {
-        self.try_enumerate_visit_mut_with(rhs, |i, x, y| unsafe {
+        self.try_enumerate_meet_each_mut(rhs, |i, x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(i, value, y)?);
             Ok(())
@@ -69,7 +69,7 @@ impl<T, const N: usize> EnumerateZipAssignWith<T, N> for [T; N]
         Rhs: ArrayForm<N>,
         Zip: AsyncFn(usize, T, Rhs::Elem) -> Result<T, E>
     {
-        self.try_enumerate_visit_mut_async_with(rhs, async |i, x, y| unsafe {
+        self.try_enumerate_meet_each_mut_async(rhs, async |i, x, y| unsafe {
             let value = core::ptr::read(x);
             core::ptr::write(x, zip(i, value, y).await?);
             Ok(())

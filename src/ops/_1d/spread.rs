@@ -1,7 +1,11 @@
+use core::pin::Pin;
+
 use array_trait::Array;
 use slice_ops::Padded;
 
-use crate::{private, MutForm};
+use crate::{ops::{ArrayChunks, ArrayTranspose}, private};
+
+use super::Split;
 
 #[const_trait]
 pub trait ArraySpread<T, const N: usize>: Array<Item = T>
@@ -29,7 +33,6 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
         [(); M - 1]:,
         [(); N / M]:,
         [(); N % M]:;
-
     /// Distributes items of an array-slice equally across a given width, then provides the rest as a separate array-slice.
     /// 
     /// The spread-out slices are given in padded arrays. Each padded item can be borrowed into a reference to the array's item.
@@ -37,7 +40,6 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     where
         [(); M - 1]:,
         [(); N % M]:;
-    
     /// Distributes items of a mutable array-slice equally across a given width, then provides the rest as a separate mutable array-slice.
     /// 
     /// The spread-out slices are given in padded arrays. Each padded item can be borrowed into a reference to the array's item.
@@ -80,6 +82,14 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     where
         [(); M - 1]:,
         [(); N % M]:;
+    fn spread_pin_ref<const M: usize>(self: Pin<&Self>) -> ([Pin<&[Padded<T, M>; N / M]>; M], Pin<&[T; N % M]>)
+    where
+        [(); M - 1]:,
+        [(); N % M]:;
+    fn spread_pin_mut<const M: usize>(self: Pin<&mut Self>) -> ([Pin<&mut [Padded<T, M>; N / M]>; M], Pin<&mut [T; N % M]>)
+    where
+        [(); M - 1]:,
+        [(); N % M]:;
     
     /// Distributes items of an array equally across a given width, then provides the leftmost rest as a separate array.
     fn rspread<const M: usize>(self) -> ([T; N % M], [[T; N / M]; M])
@@ -88,7 +98,6 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
         [(); N / M]:,
         [(); N % M]:,
         T: Copy;
-
     /// Distributes items of an array-slice equally across a given width, then provides the leftmost rest as a separate array-slice.
     /// 
     /// The spread-out slices are given in padded arrays. Each padded item can be borrowed into a reference to the array's item.
@@ -154,6 +163,14 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     where
         [(); M - 1]:,
         [(); N % M]:;
+    fn rspread_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[T; N % M]>, [Pin<&[Padded<T, M>; N / M]>; M])
+    where
+        [(); M - 1]:,
+        [(); N % M]:;
+    fn rspread_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [T; N % M]>, [Pin<&mut [Padded<T, M>; N / M]>; M])
+    where
+        [(); M - 1]:,
+        [(); N % M]:;
     
     /// Distributes items of an array equally across a given width, with no rest.
     /// 
@@ -179,7 +196,6 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
         [(); M - 1]:,
         [(); 0 - N % M]:,
         [(); N / M]:;
-    
     /// Distributes items of an array-slice equally across a given width, with no rest.
     /// 
     /// The width must be a factor of the array length, otherwise it will not compile.
@@ -206,7 +222,6 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     where
         [(); M - 1]:,
         [(); 0 - N % M]:;
-
     /// Distributes items of a mutable array-slice equally across a given width, with no rest.
     /// 
     /// The width must be a factor of the array length, otherwise it will not compile.
@@ -240,9 +255,17 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     where
         [(); M - 1]:,
         [(); 0 - N % M]:;
+    fn spread_exact_pin_ref<const M: usize>(self: Pin<&Self>) -> [Pin<&[Padded<T, M>; N / M]>; M]
+    where
+        [(); M - 1]:,
+        [(); 0 - N % M]:;
+    fn spread_exact_pin_mut<const M: usize>(self: Pin<&mut Self>) -> [Pin<&mut [Padded<T, M>; N / M]>; M]
+    where
+        [(); M - 1]:,
+        [(); 0 - N % M]:;
 }
 
-impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
+impl<T, const N: usize> ArraySpread<T, N> for [T; N]
 {
     fn spread<const M: usize>(self) -> ([[T; N / M]; M], [T; N % M])
     where
@@ -250,7 +273,7 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
         [(); N % M]:,
         [(); N / M]:
     {
-        let split = self.chunk();
+        let split = self.chunks();
     
         let spread_t = unsafe {core::ptr::read(&split.0 as *const [[T; _]; _])};
         let rest = unsafe {core::ptr::read(&split.1 as *const [T; _])};
@@ -266,8 +289,10 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
         let (left, right) = self.rsplit_ptr(N % M);
     
         unsafe {(
-            crate::from_fn(|i| &*left.add(i).cast()),
-            &*right.cast()
+            crate::from_fn(|i| {
+                left.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked()
+            }),
+            right.cast::<[T; N % M]>().as_ref_unchecked()
         )}
     }
     fn spread_mut<const M: usize>(&mut self) -> ([&mut [Padded<T, M>; N / M]; M], &mut [T; N % M])
@@ -278,8 +303,40 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
         let (left, right) = self.rsplit_mut_ptr(N % M);
     
         unsafe {(
-            crate::from_fn(|i| &mut *left.add(i).cast()),
-            &mut *right.cast()
+            crate::from_fn(|i| {
+                left.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked()
+            }),
+            right.cast::<[T; N % M]>().as_mut_unchecked()
+        )}
+    }
+    fn spread_pin_ref<const M: usize>(self: Pin<&Self>) -> ([Pin<&[Padded<T, M>; N / M]>; M], Pin<&[T; N % M]>)
+    where
+        [(); M - 1]:,
+        [(); N % M]:
+    {
+        let (left, right) = self.rsplit_ptr(N % M);
+    
+        unsafe {(
+            crate::from_fn(|i| {
+                Pin::new_unchecked(left.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked())
+            }),
+            Pin::new_unchecked(right.cast::<[T; N % M]>().as_ref_unchecked())
+        )}
+    }
+    fn spread_pin_mut<const M: usize>(self: Pin<&mut Self>) -> ([Pin<&mut [Padded<T, M>; N / M]>; M], Pin<&mut [T; N % M]>)
+    where
+        [(); M - 1]:,
+        [(); N % M]:
+    {
+        let (left, right) = unsafe {
+            self.get_unchecked_mut().rsplit_mut_ptr(N % M)
+        };
+    
+        unsafe {(
+            crate::from_fn(|i| {
+                Pin::new_unchecked(left.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked())
+            }),
+            Pin::new_unchecked(right.cast::<[T; N % M]>().as_mut_unchecked())
         )}
     }
     
@@ -305,8 +362,10 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
         let (left, right) = self.split_ptr(N % M);
     
         unsafe {(
-            &*left.cast(),
-            crate::from_fn(|i| &*right.add(i).cast())
+            left.cast::<[T; N % M]>().as_ref_unchecked(),
+            crate::from_fn(|i| {
+                right.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked()
+            })
         )}
     }
     fn rspread_mut<const M: usize>(&mut self) -> (&mut [T; N % M], [&mut [Padded<T, M>; N / M]; M])
@@ -317,10 +376,43 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
         let (left, right) = self.split_mut_ptr(N % M);
     
         unsafe {(
-            &mut *left.cast(),
-            crate::from_fn(|i| &mut *right.add(i).cast())
+            left.cast::<[T; N % M]>().as_mut_unchecked(),
+            crate::from_fn(|i| {
+                right.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked()
+            })
         )}
     }
+    fn rspread_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[T; N % M]>, [Pin<&[Padded<T, M>; N / M]>; M])
+    where
+        [(); M - 1]:,
+        [(); N % M]:
+    {
+        let (left, right) = self.split_ptr(N % M);
+    
+        unsafe {(
+            self.map_unchecked(|_| left.cast::<[T; N % M]>().as_ref_unchecked()),
+            crate::from_fn(|i| {
+                self.map_unchecked(|_| right.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked())
+            })
+        )}
+    }
+    fn rspread_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [T; N % M]>, [Pin<&mut [Padded<T, M>; N / M]>; M])
+    where
+        [(); M - 1]:,
+        [(); N % M]:
+    {
+        let (left, right) = unsafe {
+            self.get_unchecked_mut().split_mut_ptr(N % M)
+        };
+    
+        unsafe {(
+            Pin::new_unchecked(left.cast::<[T; N % M]>().as_mut_unchecked()),
+            crate::from_fn(|i| {
+                Pin::new_unchecked(right.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked())
+            })
+        )}
+    }
+
     fn spread_exact<const M: usize>(self) -> [[T; N / M]; M]
     where
         [(); M - 1]:,
@@ -339,7 +431,9 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
     {
         let ptr = self as *const T;
         
-        crate::from_fn(|i| unsafe {&*ptr.add(i).cast()})
+        crate::from_fn(|i| unsafe {
+            ptr.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked()
+        })
     }
     fn spread_exact_mut<const M: usize>(&mut self) -> [&mut [Padded<T, M>; N / M]; M]
     where
@@ -348,6 +442,32 @@ impl<T, const N: usize> const ArraySpread<T, N> for [T; N]
     {
         let ptr = self as *mut T;
         
-        crate::from_fn(|i| unsafe {&mut *ptr.add(i).cast()})
+        crate::from_fn(|i| unsafe {
+            ptr.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked()
+        })
+    }
+    fn spread_exact_pin_ref<const M: usize>(self: Pin<&Self>) -> [Pin<&[Padded<T, M>; N / M]>; M]
+    where
+        [(); M - 1]:,
+        [(); 0 - N % M]:
+    {
+        let ptr = &*self as *const T;
+
+        crate::from_fn(|i| unsafe {
+            Pin::new_unchecked(ptr.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked())
+        })
+    }
+    fn spread_exact_pin_mut<const M: usize>(self: Pin<&mut Self>) -> [Pin<&mut [Padded<T, M>; N / M]>; M]
+    where
+        [(); M - 1]:,
+        [(); 0 - N % M]:
+    {
+        let ptr = unsafe {
+            self.get_unchecked_mut() as *mut T
+        };
+
+        crate::from_fn(|i| unsafe {
+            Pin::new_unchecked(ptr.add(i).cast::<[Padded<T, M>; N / M]>().as_mut_unchecked())
+        })
     }
 }

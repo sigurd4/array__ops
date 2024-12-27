@@ -49,24 +49,7 @@ impl<'a, T, const D: Dir, const N: usize> PartialInitGuard<'a, T, D, N>
 
     pub /*const*/ fn push(&mut self, value: T)
     {
-        let f = |j| unsafe {
-            let dst = &mut self.dst[j];
-            core::ptr::write(dst, MaybeUninit::new(value))
-        };
-        match D
-        {
-            Dir::Left => {
-                assert!(self.i < N);
-                f(self.i);
-                self.i += 1;
-            },
-            Dir::Right => {
-                assert!(self.i > 0);
-                let j = self.i - 1;
-                f(j);
-                self.i = j;
-            }
-        }
+        self.push_by_fn(|_| value);
     }
     pub /*const*/ fn push_by_fn<F>(&mut self, value: F)
     where

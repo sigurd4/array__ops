@@ -33,7 +33,9 @@ impl<T, const N: usize> const ArrayTransposeAssign<T, N> for [[T; N]; N]
         let mut r = 0;
         while r < N
         {
-            let row = &mut self[r];
+            let row = unsafe {
+                (&mut self[r] as *mut [T; N]).as_mut_unchecked()
+            };
             let mut c = r + 1;
             while c < N
             {

@@ -13,13 +13,13 @@ where
 }
 
 #[const_trait]
-pub trait MutForm<T>: ~const private::_MutForm<T>
+pub trait MutForm<'a, T>: ~const private::_MutForm<'a, T>
 {
 
 }
-impl<T, U> const MutForm<T> for U
+impl<'a, T, U> const MutForm<'a, T> for U
 where
-    U: ~const private::_MutForm<T>
+    U: ~const private::_MutForm<'a, T>
 {
     
 }
@@ -31,37 +31,37 @@ mod private
     use crate::{ops::Each, private};
 
     #[const_trait]
-    pub trait _MutForm<T>
+    pub trait _MutForm<'a, T>
     {
         const IS_MUT: bool;
 
-        fn get(&self) -> &T;
-        fn get_mut(&mut self) -> &mut T;
+        fn as_mut<'b>(&'b mut self) -> &'b mut T;
+        unsafe fn read(self) -> T;
     }
-    impl<T> const _MutForm<T> for T
+    impl<'a, T> const _MutForm<'a, T> for T
     {
         const IS_MUT: bool = false;
         
-        fn get(&self) -> &T
+        fn as_mut<'b>(&'b mut self) -> &'b mut T
         {
             self
         }
-        fn get_mut(&mut self) -> &mut T
+        unsafe fn read(self) -> T
         {
             self
         }
     }
-    impl<T> const _MutForm<T> for &mut T
+    impl<'a, T> const _MutForm<'a, T> for &'a mut T
     {
         const IS_MUT: bool = true;
         
-        fn get(&self) -> &T
+        fn as_mut<'b>(&'b mut self) -> &'b mut T
         {
             *self
         }
-        fn get_mut(&mut self) -> &mut T
+        unsafe fn read(self) -> T
         {
-            *self
+            core::ptr::read(self)
         }
     }
 
@@ -79,7 +79,7 @@ mod private
             Self::_Elem: Copy;
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
         where
-            Self::_Elem: _ArrayForm<M, _Elem = U>,
+            Self::_Elem: ~const _ArrayForm<M, _Elem = U>,
             U: Copy;
         unsafe fn drop_elems<R>(&mut self, i: R)
         where
@@ -174,10 +174,10 @@ mod private
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
         where
-            Self::_Elem: _ArrayForm<M, _Elem = U>,
+            Self::_Elem: ~const _ArrayForm<M, _Elem = U>,
             U: Copy
         {
-            self[i].copy_elem(j)
+            self.copy_elem(i).copy_elem(j)
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
@@ -238,10 +238,12 @@ mod private
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
         where
-            Self::_Elem: _ArrayForm<M, _Elem = U>,
+            Self::_Elem: ~const _ArrayForm<M, _Elem = U>,
             U: Copy
         {
-            self[i].copy_elem(j)
+            unsafe {
+                self.read_elem(i).copy_elem(j)
+            }
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
@@ -295,8 +297,7 @@ mod private
         fn copy_elem(&self, i: usize) -> Self::_Elem
         {
             unsafe {
-                self.as_ref()
-                    .map_unchecked(|pin| &pin[i])
+                self.map_unchecked(move |pin| &pin[i])
             }
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
@@ -304,7 +305,7 @@ mod private
             Self::_Elem: _ArrayForm<M, _Elem = U>,
             U: Copy
         {
-            self[i].copy_elem(j)
+            self.copy_elem(i).copy_elem(j)
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
@@ -331,8 +332,7 @@ mod private
         unsafe fn read_assume_init_elem(maybe_uninit: &Self::_MaybeUninit, i: usize) -> Self::_Elem
         {
             unsafe {
-                maybe_uninit.get_ref()
-                    .map_unchecked(|pin| MaybeUninit::assume_init_ref(&pin[i]))
+                maybe_uninit.map_unchecked(|pin| MaybeUninit::assume_init_ref(&pin[i]))
             }
         }
         unsafe fn drop_elems_assume_init<R>(_: &mut Self::_MaybeUninit, _: R)
@@ -356,15 +356,15 @@ mod private
         }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
-            self.copy_elem(i)
+            (self as *const Self).cast_mut()
+                .as_mut_unchecked()
+                .as_mut()
+                .map_unchecked_mut(|pin| &mut pin[i])
         }
         fn copy_elem(&self, i: usize) -> Self::_Elem
         {
             unsafe {
-                (self as *const Self).cast_mut()
-                    .as_mut_unchecked()
-                    .as_mut()
-                    .map_unchecked_mut(|pin| &mut pin[i])
+                self.read_elem(i)
             }
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
@@ -372,7 +372,9 @@ mod private
             Self::_Elem: _ArrayForm<M, _Elem = U>,
             U: Copy
         {
-            self[i].copy_elem(j)
+            unsafe {
+                self.read_elem(i).copy_elem(j)
+            }
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
@@ -401,7 +403,7 @@ mod private
             unsafe {
                 (maybe_uninit as *const Self::_MaybeUninit).cast_mut()
                     .as_mut_unchecked()
-                    .get_mut()
+                    .as_mut()
                     .map_unchecked_mut(|pin| MaybeUninit::assume_init_mut(&mut pin[i]))
             }
         }

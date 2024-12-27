@@ -1,11 +1,8 @@
-use core::{pin::Pin, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
+use core::pin::Pin;
 
 use array_trait::Array;
-use slice_ops::Padded;
 
-use crate::{private, MutForm};
-
-use super::{Map, Split};
+use super::Map;
 
 #[const_trait]
 pub trait Each<T, const N: usize>: Array<Item = T>
@@ -16,7 +13,7 @@ pub trait Each<T, const N: usize>: Array<Item = T>
     fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N];
 }
 
-impl<T, const N: usize> const Each<T, N> for [T; N]
+impl<T, const N: usize> Each<T, N> for [T; N]
 {
     fn each_ref(&self) -> [&T; N]
     {
@@ -30,7 +27,7 @@ impl<T, const N: usize> const Each<T, N> for [T; N]
     {
         self.map_pin_ref(|x| x)
     }
-    fn each_pin_mut(mut self: Pin<&mut Self>) -> [Pin<&mut T>; N]
+    fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N]
     {
         self.map_pin_mut(|x| x)
     }

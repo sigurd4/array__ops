@@ -1,3 +1,5 @@
+use core::pin::Pin;
+
 use array_trait::Array;
 
 use super::Split;
@@ -79,6 +81,14 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     where
         [(); N % M]:,
         [(); N / M]:;
+    fn chunks_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[[T; M]; N / M]>, Pin<&[T; N % M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:;
+    fn chunks_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [[T; M]; N / M]>, Pin<&mut [T; N % M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:;
     
     /// Divides a mutable array-slice into chunks, then yielding the leftmost rest in a separate mutable array-slice.
     fn rchunks<const M: usize>(self) -> ([T; N % M], [[T; M]; N / M])
@@ -92,6 +102,14 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
         [(); N / M]:;
     /// Divides a mutable array-slice into chunks, then yielding the leftmost rest in a separate array-slice.
     fn rchunks_mut<const M: usize>(&mut self) -> (&mut [T; N % M], &mut [[T; M]; N / M])
+    where
+        [(); N % M]:,
+        [(); N / M]:;
+    fn rchunks_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[T; N % M]>, Pin<&[[T; M]; N / M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:;
+    fn rchunks_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [T; N % M]>, Pin<&mut [[T; M]; N / M]>)
     where
         [(); N % M]:,
         [(); N / M]:;
@@ -149,6 +167,14 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     where
         [(); 0 - N % M]:,
         [(); N / M]:;
+    fn chunks_exact_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[[T; M]; N / M]>
+    where
+        [(); 0 - N % M]:,
+        [(); N / M]:;
+    fn chunks_exact_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [[T; M]; N / M]>
+    where
+        [(); 0 - N % M]:,
+        [(); N / M]:;
 }
 
 impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
@@ -159,10 +185,10 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
 
         let (left, right) = self.rsplit_ptr(N % M);
         let chunks = unsafe {
-            left.cast().read()
+            left.cast::<[[T; M]; N / M]>().read()
         };
         let rest = unsafe {
-            right.cast().read()
+            right.cast::<[T; N % M]>().read()
         };
         core::mem::forget(self);
         (chunks, rest)
@@ -171,10 +197,10 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
     {
         let (left, right) = self.rsplit_ptr(N % M);
         let chunks = unsafe {
-            left.cast().as_ref_unchecked()
+            left.cast::<[[T; M]; N / M]>().as_ref_unchecked()
         };
         let rest = unsafe {
-            right.cast().as_ref_unchecked()
+            right.cast::<[T; N % M]>().as_ref_unchecked()
         };
         (chunks, rest)
     }
@@ -182,22 +208,48 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
     {
         let (left, right) = self.rsplit_mut_ptr(N % M);
         let chunks = unsafe {
-            left.cast().as_mut_unchecked()
+            left.cast::<[[T; M]; N / M]>().as_mut_unchecked()
         };
         let rest = unsafe {
-            right.cast().as_mut_unchecked()
+            right.cast::<[T; N % M]>().as_mut_unchecked()
         };
         (chunks, rest)
+    }
+    fn chunks_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[[T; M]; N / M]>, Pin<&[T; N % M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:
+    {
+        let (chunks, rest) = self.get_ref().chunks_ref();
+        unsafe {
+            (
+                Pin::new_unchecked(chunks),
+                Pin::new_unchecked(rest)
+            )
+        }
+    }
+    fn chunks_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [[T; M]; N / M]>, Pin<&mut [T; N % M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:
+    {
+        unsafe {
+            let (chunks, rest) = self.get_unchecked_mut().chunks_mut();
+            (
+                Pin::new_unchecked(chunks),
+                Pin::new_unchecked(rest)
+            )
+        }
     }
 
     fn rchunks<const M: usize>(self) -> ([T; N % M], [[T; M]; N / M])
     {
         let (left, right) = self.split_ptr(N % M);
         let rest = unsafe {
-            left.cast().read()
+            left.cast::<[T; N % M]>().read()
         };
         let chunks = unsafe {
-            right.cast().read()
+            right.cast::<[[T; M]; N / M]>().read()
         };
         core::mem::forget(self);
         (rest, chunks)
@@ -206,10 +258,10 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
     {
         let (left, right) = self.split_ptr(N % M);
         let rest = unsafe {
-            left.cast().as_ref_unchecked()
+            left.cast::<[T; N % M]>().as_ref_unchecked()
         };
         let chunks = unsafe {
-            right.cast().as_ref_unchecked()
+            right.cast::<[[T; M]; N / M]>().as_ref_unchecked()
         };
         (rest, chunks)
     }
@@ -217,12 +269,38 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
     {
         let (left, right) = self.split_mut_ptr(N % M);
         let rest = unsafe {
-            left.cast().as_mut_unchecked()
+            left.cast::<[T; N % M]>().as_mut_unchecked()
         };
         let chunks = unsafe {
-            right.cast().as_mut_unchecked()
+            right.cast::<[[T; M]; N / M]>().as_mut_unchecked()
         };
         (rest, chunks)
+    }
+    fn rchunks_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[T; N % M]>, Pin<&[[T; M]; N / M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:
+    {
+        let (rest, chunks) = self.get_ref().rchunks_ref();
+        unsafe {
+            (
+                Pin::new_unchecked(rest),
+                Pin::new_unchecked(chunks)
+            )
+        }
+    }
+    fn rchunks_pin_mut<const M: usize>(self: Pin<&mut Self>) -> (Pin<&mut [T; N % M]>, Pin<&mut [[T; M]; N / M]>)
+    where
+        [(); N % M]:,
+        [(); N / M]:
+    {
+        unsafe {
+            let (rest, chunks) = self.get_unchecked_mut().rchunks_mut();
+            (
+                Pin::new_unchecked(rest),
+                Pin::new_unchecked(chunks)
+            )
+        }
     }
     
     fn chunks_exact<const M: usize>(self) -> [[T; M]; N / M]
@@ -233,7 +311,7 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
         //unsafe {private::transmute_unchecked_size(array)}
 
         let chunks = unsafe {
-            self.as_ptr().cast().read()
+            self.as_ptr().cast::<[[T; M]; N / M]>().read()
         };
         core::mem::forget(self);
         chunks
@@ -244,7 +322,7 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
         [(); N / M]:
     {
         unsafe {
-            self.as_ptr().cast().as_ref_unchecked()
+            self.as_ptr().cast::<[[T; M]; N / M]>().as_ref_unchecked()
         }
     }
     fn chunks_exact_mut<const M: usize>(&mut self) -> &mut [[T; M]; N / M]
@@ -253,7 +331,25 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
         [(); N / M]:
     {
         unsafe {
-            self.as_mut().cast().as_mut_unchecked()
+            self.as_mut_ptr().cast::<[[T; M]; N / M]>().as_mut_unchecked()
+        }
+    }
+    fn chunks_exact_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[[T; M]; N / M]>
+    where
+        [(); 0 - N % M]:,
+        [(); N / M]:
+    {
+        unsafe {
+            Pin::new_unchecked(self.get_ref().chunks_exact_ref())
+        }
+    }
+    fn chunks_exact_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [[T; M]; N / M]>
+    where
+        [(); 0 - N % M]:,
+        [(); N / M]:
+    {
+        unsafe {
+            Pin::new_unchecked(self.get_unchecked_mut().chunks_exact_mut())
         }
     }
 }

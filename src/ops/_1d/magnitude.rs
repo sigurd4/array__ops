@@ -1,9 +1,5 @@
 use core::ops::{AddAssign, Mul};
 
-use array_trait::Array;
-
-use crate::{private::guard::PartialZipEmptyGuard, ArrayForm};
-
 use super::ArrayMulDot;
 
 #[const_trait]
