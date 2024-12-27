@@ -2,6 +2,8 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
+use crate::private;
+
 use super::Split;
 
 #[const_trait]
@@ -181,17 +183,9 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
 {
     fn chunks<const M: usize>(self) -> ([[T; M]; N / M], [T; N % M])
     {
-        //unsafe {private::split_transmute(array)}
-
-        let (left, right) = self.rsplit_ptr(N % M);
-        let chunks = unsafe {
-            left.cast::<[[T; M]; N / M]>().read()
-        };
-        let rest = unsafe {
-            right.cast::<[T; N % M]>().read()
-        };
-        core::mem::forget(self);
-        (chunks, rest)
+        unsafe {
+            private::split_transmute(self)
+        }
     }
     fn chunks_ref<const M: usize>(&self) -> (&[[T; M]; N / M], &[T; N % M])
     {
@@ -244,15 +238,9 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
 
     fn rchunks<const M: usize>(self) -> ([T; N % M], [[T; M]; N / M])
     {
-        let (left, right) = self.split_ptr(N % M);
-        let rest = unsafe {
-            left.cast::<[T; N % M]>().read()
-        };
-        let chunks = unsafe {
-            right.cast::<[[T; M]; N / M]>().read()
-        };
-        core::mem::forget(self);
-        (rest, chunks)
+        unsafe {
+            private::split_transmute(self)
+        }
     }
     fn rchunks_ref<const M: usize>(&self) -> (&[T; N % M], &[[T; M]; N / M])
     {
@@ -308,13 +296,9 @@ impl<T, const N: usize> const ArrayChunks<T, N> for [T; N]
         [(); 0 - N % M]:,
         [(); N / M]:
     {
-        //unsafe {private::transmute_unchecked_size(array)}
-
-        let chunks = unsafe {
-            self.as_ptr().cast::<[[T; M]; N / M]>().read()
-        };
-        core::mem::forget(self);
-        chunks
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn chunks_exact_ref<const M: usize>(&self) -> &[[T; M]; N / M]
     where

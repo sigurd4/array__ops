@@ -90,7 +90,7 @@ impl<T, const N: usize> Reformulate<T, N> for [T; N]
             return Err(self)
         }
         unsafe {
-            Ok(private::transmute_unchecked_size(self))
+            Ok(private::transmute(self))
         }
     }
     fn try_reformulate_ref<const M: usize>(&self) -> Option<&[T; M]>

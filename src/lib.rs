@@ -23,6 +23,7 @@
 #![feature(slice_swap_unchecked)]
 #![feature(adt_const_params)]
 #![feature(arbitrary_self_types)]
+#![feature(core_intrinsics)]
 #![feature(unsized_const_params)]
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]

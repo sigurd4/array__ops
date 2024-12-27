@@ -2,6 +2,8 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
+use crate::private;
+
 #[const_trait]
 pub trait ArrayFlatten<T, const M: usize, const N: usize>: Array<Item = [T; N]>
 {
@@ -16,11 +18,9 @@ impl<T, const M: usize, const N: usize> const ArrayFlatten<T, M, N> for [[T; N];
 {
     fn flatten(self) -> [T; M*N]
     {
-        let flattened = unsafe {
-            self.as_ptr().cast::<[T; M*N]>().read()
-        };
-        core::mem::forget(self);
-        flattened
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn flatten_ref(&self) -> &[T; M*N]
     {

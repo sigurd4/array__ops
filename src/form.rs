@@ -130,7 +130,7 @@ mod private
         fn maybe_uninit(self) -> Self::_MaybeUninit
         {
             unsafe {
-                private::transmute_unchecked_size(self)
+                private::transmute(self)
             }
         }
         fn each_elem_maybe_uninit(self) -> [MaybeUninit<Self::_Elem>; N]
@@ -139,7 +139,7 @@ mod private
         }
         unsafe fn assume_init(maybe_uninit: Self::_MaybeUninit) -> Self
         {
-            private::transmute_unchecked_size(maybe_uninit)
+            private::transmute(maybe_uninit)
         }
         unsafe fn read_assume_init_elem(maybe_uninit: &Self::_MaybeUninit, i: usize) -> Self::_Elem
         {
@@ -194,7 +194,7 @@ mod private
         fn each_elem_maybe_uninit(self) -> [MaybeUninit<Self::_Elem>; N]
         {
             unsafe {
-                private::transmute_unchecked_size(self.each_elem())
+                private::transmute(self.each_elem())
             }
         }
         unsafe fn assume_init(maybe_uninit: Self::_MaybeUninit) -> Self
@@ -260,7 +260,7 @@ mod private
         fn each_elem_maybe_uninit(self) -> [MaybeUninit<Self::_Elem>; N]
         {
             unsafe {
-                private::transmute_unchecked_size(self.each_elem())
+                private::transmute(self.each_elem())
             }
         }
         unsafe fn assume_init(maybe_uninit: Self::_MaybeUninit) -> Self
@@ -322,7 +322,7 @@ mod private
         fn each_elem_maybe_uninit(self) -> [MaybeUninit<Self::_Elem>; N]
         {
             unsafe {
-                private::transmute_unchecked_size(self.each_elem())
+                private::transmute(self.each_elem())
             }
         }
         unsafe fn assume_init(maybe_uninit: Self::_MaybeUninit) -> Self
@@ -388,7 +388,7 @@ mod private
         fn each_elem_maybe_uninit(self) -> [MaybeUninit<Self::_Elem>; N]
         {
             unsafe {
-                private::transmute_unchecked_size(self.each_elem())
+                private::transmute(self.each_elem())
             }
         }
         unsafe fn assume_init(maybe_uninit: Self::_MaybeUninit) -> Self

@@ -21,46 +21,61 @@ impl<L, R> Pair<L, R>
 
     pub(crate) const fn unpack(self) -> (L, R)
     {
-        unsafe {
-            let mut left_right = unsafe {(
-                core::ptr::read(&self.left),
-                core::ptr::read(&self.right)
-            )};
-
-            core::mem::forget(self);
-
-            left_right
+        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        {
+            unsafe {
+                return transmute(self)
+            }
         }
+
+        let left_right = unsafe {(
+            core::ptr::read(&self.left),
+            core::ptr::read(&self.right)
+        )};
+
+        core::mem::forget(self);
+
+        left_right
     }
 
     pub(crate) const fn pack(left_right: (L, R)) -> Self
     {
-        unsafe {
-            let pair =  unsafe {
-                Self {
-                    left: core::ptr::read(&left_right.0),
-                    right: core::ptr::read(&left_right.1)
-                }
-            };
-
-            core::mem::forget(left_right);
-
-            pair
+        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        {
+            unsafe {
+                return transmute(left_right)
+            }
         }
+
+        let pair =  unsafe {
+            Self {
+                left: core::ptr::read(&left_right.0),
+                right: core::ptr::read(&left_right.1)
+            }
+        };
+
+        core::mem::forget(left_right);
+
+        pair
     }
     
     pub(crate) const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
     {
-        unsafe {
-            let mut left_right = unsafe {(
-                ManuallyDrop::new(core::ptr::read(&self.left)),
-                ManuallyDrop::new(core::ptr::read(&self.right))
-            )};
-
-            core::mem::forget(self);
-
-            left_right
+        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        {
+            unsafe {
+                return transmute(self)
+            }
         }
+
+        let left_right = unsafe {(
+            ManuallyDrop::new(core::ptr::read(&self.left)),
+            ManuallyDrop::new(core::ptr::read(&self.right))
+        )};
+
+        core::mem::forget(self);
+
+        left_right
     }
 }
 
@@ -94,20 +109,14 @@ pub(crate) const fn empty<T, const N: usize>() -> [T; N]
     }
 }
 
-#[deprecated]
-pub(crate) const unsafe fn uninit<T>() -> T
-{
-    MaybeUninit::assume_init(MaybeUninit::uninit())
-}
-
 pub(crate) const unsafe fn split_transmute<A, B, C>(a: A) -> (B, C)
 {
-    transmute_unchecked_size::<_, Pair<_, _>>(a).unpack()
+    transmute::<_, Pair<_, _>>(a).unpack()
 }
 
 pub(crate) const unsafe fn merge_transmute<A, B, C>(a: A, b: B) -> C
 {
-    transmute_unchecked_size(Pair::new(a, b))
+    transmute(Pair::new(a, b))
 }
 
 pub(crate) const unsafe fn overlap_swap_transmute<A, B>(a: A, b: B) -> (B, A)
@@ -115,25 +124,12 @@ pub(crate) const unsafe fn overlap_swap_transmute<A, B>(a: A, b: B) -> (B, A)
     split_transmute(Pair::new(a, b))
 }
 
-pub(crate) const unsafe fn transmute_unchecked_size<A, B>(from: A) -> B
+pub(crate) const unsafe fn transmute<A, B>(from: A) -> B
 {
-    /*#[cfg(test)]
-    if core::mem::size_of::<A>() != core::mem::size_of::<B>() && core::mem::align_of::<A>() != core::mem::align_of::<B>()
-    {
-        panic!("Cannot transmute due to unequal size or alignment")
-    }*/
-    
-    let b = unsafe {core::mem::transmute_copy(&from)};
-    core::mem::forget(from);
-    b
-
-    //core::ptr::read(core::mem::transmute(&ManuallyDrop::new(from)))
-    
-    /*union Transmutation<A, B>
-    {
-        a: ManuallyDrop<A>,
-        b: ManuallyDrop<B>
-    }
-
-    unsafe {ManuallyDrop::into_inner(Transmutation {a: ManuallyDrop::new(a)}.b)}*/
+    #[cfg(test)]
+    assert!(
+        core::mem::size_of::<A>() == core::mem::size_of::<B>() && core::mem::align_of::<A>() == core::mem::align_of::<B>(),
+        "Cannot transmute due to unequal size or alignment"
+    );
+    core::intrinsics::transmute_unchecked(from)
 }

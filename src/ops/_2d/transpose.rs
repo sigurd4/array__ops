@@ -2,6 +2,8 @@ use core::mem::MaybeUninit;
 
 use array_trait::Array;
 
+use crate::private;
+
 use super::ArrayTransposeAssign;
 
 #[const_trait]
@@ -39,9 +41,8 @@ impl<T, const M: usize, const N: usize> const ArrayTranspose<T, M, N> for [[T; N
         // Even though the matrices have different dimensions, they have equal size, which makes this trick possible.
 
         let mut transposed = unsafe {
-            (&self as *const Self).cast::<[[T; M]; N]>().read()
+            private::transmute(self)
         };
-        core::mem::forget(self);
 
         if N == M
         {

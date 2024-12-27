@@ -2,6 +2,8 @@ use core::{pin::Pin, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
 
 use array_trait::Array;
 
+use crate::private;
+
 pub trait ArrayUnsimd<T, const N: usize, const M: usize>: Array<Item = Simd<T, M>>
 where
     T: SimdElement,
@@ -21,12 +23,9 @@ where
 {
     fn unsimd(self) -> [T; N*M]
     {
-        let unsimd = unsafe {
-            self.as_ptr().cast::<[T; N*M]>().read()
-        };
-        #[allow(forgetting_copy_types)]
-        core::mem::forget(self);
-        unsimd
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn unsimd_ref(&self) -> &[T; N*M]
     {

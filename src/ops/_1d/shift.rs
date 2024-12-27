@@ -1,10 +1,16 @@
 use array_trait::Array;
 
-use crate::form::MutForm;
+use crate::{form::MutForm, private};
 
 #[const_trait]
 pub trait ArrayShift<T, const N: usize>: Array<Item = T>
 {
+    fn into_shift_many_left<const M: usize>(self, items: [T; M]) -> ([T; N], [T; M]);
+    fn into_shift_many_right<const M: usize>(self, items: [T; M]) -> ([T; M], [T; N]);
+    
+    fn into_shift_left(self, item: T) -> ([T; N], T);
+    fn into_shift_right(self, item: T) -> (T, [T; N]);
+
     fn shift_many_left<'a, const M: usize, I>(&mut self, items: I)
     where
         I: ~const MutForm<'a, [T; M]>,
@@ -26,6 +32,32 @@ pub trait ArrayShift<T, const N: usize>: Array<Item = T>
 
 impl<T, const N: usize> ArrayShift<T, N> for [T; N]
 {
+    fn into_shift_many_left<const M: usize>(self, items: [T; M]) -> ([T; N], [T; M])
+    {
+        unsafe {
+            private::overlap_swap_transmute(items, self)
+        }
+    }
+    fn into_shift_many_right<const M: usize>(self, items: [T; M]) -> ([T; M], [T; N])
+    {
+        unsafe {
+            private::overlap_swap_transmute(self, items)
+        }
+    }
+    
+    fn into_shift_left(self, item: T) -> ([T; N], T)
+    {
+        unsafe {
+            private::overlap_swap_transmute(item, self)
+        }
+    }
+    fn into_shift_right(self, item: T) -> (T, [T; N])
+    {
+        unsafe {
+            private::overlap_swap_transmute(self, item)
+        }
+    }
+
     fn shift_many_left<'a, const M: usize, I>(&mut self, mut items: I)
     where
         I: MutForm<'a, [T; M]>,

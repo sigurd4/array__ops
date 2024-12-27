@@ -2,6 +2,8 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
+use crate::private;
+
 #[const_trait]
 pub trait FromItem<T>: Array<Item = T, LENGTH = 1>
 {
@@ -47,11 +49,9 @@ impl<T> const FromItem<T> for [T; 1]
 
     fn into_item(self) -> T
     {
-        let value = unsafe {
-            core::ptr::read(self.as_item())
-        };
-        core::mem::forget(self);
-        value
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn as_item(&self) -> &T
     {

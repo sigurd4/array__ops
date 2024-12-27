@@ -2,6 +2,8 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
+use crate::private;
+
 #[const_trait]
 pub trait ArrayUncollumn<T, const N: usize>: Array<Item = [T; 1]>
 {
@@ -16,11 +18,9 @@ impl<T, const N: usize> ArrayUncollumn<T, N> for [[T; 1]; N]
 {
     fn uncollumn(self) -> [T; N]
     {
-        let uncollumn = unsafe {
-            self.as_ptr().cast::<[T; N]>().read()
-        };
-        core::mem::forget(self);
-        uncollumn
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn uncollumn_ref(&self) -> &[T; N]
     {

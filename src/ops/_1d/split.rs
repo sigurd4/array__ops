@@ -2,6 +2,8 @@ use core::{mem::MaybeUninit, pin::Pin};
 
 use array_trait::Array;
 
+use crate::private;
+
 #[const_trait]
 pub trait Split<T, const N: usize>: Array<Item = T>
 {
@@ -90,21 +92,9 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        //unsafe {private::split_transmute(self)}
-        let (mut left, mut right) = (
-            MaybeUninit::uninit_array(),
-            MaybeUninit::uninit_array()
-        );
-        let (src_left, src_right) = self.split_ptr(M);
         unsafe {
-            core::ptr::copy_nonoverlapping(src_left, left.as_mut_ptr().cast(), M);
-            core::ptr::copy_nonoverlapping(src_right, right.as_mut_ptr().cast(), N - M);
+            private::split_transmute(self)
         }
-        core::mem::forget(self);
-        unsafe {(
-            MaybeUninit::array_assume_init(left),
-            MaybeUninit::array_assume_init(right)
-            )}
     }
     fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T; N - M])
     where
@@ -153,21 +143,9 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        //unsafe {private::split_transmute(self)}
-        let (mut left, mut right) = (
-            MaybeUninit::uninit_array(),
-            MaybeUninit::uninit_array()
-        );
-        let (src_left, src_right) = self.rsplit_ptr(M);
         unsafe {
-            core::ptr::copy_nonoverlapping(src_left, left.as_mut_ptr().cast(), N - M);
-            core::ptr::copy_nonoverlapping(src_right, right.as_mut_ptr().cast(), M);
+            private::split_transmute(self)
         }
-        core::mem::forget(self);
-        unsafe {(
-            MaybeUninit::array_assume_init(left),
-            MaybeUninit::array_assume_init(right)
-            )}
     }
     fn rsplit_array_ref<const M: usize>(&self) -> (&[T; N - M], &[T; M])
     where

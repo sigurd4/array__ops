@@ -30,7 +30,6 @@ impl<T, const N: usize> const ArrayRotate<T, N> for [T; N]
             core::ptr::copy_nonoverlapping(src_right, dst_left, right);
             core::ptr::copy_nonoverlapping(src_left, dst_right, left);
         }
-    
         core::mem::forget(self);
     
         unsafe {
@@ -51,7 +50,6 @@ impl<T, const N: usize> const ArrayRotate<T, N> for [T; N]
             core::ptr::copy_nonoverlapping(src_right, dst_left, right);
             core::ptr::copy_nonoverlapping(src_left, dst_right, left);
         }
-    
         core::mem::forget(self);
     
         unsafe {

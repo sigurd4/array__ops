@@ -1,8 +1,6 @@
-use core::mem::MaybeUninit;
-
 use array_trait::Array;
 
-use super::Split;
+use crate::private;
 
 #[const_trait]
 pub trait ArrayChain<T, const N: usize>: Array<Item = T>
@@ -41,37 +39,15 @@ impl<T, const N: usize> const ArrayChain<T, N> for [T; N]
     
     fn chain<const M: usize>(self, rhs: [T; M]) -> [T; N + M]
     {
-        /*unsafe {
+        unsafe {
             private::merge_transmute(self, rhs)
-        }*/
-        let mut chain = MaybeUninit::uninit_array();
-        let (left, right) = chain.rsplit_mut_ptr(M);
-        unsafe {
-            core::ptr::copy_nonoverlapping(self.as_ptr(), left.cast(), N);
-            core::ptr::copy_nonoverlapping(rhs.as_ptr(), right.cast(), M);
-        }
-        core::mem::forget(self);
-        core::mem::forget(rhs);
-        unsafe {
-            MaybeUninit::array_assume_init(chain)
         }
     }
     
     fn rchain<const M: usize>(self, lhs: [T; M]) -> [T; N + M]
     {
-        /*unsafe {
-            private::merge_transmute(rhs, self)
-        }*/
-        let mut chain = MaybeUninit::uninit_array();
-        let (left, right) = chain.split_mut_ptr(M);
         unsafe {
-            core::ptr::copy_nonoverlapping(lhs.as_ptr(), left.cast(), M);
-            core::ptr::copy_nonoverlapping(self.as_ptr(), right.cast(), N);
-        }
-        core::mem::forget(lhs);
-        core::mem::forget(self);
-        unsafe {
-            MaybeUninit::array_assume_init(chain)
+            private::merge_transmute(lhs, self)
         }
     }
 }

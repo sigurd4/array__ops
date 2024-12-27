@@ -273,12 +273,7 @@ impl<T, const N: usize> ArraySpread<T, N> for [T; N]
         [(); N % M]:,
         [(); N / M]:
     {
-        let split = self.chunks();
-    
-        let spread_t = unsafe {core::ptr::read(&split.0 as *const [[T; _]; _])};
-        let rest = unsafe {core::ptr::read(&split.1 as *const [T; _])};
-        core::mem::forget(split);
-    
+        let (spread_t, rest) = self.chunks();
         (spread_t.transpose(), rest)
     }
     fn spread_ref<const M: usize>(&self) -> ([&[Padded<T, M>; N / M]; M], &[T; N % M])
@@ -346,12 +341,7 @@ impl<T, const N: usize> ArraySpread<T, N> for [T; N]
         [(); N % M]:,
         [(); N / M]:
     {
-        let split = self.rchunks();
-        
-        let start = unsafe {core::ptr::read(&split.0 as *const [T; _])};
-        let spread_t = unsafe {core::ptr::read(&split.1 as *const [[T; _]; _])};
-        core::mem::forget(split);
-    
+        let (start, spread_t) = self.rchunks();
         (start, spread_t.transpose())
     }
     fn rspread_ref<const M: usize>(&self) -> (&[T; N % M], [&[Padded<T, M>; N / M]; M])
@@ -420,7 +410,7 @@ impl<T, const N: usize> ArraySpread<T, N> for [T; N]
         [(); N / M]:
     {
         let spread_t: [[T; M]; N / M] = unsafe {
-            private::transmute_unchecked_size(self)
+            private::transmute(self)
         };
         spread_t.transpose()
     }

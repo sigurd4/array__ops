@@ -10,7 +10,7 @@ keywords = ["array", "util", "ops"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = []
+default = ["alloc"]
 alloc = ["slice_ops/alloc"]
 #std = ["alloc"]
 

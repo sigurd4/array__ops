@@ -25,7 +25,7 @@ impl<T, const N: usize> const FromCollumn<T, N> for [T; N]
     fn from_collumn(collumn: [[T; 1]; N]) -> Self
     {
         unsafe {
-            private::transmute_unchecked_size(collumn)
+            private::transmute(collumn)
         }
     }
     fn from_collumn_ref(collumn: &[[T; 1]; N]) -> &Self
@@ -56,7 +56,7 @@ impl<T, const N: usize> const FromCollumn<T, N> for [T; N]
     fn into_collumn(self) -> [[T; 1]; N]
     {
         unsafe {
-            private::transmute_unchecked_size(self)
+            private::transmute(self)
         }
     }
     fn as_collumn(&self) -> &[[T; 1]; N]

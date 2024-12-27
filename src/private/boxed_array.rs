@@ -3,8 +3,9 @@ use core::{mem::MaybeUninit, alloc::Allocator};
 
 use alloc::{alloc::Global, boxed::Box};
 
-use super::transmute_unchecked_size;
+use crate::private;
 
+#[allow(unused)]
 pub fn new_uninit<T, const N: usize>() -> Box<[MaybeUninit<T>; N]>
 {
     new_uninit_in(Global)
@@ -15,7 +16,7 @@ where
 {
     let boxed = Box::<[T; N], A>::new_uninit_in(alloc);
     unsafe {
-        transmute_unchecked_size(boxed)
+        private::transmute(boxed)
     }
 }
 
@@ -23,5 +24,5 @@ pub unsafe fn assume_init<T, A, const N: usize>(boxed: Box<[MaybeUninit<T>; N], 
 where
     A: Allocator
 {
-    transmute_unchecked_size(boxed)
+    private::transmute(boxed)
 }

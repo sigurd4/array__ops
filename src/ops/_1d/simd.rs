@@ -2,6 +2,8 @@ use core::{pin::Pin, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
 
 use array_trait::Array;
 
+use crate::private;
+
 use super::Split;
 
 #[const_trait]
@@ -110,18 +112,9 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         [(); N % M]:,
         [(); N / M]:
     {
-        // transmute?
-
-        let (left, right) = self.rsplit_ptr(N % M);
-        let simd = unsafe {
-            left.cast::<[Simd<T, M>; N / M]>().read()
-        };
-        let rest = unsafe {
-            right.cast::<[T; N % M]>().read()
-        };
-        #[allow(forgetting_copy_types)]
-        core::mem::forget(self);
-        (simd, rest)
+        unsafe {
+            private::split_transmute(self)
+        }
     }
     fn array_simd_ref<const M: usize>(&self) -> (&[Simd<T, M>; N / M], &[T; N % M])
     where
@@ -191,18 +184,9 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         [(); N % M]:,
         [(); N / M]:
     {
-        // transmute?
-
-        let (left, right) = self.split_ptr(N % M);
-        let rest = unsafe {
-            left.cast::<[T; N % M]>().read()
-        };
-        let simd = unsafe {
-            right.cast::<[Simd<T, M>; N / M]>().read()
-        };
-        #[allow(forgetting_copy_types)]
-        core::mem::forget(self);
-        (rest, simd)
+        unsafe {
+            private::split_transmute(self)
+        }
     }
     fn array_rsimd_ref<const M: usize>(&self) -> (&[T; N % M], &[Simd<T, M>; N / M])
     where
@@ -272,14 +256,9 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         [(); 0 - N % M]:,
         [(); N / M]:
     {
-        // transmute?
-
-        let simd = unsafe {
-            self.as_ptr().cast::<[Simd<T, M>; N / M]>().read()
-        };
-        #[allow(forgetting_copy_types)]
-        core::mem::forget(self);
-        simd
+        unsafe {
+            private::transmute(self)
+        }
     }
     fn array_simd_exact_ref<const M: usize>(&self) -> &[Simd<T, M>; N / M]
     where

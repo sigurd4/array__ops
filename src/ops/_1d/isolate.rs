@@ -12,6 +12,7 @@ impl<T, const N: usize> Isolate<T, N> for [T; N]
 {
     fn isolate(mut self, i: usize) -> T
     {
+        // TODO optimize
         assert!(i < N, "Index is out of bounds");
         let value = unsafe {
             core::ptr::drop_in_place(&mut self[..i]);
