@@ -36,13 +36,13 @@ impl<T, const M: usize, const N: usize> ArrayDiagonal<T, M, N> for [[T; N]; M]
     fn diagonal_pin_ref(self: Pin<&Self>) -> [Pin<&T>; crate::min_len(M, N)]
     {
         crate::from_fn(|n| unsafe {
-            self.map_unchecked(|pin| &pin[n][n])
+            Pin::new_unchecked(&self.get_ref()[n][n])
         })
     }
     fn diagonal_pin_mut(mut self: Pin<&mut Self>) -> [Pin<&mut T>; crate::min_len(M, N)]
     {
         crate::from_fn(|n| unsafe {
-            (&mut self as *mut Pin<&mut Self>).as_mut_unchecked().as_mut().map_unchecked_mut(|pin| &mut pin[n][n])
+            Pin::new_unchecked(&mut (&mut self as *mut Pin<&mut Self>).as_mut_unchecked().as_mut().get_unchecked_mut()[n][n])
         })
     }
 }

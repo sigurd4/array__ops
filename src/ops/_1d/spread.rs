@@ -387,12 +387,12 @@ impl<T, const N: usize> ArraySpread<T, N> for [T; N]
         [(); M - 1]:,
         [(); N % M]:
     {
-        let (left, right) = self.split_ptr(N % M);
+        let (left, right) = self.get_ref().split_ptr(N % M);
     
         unsafe {(
-            self.map_unchecked(|_| left.cast::<[T; N % M]>().as_ref_unchecked()),
+            Pin::new_unchecked(left.cast::<[T; N % M]>().as_ref_unchecked()),
             crate::from_fn(|i| {
-                self.map_unchecked(|_| right.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked())
+                Pin::new_unchecked(right.add(i).cast::<[Padded<T, M>; N / M]>().as_ref_unchecked())
             })
         )}
     }

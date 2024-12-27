@@ -181,7 +181,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         [(); N - M]:
     {
         unsafe {
-            self.map_unchecked(|pin| pin.truncate_ref())
+            Pin::new_unchecked(self.get_ref().truncate_ref())
         }
     }
     fn rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Pin<&[T; M]>
@@ -189,7 +189,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         [(); N - M]:
     {
         unsafe {
-            self.map_unchecked(|pin| pin.rtruncate_ref())
+            Pin::new_unchecked(self.get_ref().rtruncate_ref())
         }
     }
     fn try_truncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>
@@ -199,7 +199,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
             return None
         }
         unsafe {
-            Some(self.map_unchecked(|pin| pin.try_truncate_ref().unwrap()))
+            Some(Pin::new_unchecked(self.get_ref().try_truncate_ref().unwrap_unchecked()))
         }
     }
     fn try_rtruncate_pin_ref<const M: usize>(self: Pin<&Self>) -> Option<Pin<&[T; M]>>
@@ -209,7 +209,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
             return None
         }
         unsafe {
-            Some(self.map_unchecked(|pin| pin.try_rtruncate_ref().unwrap()))
+            Some(Pin::new_unchecked(self.get_ref().try_rtruncate_ref().unwrap_unchecked()))
         }
     }
 
@@ -218,7 +218,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         [(); N - M]:
     {
         unsafe {
-            self.map_unchecked_mut(|pin| pin.truncate_mut())
+            Pin::new_unchecked(self.get_unchecked_mut().truncate_mut())
         }
     }
     fn rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Pin<&mut [T; M]>
@@ -226,7 +226,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         [(); N - M]:
     {
         unsafe {
-            self.map_unchecked_mut(|pin| pin.rtruncate_mut())
+            Pin::new_unchecked(self.get_unchecked_mut().rtruncate_mut())
         }
     }
     fn try_truncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>
@@ -236,7 +236,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
             return None
         }
         unsafe {
-            Some(self.map_unchecked_mut(|pin| pin.try_truncate_mut().unwrap()))
+            Some(Pin::new_unchecked(self.get_unchecked_mut().try_truncate_mut().unwrap_unchecked()))
         }
     }
     fn try_rtruncate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>
@@ -246,7 +246,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
             return None
         }
         unsafe {
-            Some(self.map_unchecked_mut(|pin| pin.try_rtruncate_mut().unwrap()))
+            Some(Pin::new_unchecked(self.get_unchecked_mut().try_rtruncate_mut().unwrap_unchecked()))
         }
     }
 }

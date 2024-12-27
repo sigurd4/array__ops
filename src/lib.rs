@@ -14,7 +14,6 @@
 #![feature(portable_simd)]
 #![feature(const_swap)]
 #![feature(allocator_api)]
-#![cfg_attr(feature = "alloc", feature(new_uninit))]
 #![feature(let_chains)]
 #![feature(const_array_each_ref)]
 #![feature(ptr_as_ref_unchecked)]
@@ -27,7 +26,9 @@
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]
 
-// TODO: poll each / poll all
+/// TODO:
+/// - poll each / poll all
+/// - do transmute in-place, transmuted
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

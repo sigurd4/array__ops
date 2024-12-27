@@ -297,7 +297,7 @@ mod private
         fn copy_elem(&self, i: usize) -> Self::_Elem
         {
             unsafe {
-                self.map_unchecked(move |pin| &pin[i])
+                Pin::new_unchecked(&self.get_ref()[i])
             }
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
@@ -332,7 +332,7 @@ mod private
         unsafe fn read_assume_init_elem(maybe_uninit: &Self::_MaybeUninit, i: usize) -> Self::_Elem
         {
             unsafe {
-                maybe_uninit.map_unchecked(|pin| MaybeUninit::assume_init_ref(&pin[i]))
+                Pin::new_unchecked(MaybeUninit::assume_init_ref(&maybe_uninit.get_ref()[i]))
             }
         }
         unsafe fn drop_elems_assume_init<R>(_: &mut Self::_MaybeUninit, _: R)
@@ -356,10 +356,7 @@ mod private
         }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
-            (self as *const Self).cast_mut()
-                .as_mut_unchecked()
-                .as_mut()
-                .map_unchecked_mut(|pin| &mut pin[i])
+            Pin::new_unchecked(&mut (self as *const Self).cast_mut().as_mut_unchecked().as_mut().get_unchecked_mut()[i])
         }
         fn copy_elem(&self, i: usize) -> Self::_Elem
         {
@@ -400,12 +397,9 @@ mod private
         }
         unsafe fn read_assume_init_elem(maybe_uninit: &Self::_MaybeUninit, i: usize) -> Self::_Elem
         {
-            unsafe {
-                (maybe_uninit as *const Self::_MaybeUninit).cast_mut()
-                    .as_mut_unchecked()
-                    .as_mut()
-                    .map_unchecked_mut(|pin| MaybeUninit::assume_init_mut(&mut pin[i]))
-            }
+            Pin::new_unchecked(MaybeUninit::assume_init_mut(
+                &mut (maybe_uninit as *const Self::_MaybeUninit).cast_mut().as_mut_unchecked().as_mut().get_unchecked_mut()[i]
+            ))
         }
         unsafe fn drop_elems_assume_init<R>(_: &mut Self::_MaybeUninit, _: R)
         where

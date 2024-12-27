@@ -24,6 +24,7 @@ where
         let unsimd = unsafe {
             self.as_ptr().cast::<[T; N*M]>().read()
         };
+        #[allow(forgetting_copy_types)]
         core::mem::forget(self);
         unsimd
     }
@@ -42,13 +43,13 @@ where
     fn unsimd_pin_ref(self: Pin<&Self>) -> Pin<&[T; N*M]>
     {
         unsafe {
-            self.map_unchecked(|pin| pin.unsimd_ref())
+            Pin::new_unchecked(self.get_ref().unsimd_ref())
         }
     }
     fn unsimd_pin_mut(self: Pin<&mut Self>) -> Pin<&mut [T; N*M]>
     {
         unsafe {
-            self.map_unchecked_mut(|pin| pin.unsimd_mut())
+            Pin::new_unchecked(self.get_unchecked_mut().unsimd_mut())
         }
     }
 }

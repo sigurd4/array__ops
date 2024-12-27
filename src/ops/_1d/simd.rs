@@ -119,6 +119,7 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         let rest = unsafe {
             right.cast::<[T; N % M]>().read()
         };
+        #[allow(forgetting_copy_types)]
         core::mem::forget(self);
         (simd, rest)
     }
@@ -199,6 +200,7 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         let simd = unsafe {
             right.cast::<[Simd<T, M>; N / M]>().read()
         };
+        #[allow(forgetting_copy_types)]
         core::mem::forget(self);
         (rest, simd)
     }
@@ -275,6 +277,7 @@ impl<T, const N: usize> const ArraySimd<T, N> for [T; N]
         let simd = unsafe {
             self.as_ptr().cast::<[Simd<T, M>; N / M]>().read()
         };
+        #[allow(forgetting_copy_types)]
         core::mem::forget(self);
         simd
     }

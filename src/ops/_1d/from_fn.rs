@@ -6,6 +6,15 @@ use crate::private::guard::PartialInitGuard;
 
 use super::ArrayJoin;
 
+#[cfg(feature = "alloc")]
+use crate::private;
+
+#[cfg(feature = "alloc")]
+use core::alloc::Allocator;
+
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, alloc::Global};
+
 #[const_trait]
 pub trait FromFn<T, const N: usize>: Array<Item = T>
 {

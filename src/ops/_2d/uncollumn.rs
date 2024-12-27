@@ -37,13 +37,13 @@ impl<T, const N: usize> ArrayUncollumn<T, N> for [[T; 1]; N]
     fn uncollumn_pin_ref(self: Pin<&Self>) -> Pin<&[T; N]>
     {
         unsafe {
-            self.map_unchecked(|pin| pin.uncollumn_ref())
+            Pin::new_unchecked(self.get_ref().uncollumn_ref())
         }
     }
     fn uncollumn_pin_mut(self: Pin<&mut Self>) -> Pin<&mut [T; N]>
     {
         unsafe {
-            self.map_unchecked_mut(|pin| pin.uncollumn_mut())
+            Pin::new_unchecked(self.get_unchecked_mut().uncollumn_mut())
         }
     }
 }

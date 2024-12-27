@@ -2,6 +2,15 @@ use crate::ops::FromFn;
 
 use core::{marker::Destruct, ops::AsyncFn};
 
+#[cfg(feature = "alloc")]
+use crate::private;
+
+#[cfg(feature = "alloc")]
+use core::alloc::Allocator;
+
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, alloc::Global};
+
 pub const fn from_fn<T, const N: usize, F>(fill: F) -> [T; N]
 where
     F: FnMut(usize) -> T + ~const Destruct,
