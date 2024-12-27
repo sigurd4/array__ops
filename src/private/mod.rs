@@ -128,7 +128,7 @@ pub(crate) const unsafe fn transmute<A, B>(from: A) -> B
 {
     #[cfg(test)]
     assert!(
-        core::mem::size_of::<A>() == core::mem::size_of::<B>() && core::mem::align_of::<A>() == core::mem::align_of::<B>(),
+        const {core::mem::size_of::<A>() == core::mem::size_of::<B>()} && const {core::mem::align_of::<A>() == core::mem::align_of::<B>()},
         "Cannot transmute due to unequal size or alignment"
     );
     core::intrinsics::transmute_unchecked(from)

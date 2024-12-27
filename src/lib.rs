@@ -23,6 +23,7 @@
 #![feature(slice_swap_unchecked)]
 #![feature(adt_const_params)]
 #![feature(arbitrary_self_types)]
+#![feature(stmt_expr_attributes)]
 #![feature(core_intrinsics)]
 #![feature(unsized_const_params)]
 #![feature(const_closures)]
@@ -73,6 +74,70 @@ pub const fn max_len(a: usize, b: usize) -> usize
     else
     {
         b
+    }
+}
+
+pub mod asm
+{
+    use crate::ops::*;
+
+    const N: usize = 4;
+    const M: usize = 2;
+    const MN: (usize, usize) = (3, 2);
+
+    #[inline(never)]
+    pub fn chunks(a: [i32; N]) -> [[i32; M]; N / M]
+    {
+        a.chunks_exact()
+    }
+
+    #[inline(never)]
+    pub fn differentiate(a: &mut [i32; N])
+    {
+        a.differentiate();
+    }
+
+    #[inline(never)]
+    pub fn integrate(a: &mut [i32; N])
+    {
+        a.integrate();
+    }
+
+    #[inline(never)]
+    pub fn sum_dac(a: [i32; N]) -> Option<i32>
+    {
+        a.divide_and_conquer(|x, y| x + y)
+    }
+    #[inline(never)]
+    pub fn sum_reduce(a: [i32; N]) -> Option<i32>
+    {
+        a.reduce(|x, y| x + y)
+    }
+
+    #[inline(never)]
+    pub fn argmin(a: [i32; N]) -> Option<usize>
+    {
+        a.argmin()
+    }
+
+    #[inline(never)]
+    pub fn add_each(a: [i32; N], b: [i32; N]) -> [i32; N]
+    {
+        a.add_each(b)
+    }
+
+    #[inline(never)]
+    pub fn add_assign(a: &mut [i32; N], b: [i32; N])
+    {
+        a.add_assign_each(b)
+    }
+
+    #[inline(never)]
+    pub fn transpose(a: [[i32; MN.1]; MN.0]) -> [[i32; MN.0]; MN.1]
+    {
+        let a_t = a.transpose();
+    
+        return a_t
     }
 }
 

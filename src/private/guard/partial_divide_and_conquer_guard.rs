@@ -1,4 +1,4 @@
-use core::mem::MaybeUninit;
+use core::{marker::Destruct, mem::MaybeUninit};
 
 use crate::form::ArrayForm;
 
@@ -41,7 +41,7 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
             i: match D
             {
                 Dir::Left => 0,
-                Dir::Right => N - 1,
+                Dir::Right => const {N - 1},
             },
             j: 1
         }
@@ -49,151 +49,145 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
     
     pub const fn more(&self) -> bool
     {
-        self.j != 0 && self.j < N
+        self.j < N && (self.j < const {N - 1} || {
+            match D
+            {
+                Dir::Left => self.i + self.j < N,
+                Dir::Right => self.i >= self.j
+            }
+        })
     }
 
-    pub fn pop(&mut self) -> (&mut T, T)
+    fn incr(&mut self, skip: bool)
     {
-        let f1 = |i| {
-            unsafe {
-                (MaybeUninit::assume_init_ref(&self.src[i]) as *const T).cast_mut().as_mut_unchecked()
-            }
-        };
-        let f2 = |i| {
-            unsafe {
-                MaybeUninit::assume_init_read(&self.src[i])
-            }
-        };
-        loop
+        let mut jj = self.j;
+        if skip
         {
-            assert!(self.i < N);
-            assert!(self.j < N);
-            return match D
-            {
-                Dir::Left => {
-                    let dst = f1(self.i);
-                    self.i += self.j;
-                    if self.i > N
-                    {
-                        self.i = 0;
-                        self.j *= 2;
-                        continue
-                    }
-                    let value = f2(self.i);
-                    if self.i > N
-                    {
-                        self.i = 0;
-                        self.j *= 2;
-                    }
-                    (dst, value)
-                },
-                Dir::Right => {
-                    let dst = f1(self.i);
-                    if self.i < self.j
-                    {
-                        self.i = N;
-                        self.j *= 2;
-                        continue
-                    }
-                    self.i -= self.j;
-                    let value = f2(self.i);
-                    if self.i < self.j
-                    {
-                        self.i = N;
-                        self.j *= 2;
-                    }
-                    self.i -= self.j;
-                    (dst, value)
+            jj += jj
+        }
+        match D
+        {
+            Dir::Left => {
+                if self.i + jj >= N
+                {
+                    self.i = 0;
+                    self.j *= 2
+                }
+                else
+                {
+                    self.i += self.j
+                }
+            },
+            Dir::Right => {
+                if self.i < jj
+                {
+                    self.i = const {N - 1};
+                    self.j *= 2
+                }
+                else
+                {
+                    self.i -= self.j
                 }
             }
         }
+    }
+
+    fn get(&mut self) -> *mut T
+    {
+        let f = #[inline] |this: &Self, i| {
+            unsafe {
+                (MaybeUninit::assume_init_ref(&this.src.get_unchecked(i)) as *const T).cast_mut().as_mut_unchecked()
+            }
+        };
+        
+        let dst = f(self, self.i);
+        self.incr(false);
+        dst
+    }
+    fn pop(&mut self) -> T
+    {
+        let f = #[inline] |this: &Self, i| {
+            unsafe {
+                MaybeUninit::assume_init_read(&this.src.get_unchecked(i))
+            }
+        };
+        
+        let dst = f(self, self.i);
+        self.incr(true);
+        dst
     }
 
     pub fn reduce<F>(mut self, mut reduce: F) -> Option<T>
     where
         F: FnMut(T, T) -> T
     {
+        if N <= 0
+        {
+            return None
+        }
         while self.more()
         {
-            let (dst, value) = self.pop();
+            let dst = self.get();
+            let value = self.pop();
             unsafe {
                 core::ptr::write(dst, reduce(core::ptr::read(dst), value));
             }
         }
-        let value = if N > 0
-        {
-            self.j = 0;
-            unsafe {
-                Some(MaybeUninit::assume_init_read(&self.src[0]))
-            }
-        }
-        else
-        {
-            None
+        let value = unsafe {
+            MaybeUninit::assume_init_read(&self.src.get_unchecked(self.i))
         };
         self.done();
 
-        value
+        Some(value)
     }
 
     pub const fn done(self)
     {
+        debug_assert!(self.j >= N);
         match D
         {
-            Dir::Left => assert!(self.i == N),
-            Dir::Right => assert!(self.i == 0)
+            Dir::Left => debug_assert!(self.i == 0),
+            Dir::Right => debug_assert!(self.i == N - 1)
         }
         core::mem::forget(self)
     }
 }
 
-impl<T, const D: Dir, const N: usize> /*const*/ Drop for PartialDivideAndConquerGuard<T, D, N>
+impl<T, const D: Dir, const N: usize> Drop for PartialDivideAndConquerGuard<T, D, N>
 {
     fn drop(&mut self)
     {
-        if N > 0 && self.j > 0
+        let end = (self.i + self.j).min(N);
+        let less = |this: &Self| match D
         {
-            let i0 = self.i;
-            while match D
-            {
-                Dir::Left => self.i >= self.j,
-                Dir::Right => self.i + self.j < N
+            Dir::Left => this.i >= this.j,
+            Dir::Right => this.i < N - this.j
+        };
+        let decr = |this: &mut Self| match D
+        {
+            Dir::Left => this.i -= this.j,
+            Dir::Right => this.i += this.j
+        };
+        let kill = |this: &mut Self| if let Some(x) = this.src.get_mut(this.i)
+        {
+            unsafe {
+                core::ptr::drop_in_place(x);
             }
-            {
-                match D
-                {
-                    Dir::Left => self.i -= self.j,
-                    Dir::Right => self.i += self.j
-                }
-                unsafe {
-                    core::ptr::drop_in_place(&mut self.src[self.i]);
-                }
-            }
-            self.j /= 2;
-
-            if self.j > 0
-            {
-                self.i = match D
-                {
-                    Dir::Left => 0,
-                    Dir::Right => N - 1
-                };
-                while match D
-                {
-                    Dir::Left => self.i >= i0 + self.j,
-                    Dir::Right => self.i + self.j <= i0
-                }
-                {
-                    match D
-                    {
-                        Dir::Left => self.i -= self.j,
-                        Dir::Right => self.i += self.j
-                    }
-                    unsafe {
-                        core::ptr::drop_in_place(&mut self.src[self.i]);
-                    }
-                }
-            }
+        };
+        while less(self)
+        {
+            kill(self);
+            decr(self);
+        }
+        let less = |this: &Self| match D
+        {
+            Dir::Left => this.i > end + this.j,
+            Dir::Right => this.i < end - this.j
+        };
+        while less(self)
+        {
+            kill(self);
+            decr(self);
         }
     }
 }

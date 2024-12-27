@@ -114,3 +114,19 @@ impl<T, const N: usize> DivideAndConquer<T, N> for [T; N]
         FutureDivideAndConquer::new(self.each_pin_mut(), |x, y| reduce(x, y)).await
     }
 }
+
+#[cfg(test)]
+mod test
+{
+    use crate::ops::*;
+
+    #[test]
+    fn it_works()
+    {
+        let a = [1, 2, 3];
+
+        let s = a.divide_and_conquer(|x, y| x + y).unwrap();
+
+        println!("{}", s)
+    }
+}
