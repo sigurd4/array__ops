@@ -1,5 +1,5 @@
 moddef::moddef!(
-    flat(pub) mod {
+    pub flat(pub) mod {
         _1d,
         _2d,
         nd

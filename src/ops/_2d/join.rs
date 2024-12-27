@@ -4,8 +4,7 @@ use array_trait::Array;
 
 use crate::join::{Actions2D, Runs2D, TryActions2D, TryRuns2D};
 
-#[const_trait]
-pub trait ArrayJoin2D<T, const M: usize, const N: usize>: Array<Item: Array<Item = T>>
+pub trait ArrayJoin2D<T, const M: usize, const N: usize>: Array<Item = [T; N]>
 {
     async fn join_actions_2d(self)
     where

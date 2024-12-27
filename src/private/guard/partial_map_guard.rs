@@ -125,13 +125,13 @@ where
         {
             Dir::Left => {
                 assert!(self.i < N);
-                f(self.i);
+                f(self.i)?;
                 self.i += 1;
             },
             Dir::Right => {
                 assert!(self.i > 0);
                 let j = self.i - 1;
-                f(j);
+                f(j)?;
                 self.i = j;
             }
         }

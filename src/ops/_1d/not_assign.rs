@@ -9,7 +9,7 @@ pub trait ArrayShrAssign<T, const N: usize>: MapAssign<T, N>
     where
         T: Not<Output = T>;
 
-    async fn not_assign_all_async(&mut self)
+    async fn not_assign_all_async(&mut self) 
     where
         T: Not<Output = T>;
 }
