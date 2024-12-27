@@ -16,7 +16,7 @@ pub trait Zip<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// const A: [u8; 4] = [4, 3, 2, 1];
     /// const B: [&str; 4] = ["four", "three", "two", "one"];

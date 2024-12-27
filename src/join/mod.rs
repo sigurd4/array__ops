@@ -35,6 +35,10 @@ impl<F: Future> MaybeDone<F>
             _ => None,
         }
     }
+    pub fn cancel(&mut self)
+    {
+        *self = Self::Taken
+    }
 }
 
 impl<F: Future> Future for MaybeDone<F>

@@ -7,7 +7,7 @@ pub trait ArrayTransposeAssign<T, const N: usize>: Array<Item = [T; N]>
     /// 
     /// # Examples
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut a = [
     ///     [1, 2, 3],

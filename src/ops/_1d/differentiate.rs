@@ -10,7 +10,7 @@ pub trait Differentiate<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut a = [1, 2, 3];
     /// 

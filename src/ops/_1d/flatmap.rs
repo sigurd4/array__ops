@@ -12,7 +12,7 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// const A: [u8; 4] = [1, 2, 3, 4];
     /// let b = A.map(|b| -(b as i8));

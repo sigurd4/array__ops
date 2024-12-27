@@ -12,7 +12,7 @@ pub trait Reduce<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::ArrayOps;
+    /// use array__ops::ops::*;
     /// 
     /// const A: [u8; 3] = [1, 2, 3];
     /// 

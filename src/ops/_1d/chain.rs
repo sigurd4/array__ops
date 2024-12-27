@@ -10,7 +10,7 @@ pub trait ArrayChain<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let a = ["one", "two"];
     /// let b = ["three"];
@@ -24,7 +24,7 @@ pub trait ArrayChain<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let a = ["two", "three"];
     /// let b = ["one"];

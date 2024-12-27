@@ -18,7 +18,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = ["ping 1", "pong 1", "ping 2", "pong 2", "ping 3", "pong 3", "uhh..."];
     /// 
@@ -50,7 +50,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"];
     /// 
@@ -109,7 +109,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_arg_infer)]
     /// #![feature(array_methods)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     /// 
@@ -134,7 +134,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_arg_infer)]
     /// #![feature(array_methods)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut array = ["the", "beat", "goes", "1", "2", "3", "4", "5", "6", "7", "8"];
     /// 
@@ -182,7 +182,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = *b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ";
     /// 
@@ -209,7 +209,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_arg_infer)]
     /// #![feature(array_methods)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let statement = ["s", "he", "be", "lie", "ve", "d"];
     /// 
@@ -235,7 +235,7 @@ pub trait ArraySpread<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_arg_infer)]
     /// #![feature(array_methods)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut array = *b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ";
     /// 

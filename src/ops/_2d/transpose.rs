@@ -14,7 +14,7 @@ pub trait ArrayTranspose<T, const M: usize, const N: usize>: Array<Item = [T; N]
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let matrix: [[u8; 5]; 3] = [
     ///     [1,   2,  3,  4,  5],

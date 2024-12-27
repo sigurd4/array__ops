@@ -14,14 +14,14 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
     /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
     /// 
-    /// x.visit_with(|&a, b| {
+    /// x.meet_each(y, |&a, b| {
     ///     assert_eq!(a, b)
-    /// }, y);
+    /// });
     /// ```
     fn meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where
@@ -33,14 +33,14 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [0; 8];
     /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
     /// 
-    /// x.visit_mut_with(|a, b| {
+    /// x.meet_each_mut(y, |a, b| {
     ///     *a += b
-    /// }, y);
+    /// });
     /// 
     /// assert_eq!(x, [1, 2, 3, 4, 5, 6, 7, 8]);
     /// ```
@@ -65,12 +65,12 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
     /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
     /// 
-    /// let result = x.try_visit_with(|&a, b| {
+    /// let result = x.try_meet_each(y, |&a, b| {
     ///     if b < 0
     ///     {
     ///         return Err(b)
@@ -91,19 +91,19 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [0; 8];
     /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
     /// 
-    /// let result = x.try_visit_mut_with(|a, b| {
+    /// let result = x.try_meet_each_mut(y, |a, b| {
     ///     if b < 0
     ///     {
     ///         return Err(b)
     ///     }
     ///     *a = b;
     ///     Ok(())
-    /// }, y);
+    /// });
     /// 
     /// assert_eq!(result, Err(-1));
     /// assert_eq!(x, [1, 2, 3, 4, 0, 0, 0, 0])
@@ -129,14 +129,14 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [8, 7, 6, 5, 4, 3, 2, 1];
     /// let y = [8, 7, 6, 5, 4, 3, 2, 1];
     /// 
-    /// x.rvisit_with(|&a, b| {
+    /// x.rmeet_each(y, |&a, b| {
     ///     assert_eq!(a, b)
-    /// }, y);
+    /// });
     /// ```
     fn rmeet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where
@@ -148,14 +148,14 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [0; 8];
     /// let y = [8, 7, 6, 5, 4, 3, 2, 1];
     /// 
-    /// x.rvisit_mut_with(|a, b| {
+    /// x.rmeet_each_mut(y, |a, b| {
     ///     *a = b;
-    /// }, y);
+    /// });
     /// 
     /// assert_eq!(x, [8, 7, 6, 5, 4, 3, 2, 1]);
     /// ```
@@ -180,12 +180,12 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [8, 7, 6, 5, 4, 3, 2, 1];
     /// let y = [-4, -3, -2, -1, 4, 3, 2, 1];
     /// 
-    /// let result = x.try_rvisit_with(|&a, b| {
+    /// let result = x.try_rmeet_each(y, |&a, b| {
     ///     if b < 0
     ///     {
     ///         return Err(b)
@@ -206,12 +206,12 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [0; 8];
     /// let y = [-4, -3, -2, -1, 4, 3, 2, 1];
     /// 
-    /// let result = x.try_rvisit_mut_with(|a, b| {
+    /// let result = x.try_rmeet_each_mut(y, |a, b| {
     ///     if b < 0
     ///     {
     ///         return Err(b)
@@ -244,17 +244,17 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
     /// let y = [1, 2, 3, 4, 5, 6, 7, 8];
     /// 
     /// # tokio_test::block_on(async {
-    /// x.visit_async_with(async |&a, b| {
+    /// x.meet_each_async(y, async |&a, b| {
     ///     assert_eq!(x[a - 1], a)
     ///     assert_eq!(y[b - 1], b)
     ///     assert_eq!(a, b);
-    /// }, y).await;
+    /// }).await;
     /// # })
     /// ```
     async fn meet_each_async<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
@@ -267,15 +267,15 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
     /// let y = [-7, -5, -3, -1, 1, 3, 5, 7];
     /// 
     /// # tokio_test::block_on(async {
-    /// x.visit_mut_async_with(async |a, b| {
+    /// x.meet_each_mut_async(y, async |a, b| {
     ///     *a += b
-    /// }, y).await;
+    /// }).await;
     /// 
     /// assert_eq!(x, [1, 2, 3, 4, 5, 6, 7, 8]);
     /// # })
@@ -307,13 +307,13 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let x = [1, 2, 3, 4, 5, 6, 7, 8];
     /// let y = [1, 2, 3, 4, -1, -2, -3, -4];
     /// 
     /// # tokio_test::block_on(async {
-    /// let result = x.try_visit_async_with(async |&a, b| {
+    /// let result = x.try_meet_each_async(y, async |&a, b| {
     ///     assert_eq!(x[a - 1], a);
     ///     assert_eq!(y[b - 1], b);
     ///     if b < 0
@@ -322,7 +322,7 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     ///     }
     ///     assert_eq!(a, b);
     ///     Ok(())
-    /// }, y).await;
+    /// }).await;
     /// 
     /// assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
     /// # })
@@ -343,26 +343,26 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
     /// let y = [-7, -5, -3, -1, -1, -2, -3, -4];
     /// 
     /// # tokio_test::block_on(async {
-    /// let result = x.try_visit_mut_async_with(async |a, b| {
+    /// let result = x.try_meet_each_mut_async(y, async |a, b| {
     ///     if b < 0
     ///     {
     ///         return Err(b)
     ///     }
     ///     *a += b;
     ///     Ok(())
-    /// }, y).await;
+    /// }).await;
     /// 
-    /// assert_eq!(x[..4], [1, 2, 3, 4]);
-    /// assert!(x[4] == 5 || x[4] == 4);
-    /// assert!(x[5] == 6 || x[5] == 3);
-    /// assert!(x[6] == 7 || x[6] == 2);
-    /// assert!(x[7] == 8 || x[7] == 1);
+    /// assert!(x[0] == 8 || x[0] == 1);
+    /// assert!(x[1] == 7 || x[1] == 2);
+    /// assert!(x[2] == 6 || x[2] == 3);
+    /// assert!(x[3] == 5 || x[3] == 4);
+    /// assert_eq!(x[4..], [4, 3, 2, 1]);
     /// assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
     /// # })
     /// ```
@@ -905,5 +905,36 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
         T: 'a
     {
         self.try_enumerate_meet_all_pin_mut_async(rhs, |_, x, y| visitor(x, y)).await
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use crate::ops::Meet;
+
+    #[test]
+    fn it_works()
+    {
+        let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
+        let y = [-7, -5, -3, -1, -1, -2, -3, -4];
+        
+        tokio_test::block_on(async {
+            let result = x.try_meet_each_mut_async(y, async |a, b| {
+                if b < 0
+                {
+                    return Err(b)
+                }
+                *a += b;
+                Ok(())
+            }).await;
+            
+            assert!(x[0] == 8 || x[0] == 1);
+            assert!(x[1] == 7 || x[1] == 2);
+            assert!(x[2] == 6 || x[2] == 3);
+            assert!(x[3] == 5 || x[3] == 4);
+            assert_eq!(x[4..], [4, 3, 2, 1]);
+            assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
+        })
     }
 }

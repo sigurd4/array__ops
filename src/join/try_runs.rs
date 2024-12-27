@@ -52,6 +52,10 @@ where
                 let result = join.tasks[i].take_output();
                 if let Some(Err(error)) = result
                 {
+                    for task in join.tasks.iter_mut()
+                    {
+                        task.cancel()
+                    }
                     return Poll::Ready(Err(error))
                 }
             }

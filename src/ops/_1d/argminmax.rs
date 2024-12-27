@@ -12,7 +12,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                v
     /// let x = [1, 5, 5, 6, 2, -1, 0, -4, -1, 6];
@@ -31,7 +31,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                              v
     /// let x = [1, 5, 5, 6, 2, -1, 0, -4, -1, 6];
@@ -50,7 +50,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                v
     /// let x = [1, 5, 5, 6, 2, -1, 0, -4, -1, 6];
@@ -72,7 +72,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                              v
     /// let x = [1, 5, 5, 6, 2, -1, 0, -4, -1, 6];
@@ -94,7 +94,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                       v
     /// let x = ["1", "5", "5", "6", "2", "-1", "0", "-4", "-1", "6"];
@@ -117,7 +117,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// //                                  v
     /// let x = ["1", "5", "5", "6", "2", "-1", "0", "-4", "-1", "6"];

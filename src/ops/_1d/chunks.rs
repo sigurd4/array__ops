@@ -17,7 +17,7 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = ["carrot", "potato", "beet", "tomato", "kiwi", "banana", "cherry", "peach", "strawberry", "nine volt batteries"];
     /// 
@@ -40,7 +40,7 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let transistors = ["2N3904", "2N2222A", "BC107", "AC127", "OC7", "NKT275", "2SK30A", "2N5458", "J108", "2N7000", "BS170"];
     /// 
@@ -63,7 +63,7 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let mut array = [0, 1, 0, 1, 0, 1, 6];
     /// 
@@ -126,7 +126,7 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     /// 
@@ -149,7 +149,7 @@ pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
     /// #![feature(generic_const_exprs)]
     /// #![feature(generic_arg_infer)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// let array = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
     /// 

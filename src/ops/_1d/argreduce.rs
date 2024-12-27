@@ -8,7 +8,7 @@ pub trait ArgReduce<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// fn my_argmax<T>(slice: &[T]) -> Option<usize>
     /// where
@@ -39,7 +39,7 @@ pub trait ArgReduce<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// fn hasher(str: &&str) -> i32
     /// {

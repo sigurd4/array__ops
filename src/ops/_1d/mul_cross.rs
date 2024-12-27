@@ -14,7 +14,7 @@ pub trait ArrayMulCross<T, const N: usize>: Array<Item = T>
     /// ```rust
     /// #![feature(generic_const_exprs)]
     /// 
-    /// use array__ops::*;
+    /// use array__ops::ops::*;
     /// 
     /// const U: [f64; 3] = [1.0, 0.0, 0.0];
     /// const V: [f64; 3] = [0.0, 1.0, 0.0];
