@@ -10,6 +10,8 @@ pub trait ArrayChain<T, const N: usize>: Array<Item = T>
     /// # Example
     /// 
     /// ```rust
+    /// #![feature(generic_const_exprs)]
+    /// 
     /// use array__ops::ops::*;
     /// 
     /// let a = ["one", "two"];
@@ -22,8 +24,9 @@ pub trait ArrayChain<T, const N: usize>: Array<Item = T>
     /// Chains two arrays with the same item together in reverse.
     /// 
     /// # Example
-    /// 
     /// ```rust
+    /// #![feature(generic_const_exprs)]
+    /// 
     /// use array__ops::ops::*;
     /// 
     /// let a = ["two", "three"];
@@ -49,5 +52,20 @@ impl<T, const N: usize> const ArrayChain<T, N> for [T; N]
         unsafe {
             private::merge_transmute(lhs, self)
         }
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use crate::ops::*;
+
+    #[test]
+    fn it_works()
+    {
+        let a = ["one", "two"];
+        let b = ["three"];
+        
+        assert_eq!(a.chain(b), ["one", "two", "three"]);
     }
 }

@@ -10,14 +10,14 @@ pub trait ArgReduce<T, const N: usize>: Array<Item = T>
     /// ```rust
     /// use array__ops::ops::*;
     /// 
-    /// fn my_argmax<T>(slice: &[T]) -> Option<usize>
+    /// fn my_argmax<T, const N: usize>(slice: &[T; N]) -> Option<usize>
     /// where
     ///     T: PartialOrd
     /// {
     ///     slice.argreduce(PartialOrd::gt)
     /// }
     /// 
-    /// fn my_argmin<T>(slice: &[T]) -> Option<usize>
+    /// fn my_argmin<T, const N: usize>(slice: &[T; N]) -> Option<usize>
     /// where
     ///     T: PartialOrd
     /// {
@@ -46,12 +46,12 @@ pub trait ArgReduce<T, const N: usize>: Array<Item = T>
     ///     i32::from_str_radix(str, 10).unwrap()
     /// }
     /// 
-    /// fn my_argmax(slice: &[&str]) -> Option<usize>
+    /// fn my_argmax<const N: usize>(slice: &[&str; N]) -> Option<usize>
     /// {
     ///     slice.argreduce_key(PartialOrd::gt, hasher)
     /// }
     /// 
-    /// fn my_argmin(slice: &[&str]) -> Option<usize>
+    /// fn my_argmin<const N: usize>(slice: &[&str; N]) -> Option<usize>
     /// {
     ///     slice.argreduce_key(PartialOrd::lt, hasher)
     /// }

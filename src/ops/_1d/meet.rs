@@ -251,8 +251,8 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// 
     /// # tokio_test::block_on(async {
     /// x.meet_each_async(y, async |&a, b| {
-    ///     assert_eq!(x[a - 1], a)
-    ///     assert_eq!(y[b - 1], b)
+    ///     assert_eq!(x[a as usize - 1], a);
+    ///     assert_eq!(y[b as usize - 1], b);
     ///     assert_eq!(a, b);
     /// }).await;
     /// # })
@@ -314,12 +314,12 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// 
     /// # tokio_test::block_on(async {
     /// let result = x.try_meet_each_async(y, async |&a, b| {
-    ///     assert_eq!(x[a - 1], a);
-    ///     assert_eq!(y[b - 1], b);
     ///     if b < 0
     ///     {
     ///         return Err(b)
     ///     }
+    ///     assert_eq!(x[a as usize - 1], a);
+    ///     assert_eq!(y[b as usize - 1], b);
     ///     assert_eq!(a, b);
     ///     Ok(())
     /// }).await;
@@ -346,11 +346,11 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// use array__ops::ops::*;
     /// 
     /// let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
-    /// let y = [-7, -5, -3, -1, -1, -2, -3, -4];
+    /// let y = [-7, -5, -3, -1, 1, 3, 5, 7];
     /// 
     /// # tokio_test::block_on(async {
     /// let result = x.try_meet_each_mut_async(y, async |a, b| {
-    ///     if b < 0
+    ///     if b > 0
     ///     {
     ///         return Err(b)
     ///     }
@@ -363,7 +363,7 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
     /// assert!(x[2] == 6 || x[2] == 3);
     /// assert!(x[3] == 5 || x[3] == 4);
     /// assert_eq!(x[4..], [4, 3, 2, 1]);
-    /// assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
+    /// assert!(result == Err(1) || result == Err(3) || result == Err(5) || result == Err(7));
     /// # })
     /// ```
     async fn try_meet_each_mut_async<'a, E, F, Rhs>(&'a mut self, rhs: Rhs, visitor: F) -> Result<(), E>
@@ -915,26 +915,23 @@ mod test
 
     #[test]
     fn it_works()
-    {
-        let mut x = [8, 7, 6, 5, 4, 3, 2, 1];
-        let y = [-7, -5, -3, -1, -1, -2, -3, -4];
+    {        
+        let x = [1, 2, 3, 4, 5, 6, 7, 8];
+        let y = [1, 2, 3, 4, -1, -2, -3, -4];
         
         tokio_test::block_on(async {
-            let result = x.try_meet_each_mut_async(y, async |a, b| {
-                if b < 0
-                {
-                    return Err(b)
-                }
-                *a += b;
-                Ok(())
-            }).await;
-            
-            assert!(x[0] == 8 || x[0] == 1);
-            assert!(x[1] == 7 || x[1] == 2);
-            assert!(x[2] == 6 || x[2] == 3);
-            assert!(x[3] == 5 || x[3] == 4);
-            assert_eq!(x[4..], [4, 3, 2, 1]);
-            assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
+        let result = x.try_meet_each_async(y, async |&a, b| {
+            if b < 0
+            {
+                return Err(b)
+            }
+            assert_eq!(x[a as usize - 1], a);
+            assert_eq!(y[b as usize - 1], b);
+            assert_eq!(a, b);
+            Ok(())
+        }).await;
+        
+        assert!(result == Err(-1) || result == Err(-2) || result == Err(-3) || result == Err(-4));
         })
     }
 }
