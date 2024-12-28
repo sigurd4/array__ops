@@ -4,7 +4,7 @@ version = "0.1.20"
 edition = "2021"
 license = "MIT"
 description = "A selection of useful array operations"
-repository = "https://github.com/sigurd4/array_ops"
+repository = "https://github.com/sigurd4/array__ops"
 keywords = ["array", "util", "ops"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
