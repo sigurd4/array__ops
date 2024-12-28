@@ -3,7 +3,7 @@ use core::ops::Neg;
 use super::MapAssign;
 
 #[const_trait]
-pub trait ArrayShrAssign<T, const N: usize>: MapAssign<T, N>
+pub trait ArrayNegAssign<T, const N: usize>: MapAssign<T, N>
 {
     fn neg_assign_all(&mut self)
     where
@@ -14,7 +14,7 @@ pub trait ArrayShrAssign<T, const N: usize>: MapAssign<T, N>
         T: Neg<Output = T>;
 }
 
-impl<T, const N: usize> ArrayShrAssign<T, N> for [T; N]
+impl<T, const N: usize> ArrayNegAssign<T, N> for [T; N]
 {
     fn neg_assign_all(&mut self)
     where
