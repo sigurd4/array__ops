@@ -263,6 +263,7 @@ impl<T, const N: usize> EnumerateZipWith<T, N> for [T; N]
     }
 }
 
+#[allow(unused)]
 mod r#impl
 {
     use core::{ops::AsyncFn, mem::MaybeUninit};
