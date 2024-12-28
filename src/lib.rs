@@ -34,9 +34,15 @@
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]
 
-//! TODO:
+//! Provides many useful utility methods for arrays.
+//! 
+//! I had to name it `array__ops` because `array_ops` was taken.
+//! 
+//! # Todo
+//! 
 //! - for_each_zip
-//! - simd versions of map, zip, visit, meet, for_each etc.
+//! - nd-ops(?)
+//! - Document more
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
