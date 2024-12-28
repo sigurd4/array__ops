@@ -4,7 +4,7 @@ use array_trait::Array;
 
 use crate::{join::{Actions, TryActions}, private::guard::PartialEmptyGuard};
 
-use super::EnumerateMap;
+use super::ArrayEnumerateMap;
 
 #[const_trait]
 pub trait ArrayEnumerateForEach<T, const N: usize>: Array<Item = T>

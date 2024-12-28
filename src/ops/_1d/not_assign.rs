@@ -1,9 +1,9 @@
 use core::ops::Not;
 
-use super::MapAssign;
+use super::ArrayMapAssign;
 
 #[const_trait]
-pub trait ArrayNotAssign<T, const N: usize>: MapAssign<T, N>
+pub trait ArrayNotAssign<T, const N: usize>: ArrayMapAssign<T, N>
 {
     fn not_assign_all(&mut self)
     where

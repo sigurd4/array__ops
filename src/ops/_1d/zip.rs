@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
-use super::ZipWith;
+use super::ArrayZipWith;
 
 #[const_trait]
-pub trait Zip<T, const N: usize>: Array<Item = T>
+pub trait ArrayZip<T, const N: usize>: Array<Item = T>
 {
     /// Combines two arrays with possibly different items into parallel, where each element lines up in the same position.
     /// 
@@ -41,7 +41,7 @@ pub trait Zip<T, const N: usize>: Array<Item = T>
         Z: ArrayForm<N>;
 }
 
-impl<T, const N: usize> Zip<T, N> for [T; N]
+impl<T, const N: usize> ArrayZip<T, N> for [T; N]
 {
     fn zip<Z>(self, other: Z) -> [(T, Z::Elem); N]
     where

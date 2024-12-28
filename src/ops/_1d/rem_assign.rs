@@ -2,10 +2,10 @@ use core::ops::RemAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayRemAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayRemAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn rem_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

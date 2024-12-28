@@ -47,6 +47,7 @@ impl<'a, T, const D: Dir, const N: usize> PartialInitGuard<'a, T, D, N>
         }
     }
 
+    #[allow(unused)]
     pub /*const*/ fn push(&mut self, value: T)
     {
         self.push_by_fn(|_| value);

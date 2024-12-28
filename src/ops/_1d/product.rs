@@ -2,10 +2,10 @@ use core::ops::MulAssign;
 
 use array_trait::Array;
 
-use super::{DivideAndConquer, Fold, Reduce};
+use super::{ArrayDivideAndConquer, ArrayFold, ArrayReduce};
 
 #[const_trait]
-pub trait Product<T, const N: usize>: Array<Item = T>
+pub trait ArrayPartialProduct<T, const N: usize>: Array<Item = T>
 {
     fn try_product(self) -> Option<T>
     where
@@ -18,7 +18,7 @@ pub trait Product<T, const N: usize>: Array<Item = T>
         T: MulAssign;
 }
 
-impl<T, const N: usize> Product<T, N> for [T; N]
+impl<T, const N: usize> ArrayPartialProduct<T, N> for [T; N]
 {
     fn try_product(self) -> Option<T>
     where

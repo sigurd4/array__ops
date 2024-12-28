@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use super::{ArrayJoin, EnumerateMap};
+use super::{ArrayJoin, ArrayEnumerateMap};
 
 #[const_trait]
-pub trait EnumerateVisit<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerateVisit<T, const N: usize>: Array<Item = T>
 {
     fn enumerate_visit<'a, F>(&'a self, visitor: F)
     where
@@ -110,7 +110,7 @@ pub trait EnumerateVisit<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> EnumerateVisit<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
 {
     fn enumerate_visit<'a, F>(&'a self, visitor: F)
     where

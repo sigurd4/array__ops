@@ -2,10 +2,10 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
-use super::EnumerateMap;
+use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait Enumerate<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerate<T, const N: usize>: Array<Item = T>
 {
     /// Enumerates each element in the array.
     /// 
@@ -93,7 +93,7 @@ pub trait Enumerate<T, const N: usize>: Array<Item = T>
     fn enumerate_pin_mut(self: Pin<&mut Self>) -> [(usize, Pin<&mut T>); N];
 }
 
-impl<T, const N: usize> Enumerate<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerate<T, N> for [T; N]
 {
     fn enumerate(self) -> [(usize, T); N]
     {
@@ -120,7 +120,7 @@ impl<T, const N: usize> Enumerate<T, N> for [T; N]
 #[cfg(test)]
 mod test
 {
-    use super::Enumerate;
+    use super::ArrayEnumerate;
 
     #[test]
     fn test()

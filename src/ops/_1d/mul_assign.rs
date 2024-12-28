@@ -2,10 +2,10 @@ use core::ops::MulAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayMulAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayMulAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn mul_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

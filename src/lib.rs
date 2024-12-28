@@ -1,4 +1,7 @@
+#![allow(non_snake_case)]
 #![cfg_attr(not(test), no_std)]
+#![allow(incomplete_features)]
+#![allow(internal_features)]
 #![allow(async_fn_in_trait)]
 #![allow(refining_impl_trait)]
 #![feature(associated_type_defaults)]
@@ -8,7 +11,6 @@
 #![feature(generic_arg_infer)]
 #![feature(maybe_uninit_uninit_array)]
 #![feature(maybe_uninit_array_assume_init)]
-#![feature(specialization)]
 #![feature(const_destruct)]
 #![feature(associated_const_equality)]
 #![feature(const_swap_nonoverlapping)]
@@ -25,6 +27,7 @@
 #![feature(adt_const_params)]
 #![feature(arbitrary_self_types)]
 #![feature(stmt_expr_attributes)]
+#![feature(specialization)]
 #![feature(core_intrinsics)]
 #![feature(unsized_const_params)]
 #![feature(const_closures)]
@@ -39,14 +42,14 @@ extern crate alloc;
 
 moddef::moddef!(
     flat(pub) mod {
-        from_fn
+        from_fn for warn(non_snake_case)
     },
     pub mod {
-        join,
-        ops,
-        form
+        join for warn(non_snake_case),
+        ops for warn(non_snake_case),
+        form for warn(non_snake_case)
     },
-    mod private
+    mod private for warn(non_snake_case)
 );
 
 pub use array_trait::*;
@@ -79,6 +82,7 @@ pub const fn max_len(a: usize, b: usize) -> usize
     }
 }
 
+#[warn(non_snake_case)]
 pub mod asm
 {
     use slice_ops::Padded;
@@ -318,6 +322,7 @@ pub mod asm
 }
 
 #[cfg(test)]
+#[warn(non_snake_case)]
 mod tests {
     use slice_ops::Padded;
 
@@ -462,12 +467,12 @@ mod tests {
     #[test]
     fn reduce()
     {
-        const A: [[(u8, u8); 3]; 2] = [
+        /*const A: [[(u8, u8); 3]; 2] = [
             [(0, 0), (0, 1), (0, 2)],
             [(1, 0), (1, 1), (1, 2)]
         ];
         
-        /*let r: (u8, u8) = A.reduce_nd(|(a1, a2), (b1, b2)| (a1 + b1, a2 + b2)).unwrap();
+        let r: (u8, u8) = A.reduce_nd(|(a1, a2), (b1, b2)| (a1 + b1, a2 + b2)).unwrap();
         
         assert_eq!(r, (3, 6));*/
     }

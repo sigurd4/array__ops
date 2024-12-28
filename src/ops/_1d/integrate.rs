@@ -3,7 +3,7 @@ use core::ops::AddAssign;
 use array_trait::Array;
 
 #[const_trait]
-pub trait Integrate<T, const N: usize>: Array<Item = T>
+pub trait ArrayIntegrate<T, const N: usize>: Array<Item = T>
 {
     /// Integrates array (discrete calculus)
     /// 
@@ -23,7 +23,7 @@ pub trait Integrate<T, const N: usize>: Array<Item = T>
         T: AddAssign<T> + Copy;
 }
 
-impl<T, const N: usize> Integrate<T, N> for [T; N]
+impl<T, const N: usize> ArrayIntegrate<T, N> for [T; N]
 {
     fn integrate(&mut self)
     where

@@ -5,7 +5,7 @@ use slice_ops::Padded;
 
 use crate::{ops::{ArrayChunks, ArrayTranspose}, private};
 
-use super::Split;
+use super::ArraySplit;
 
 #[const_trait]
 pub trait ArraySpread<T, const N: usize>: Array<Item = T>

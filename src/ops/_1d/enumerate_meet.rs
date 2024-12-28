@@ -6,10 +6,10 @@ use crate::{private::guard, form::ArrayForm};
 
 use self::guard::PartialEmptyGuard;
 
-use super::{ArrayJoin, EnumerateVisit, EnumerateZipWith};
+use super::{ArrayJoin, ArrayEnumerateVisit, ArrayEnumerateZipWith};
 
 #[const_trait]
-pub trait EnumerateMeet<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerateMeet<T, const N: usize>: Array<Item = T>
 {
     fn enumerate_meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where
@@ -264,7 +264,7 @@ pub trait EnumerateMeet<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> EnumerateMeet<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateMeet<T, N> for [T; N]
 {
     fn enumerate_meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where

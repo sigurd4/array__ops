@@ -1,9 +1,9 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
-use super::{ArrayJoin, Enumerate, Map};
+use super::{ArrayJoin, ArrayEnumerate, ArrayMap};
 
 #[const_trait]
-pub trait EnumerateMap<T, const N: usize>: Enumerate<T, N> + Map<T, N>
+pub trait ArrayEnumerateMap<T, const N: usize>: ArrayEnumerate<T, N> + ArrayMap<T, N>
 {
     fn enumerate_map<Map>(self, mapper: Map) -> [Map::Output; N]
     where
@@ -119,7 +119,7 @@ pub trait EnumerateMap<T, const N: usize>: Enumerate<T, N> + Map<T, N>
         T: 'a;
 }
 
-impl<T, const N: usize> EnumerateMap<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
 {
     fn enumerate_map<Map>(self, mapper: Map) -> [Map::Output; N]
     where

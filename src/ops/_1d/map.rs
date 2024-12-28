@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use super::EnumerateMap;
+use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait Map<T, const N: usize>: Array<Item = T>
+pub trait ArrayMap<T, const N: usize>: Array<Item = T>
 {
     /// Maps all values of an array with a given function.
     /// 
@@ -133,7 +133,7 @@ pub trait Map<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Map<T, N> for [T; N]
+impl<T, const N: usize> ArrayMap<T, N> for [T; N]
 {
     fn map<Map>(self, mut mapper: Map) -> [Map::Output; N]
     where

@@ -2,10 +2,10 @@ use core::ops::BitXor;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayBitXor<T, const N: usize>: Map<T, N>
+pub trait ArrayBitXor<T, const N: usize>: ArrayMap<T, N>
 {
     fn bitxor_all<Rhs>(self, rhs: Rhs) -> [<T as BitXor<Rhs>>::Output; N]
     where

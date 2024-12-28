@@ -1,7 +1,7 @@
-use super::{DivideAndConquer, Reduce};
+use super::{ArrayDivideAndConquer, ArrayReduce};
 
 #[const_trait]
-pub trait Minmax<T, const N: usize>: Reduce<T, N>
+pub trait ArrayMinmax<T, const N: usize>: ArrayReduce<T, N>
 {
     fn max(self) -> Option<T>
     where
@@ -25,7 +25,7 @@ pub trait Minmax<T, const N: usize>: Reduce<T, N>
         T: PartialOrd<T>;
 }
 
-impl<T, const N: usize> Minmax<T, N> for [T; N]
+impl<T, const N: usize> ArrayMinmax<T, N> for [T; N]
 {
     fn max(self) -> Option<T>
     where

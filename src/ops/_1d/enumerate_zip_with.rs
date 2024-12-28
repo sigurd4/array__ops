@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use crate::form::ArrayForm;
 
-use super::{Enumerate, ZipWith};
+use super::{ArrayEnumerate, ArrayZipWith};
 
 #[const_trait]
-pub trait EnumerateZipWith<T, const N: usize>: Enumerate<T, N> + ZipWith<T, N>
+pub trait ArrayEnumerateZipWith<T, const N: usize>: ArrayEnumerate<T, N> + ArrayZipWith<T, N>
 {
     fn enumerate_zip_with<Zip, Rhs>(self, rhs: Rhs, zipper: Zip) -> [Zip::Output; N]
     where
@@ -104,7 +104,7 @@ pub trait EnumerateZipWith<T, const N: usize>: Enumerate<T, N> + ZipWith<T, N>
         T: 'a;
 }
 
-impl<T, const N: usize> EnumerateZipWith<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateZipWith<T, N> for [T; N]
 {
     fn enumerate_zip_with<Zip, Rhs>(self, rhs: Rhs, zipper: Zip) -> [Zip::Output; N]
     where

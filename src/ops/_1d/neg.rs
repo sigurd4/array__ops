@@ -1,9 +1,9 @@
 use core::ops::Neg;
 
-use super::Map;
+use super::ArrayMap;
 
 #[const_trait]
-pub trait ArrayNeg<T, const N: usize>: Map<T, N>
+pub trait ArrayNeg<T, const N: usize>: ArrayMap<T, N>
 {
     fn neg_all(self) -> [<T as Neg>::Output; N]
     where

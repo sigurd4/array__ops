@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private;
 
 #[const_trait]
-pub trait FromItem<T>: Array<Item = T, LENGTH = 1>
+pub trait ArrayFromItem<T>: Array<Item = T, LENGTH = 1>
 {
     fn from_item(value: T) -> Self;
     fn from_item_ref(value: &T) -> &Self;
@@ -20,7 +20,7 @@ pub trait FromItem<T>: Array<Item = T, LENGTH = 1>
     fn as_item_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T>;
 }
 
-impl<T> const FromItem<T> for [T; 1]
+impl<T> const ArrayFromItem<T> for [T; 1]
 {
     fn from_item(value: T) -> Self
     {

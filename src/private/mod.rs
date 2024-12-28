@@ -77,6 +77,7 @@ impl<L, R> Pair<L, R>
         pair
     }
     
+    #[allow(unused)]
     pub(crate) const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
     {
         if const {fits::<(L, R), Pair<L, R>>()}
@@ -174,6 +175,7 @@ pub(crate) const unsafe fn transmute<A, B>(from: A) -> B
     core::intrinsics::transmute_unchecked(from)
 }
 
+#[allow(unused)]
 pub(crate) const unsafe fn uninit_extend_transmute<A, B>(from: A) -> MaybeUninit<B>
 {
     union AB<A, B>
@@ -192,6 +194,7 @@ pub(crate) const fn fits<A, B>() -> bool
     core::mem::size_of::<A>() == core::mem::size_of::<B>()
         && core::mem::align_of::<A>() == core::mem::align_of::<B>()
 }
+#[allow(unused)]
 pub(crate) const fn fits_in<A, B>() -> bool
 {
     core::mem::size_of::<A>() <= core::mem::size_of::<B>()

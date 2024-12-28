@@ -1,9 +1,9 @@
 use core::ops::Neg;
 
-use super::MapAssign;
+use super::ArrayMapAssign;
 
 #[const_trait]
-pub trait ArrayNegAssign<T, const N: usize>: MapAssign<T, N>
+pub trait ArrayNegAssign<T, const N: usize>: ArrayMapAssign<T, N>
 {
     fn neg_assign_all(&mut self)
     where

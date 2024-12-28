@@ -4,7 +4,7 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
-use super::ZipOuterWith;
+use super::ArrayZipOuterWith;
 
 #[const_trait]
 pub trait ArrayMulOuter<T, const N: usize>: Array<Item = T>

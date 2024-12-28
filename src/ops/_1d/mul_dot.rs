@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::{private::guard::PartialZipEmptyGuard, form::ArrayForm};
 
-use super::{sum::Sum, ZipWith};
+use super::{sum::ArrayPartialSum, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayMulDot<T, const N: usize>: Array<Item = T>
+pub trait ArrayPartialMulDot<T, const N: usize>: Array<Item = T>
 {
     fn try_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
@@ -32,7 +32,7 @@ pub trait ArrayMulDot<T, const N: usize>: Array<Item = T>
         U: AddAssign;
 }
 
-impl<T, const N: usize> ArrayMulDot<T, N> for [T; N]
+impl<T, const N: usize> ArrayPartialMulDot<T, N> for [T; N]
 {
     fn try_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
@@ -68,7 +68,7 @@ impl<T, const N: usize> ArrayMulDot<T, N> for [T; N]
         T: Mul<Rhs::Elem, Output: AddAssign>
     {
         self.zip_async_with(rhs, async |x, y| x*y).await
-            .try_sum_async().await
+            .partial_sum_async().await
     }
         
     fn mul_dot_bias<Rhs, U>(self, rhs: Rhs, bias: U) -> U

@@ -2,10 +2,10 @@ use core::ops::Shl;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayShl<T, const N: usize>: Map<T, N>
+pub trait ArrayShl<T, const N: usize>: ArrayMap<T, N>
 {
     fn shl_all<Rhs>(self, rhs: Rhs) -> [<T as Shl<Rhs>>::Output; N]
     where

@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private;
 
 #[const_trait]
-pub trait Reformulate<T, const N: usize>: Array<Item = T>
+pub trait ArrayReformulate<T, const N: usize>: Array<Item = T>
 {
     fn reformulate<const M: usize>(self) -> [T; M]
     where
@@ -35,7 +35,7 @@ pub trait Reformulate<T, const N: usize>: Array<Item = T>
     fn try_reformulate_pin_mut<const M: usize>(self: Pin<&mut Self>) -> Option<Pin<&mut [T; M]>>;
 }
 
-impl<T, const N: usize> Reformulate<T, N> for [T; N]
+impl<T, const N: usize> ArrayReformulate<T, N> for [T; N]
 {
     fn reformulate<const M: usize>(self) -> [T; M]
     where

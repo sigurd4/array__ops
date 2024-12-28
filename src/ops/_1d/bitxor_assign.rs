@@ -2,10 +2,10 @@ use core::ops::BitXorAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayBitXorAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayBitXorAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn bitxor_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

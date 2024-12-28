@@ -2,7 +2,7 @@ use core::mem::MaybeUninit;
 
 use array_trait::Array;
 
-use super::Split;
+use super::ArraySplit;
 
 #[const_trait]
 pub trait ArrayRotate<T, const N: usize>: Array<Item = T>

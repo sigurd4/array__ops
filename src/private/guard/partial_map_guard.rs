@@ -18,6 +18,7 @@ impl<'a, A, U, const N: usize> PartialMapGuard<'a, A, U, {Dir::Left}, N>
 where
     A: ArrayForm<N>
 {
+    #[allow(unused)]
     pub const fn new_left(src: A, dst: &'a mut [MaybeUninit<U>; N]) -> Self
     where
         A: ~const ArrayForm<N>
@@ -29,6 +30,7 @@ impl<'a, A, U, const N: usize> PartialMapGuard<'a, A, U, {Dir::Right}, N>
 where
     A: ArrayForm<N>
 {
+    #[allow(unused)]
     pub const fn new_right(src: A, dst: &'a mut [MaybeUninit<U>; N]) -> Self
     where
         A: ~const ArrayForm<N>
@@ -66,12 +68,14 @@ where
         }
     }
 
+    #[allow(unused)]
     pub fn map<F>(&mut self, mapper: F)
     where
         F: FnOnce(A::Elem) -> U
     {
         self.enumerate_map(|_, x| mapper(x))
     }
+    #[allow(unused)]
     pub fn try_map<F, E>(&mut self, mapper: F) -> Result<(), E>
     where
         F: FnOnce(A::Elem) -> Result<U, E>

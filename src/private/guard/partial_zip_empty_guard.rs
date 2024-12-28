@@ -31,6 +31,7 @@ where
     A: ArrayForm<N>,
     B: ArrayForm<N>
 {
+    #[allow(unused)]
     pub const fn new_right(lhs: A, rhs: B) -> Self
     where
         A: ~const ArrayForm<N>,
@@ -70,11 +71,11 @@ where
         }
     }
 
+    #[allow(unused)]
     pub fn pop(&mut self) -> (A::Elem, B::Elem)
     {
         self.pop_with(|x, y| (x, y))
     }
-
     pub fn pop_with<F>(&mut self, zipper: F) -> F::Output
     where
         F: FnOnce<(A::Elem, B::Elem)>

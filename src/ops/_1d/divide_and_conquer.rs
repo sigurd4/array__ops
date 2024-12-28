@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::{private::guard::PartialDivideAndConquerGuard, join::FutureDivideAndConquer};
 
-use super::Each;
+use super::ArrayEach;
 
 #[const_trait]
-pub trait DivideAndConquer<T, const N: usize>: Array<Item = T>
+pub trait ArrayDivideAndConquer<T, const N: usize>: Array<Item = T>
 {
     fn divide_and_conquer<F>(self, reduce: F) -> Option<T>
     where
@@ -46,7 +46,7 @@ pub trait DivideAndConquer<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> DivideAndConquer<T, N> for [T; N]
+impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
 {
     fn divide_and_conquer<F>(self, reduce: F) -> Option<T>
     where

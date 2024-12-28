@@ -2,10 +2,10 @@ use core::ops::BitAndAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayBitAndAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayBitAndAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn bitand_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

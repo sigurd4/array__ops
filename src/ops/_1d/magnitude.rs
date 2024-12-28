@@ -1,9 +1,9 @@
 use core::ops::{AddAssign, Mul};
 
-use super::ArrayMulDot;
+use super::ArrayPartialMulDot;
 
 #[const_trait]
-pub trait ArrayMagnitude<T, const N: usize>: ArrayMulDot<T, N>
+pub trait ArrayPartialMagnitude<T, const N: usize>: ArrayPartialMulDot<T, N>
 {
     fn try_magnitude_squared(self) -> Option<<T as Mul<T>>::Output>
     where
@@ -13,7 +13,7 @@ pub trait ArrayMagnitude<T, const N: usize>: ArrayMulDot<T, N>
         T: Mul<T, Output: AddAssign> + Copy;
 }
 
-impl<T, const N: usize> ArrayMagnitude<T, N> for [T; N]
+impl<T, const N: usize> ArrayPartialMagnitude<T, N> for [T; N]
 {
     fn try_magnitude_squared(self) -> Option<<T as Mul<T>>::Output>
     where

@@ -16,7 +16,7 @@ use core::alloc::Allocator;
 use alloc::{boxed::Box, alloc::Global};
 
 #[const_trait]
-pub trait FromFn<T, const N: usize>: Array<Item = T>
+pub trait ArrayFromFn<T, const N: usize>: Array<Item = T>
 {
     fn from_fn<F>(fill: F) -> Self
     where
@@ -76,7 +76,7 @@ pub trait FromFn<T, const N: usize>: Array<Item = T>
         F: AsyncFn(usize) -> Result<T, E> + ~const Destruct;
 }
 
-impl<T, const N: usize> FromFn<T, N> for [T; N]
+impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
 {
     fn from_fn<F>(mut fill: F) -> Self
     where

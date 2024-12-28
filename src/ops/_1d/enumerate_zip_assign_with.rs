@@ -2,10 +2,10 @@ use core::{ops::AsyncFn, marker::Destruct};
 
 use crate::form::ArrayForm;
 
-use super::{Enumerate, EnumerateMeet, ZipAssignWith};
+use super::{ArrayEnumerate, ArrayEnumerateMeet, ArrayZipAssignWith};
 
 #[const_trait]
-pub trait EnumerateZipAssignWith<T, const N: usize>: Enumerate<T, N> + ZipAssignWith<T, N>
+pub trait ArrayEnumerateZipAssignWith<T, const N: usize>: ArrayEnumerate<T, N> + ArrayZipAssignWith<T, N>
 {
     fn enumerate_zip_assign_with<Rhs, Zip>(&mut self, rhs: Rhs, map: Zip)
     where
@@ -28,7 +28,7 @@ pub trait EnumerateZipAssignWith<T, const N: usize>: Enumerate<T, N> + ZipAssign
         Zip: AsyncFn(usize, T, Rhs::Elem) -> Result<T, E> + ~const Destruct;
 }
 
-impl<T, const N: usize> EnumerateZipAssignWith<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateZipAssignWith<T, N> for [T; N]
 {
     fn enumerate_zip_assign_with<Rhs, Zip>(&mut self, rhs: Rhs, mut zip: Zip)
     where

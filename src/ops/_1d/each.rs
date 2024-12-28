@@ -2,10 +2,10 @@ use core::pin::Pin;
 
 use array_trait::Array;
 
-use super::Map;
+use super::ArrayMap;
 
 #[const_trait]
-pub trait Each<T, const N: usize>: Array<Item = T>
+pub trait ArrayEach<T, const N: usize>: Array<Item = T>
 {
     fn each_ref(&self) -> [&T; N];
     fn each_mut(&mut self) -> [&mut T; N];
@@ -13,7 +13,7 @@ pub trait Each<T, const N: usize>: Array<Item = T>
     fn each_pin_mut(self: Pin<&mut Self>) -> [Pin<&mut T>; N];
 }
 
-impl<T, const N: usize> Each<T, N> for [T; N]
+impl<T, const N: usize> ArrayEach<T, N> for [T; N]
 {
     fn each_ref(&self) -> [&T; N]
     {

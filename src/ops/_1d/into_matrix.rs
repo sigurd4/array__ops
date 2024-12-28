@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private::guard::PartialEmptyGuard;
 
 #[const_trait]
-pub trait IntoMatrix<T, const N: usize>: Array<Item = T>
+pub trait ArrayIntoMatrix<T, const N: usize>: Array<Item = T>
 {
     fn diagonal_matrix<const H: usize, const W: usize>(self) -> [[T; W]; H]
     where
@@ -133,7 +133,7 @@ pub trait IntoMatrix<T, const N: usize>: Array<Item = T>
     fn hankel_matrix_pin_ref<'a, const M: usize>(self: Pin<&'a Self>, r: Pin<&'a [T; M]>) -> [[Pin<&'a T>; M]; N];
 }
 
-impl<T, const N: usize> IntoMatrix<T, N> for [T; N]
+impl<T, const N: usize> ArrayIntoMatrix<T, N> for [T; N]
 {
     fn diagonal_matrix<const H: usize, const W: usize>(self) -> [[T; W]; H]
     where

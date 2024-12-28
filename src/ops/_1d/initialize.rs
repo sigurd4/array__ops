@@ -2,10 +2,10 @@ use core::{mem::MaybeUninit, ops::AsyncFn};
 
 use array_trait::Array;
 
-use super::EnumerateVisit;
+use super::ArrayEnumerateVisit;
 
 #[const_trait]
-pub trait Initialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
+pub trait ArrayInitialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
 {
     fn initialize<F>(self: &mut Self, fill: F) -> &mut [T; N]
     where
@@ -30,7 +30,7 @@ pub trait Initialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
         T: 'a;
 }
 
-impl<T, const N: usize> Initialize<T, N> for [MaybeUninit<T>; N]
+impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
 {
     fn initialize<F>(self: &mut Self, mut fill: F) -> &mut [T; N]
     where

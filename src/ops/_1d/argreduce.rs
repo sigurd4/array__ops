@@ -1,7 +1,7 @@
 use array_trait::Array;
 
 #[const_trait]
-pub trait ArgReduce<T, const N: usize>: Array<Item = T>
+pub trait ArrayArgReduce<T, const N: usize>: Array<Item = T>
 {
     /// Performs an argument reduction, finding the final righthand operand for which the comparison yields true.
     /// 
@@ -68,7 +68,7 @@ pub trait ArgReduce<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> ArgReduce<T, N> for [T; N]
+impl<T, const N: usize> ArrayArgReduce<T, N> for [T; N]
 {
     fn argreduce<'a, F>(&'a self, mut reduction: F) -> Option<usize>
     where

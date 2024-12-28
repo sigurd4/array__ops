@@ -1,9 +1,9 @@
 use core::cmp::Ordering;
 
-use super::ArgReduce;
+use super::ArrayArgReduce;
 
 #[const_trait]
-pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
+pub trait ArrayArgMinMax<T, const N: usize>: ArrayArgReduce<T, N>
 {
     /// Finds the index of the maximum value in the slice.
     /// 
@@ -135,7 +135,7 @@ pub trait ArgMinMax<T, const N: usize>: ArgReduce<T, N>
         T: 'a;
 }
 
-impl<T, const N: usize> ArgMinMax<T, N> for [T; N]
+impl<T, const N: usize> ArrayArgMinMax<T, N> for [T; N]
 {
     fn argmax(&self) -> Option<usize>
     where

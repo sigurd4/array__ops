@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use crate::ops::ArrayFlatten;
 
-use super::{Enumerate, EnumerateMap, Flatmap};
+use super::{ArrayEnumerate, ArrayEnumerateMap, ArrayFlatmap};
 
 #[const_trait]
-pub trait EnumerateFlatmap<T, const N: usize>: Enumerate<T, N> + Flatmap<T, N>
+pub trait ArrayEnumerateFlatmap<T, const N: usize>: ArrayEnumerate<T, N> + ArrayFlatmap<T, N>
 {
     fn enumerate_flatmap<Map, U, const M: usize>(self, mapper: Map) -> [U; N*M]
     where
@@ -148,7 +148,7 @@ pub trait EnumerateFlatmap<T, const N: usize>: Enumerate<T, N> + Flatmap<T, N>
         [(); N*M]:;
 }
 
-impl<T, const N: usize> EnumerateFlatmap<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateFlatmap<T, N> for [T; N]
 {
     fn enumerate_flatmap<Map, U, const M: usize>(self, mapper: Map) -> [U; N*M]
     where

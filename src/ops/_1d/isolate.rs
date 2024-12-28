@@ -3,12 +3,12 @@ use core::ops::Bound;
 use array_trait::Array;
 
 #[const_trait]
-pub trait Isolate<T, const N: usize>: Array<Item = T>
+pub trait ArrayIsolate<T, const N: usize>: Array<Item = T>
 {
     fn isolate(self, i: usize) -> Option<T>;
 }
 
-impl<T, const N: usize> Isolate<T, N> for [T; N]
+impl<T, const N: usize> ArrayIsolate<T, N> for [T; N]
 {
     fn isolate(mut self, i: usize) -> Option<T>
     {

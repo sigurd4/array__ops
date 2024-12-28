@@ -1,9 +1,9 @@
 use core::{marker::Destruct, mem::MaybeUninit};
 
-use super::{Extend, Truncate};
+use super::{ArrayExtend, Truncate};
 
 #[const_trait]
-pub trait Resize<T, const N: usize>: Truncate<T, N> + Extend<T, N>
+pub trait ArrayResize<T, const N: usize>: Truncate<T, N> + ArrayExtend<T, N>
 {
     fn resize<const M: usize, F>(self, fill: F) -> [T; M]
     where
@@ -15,7 +15,7 @@ pub trait Resize<T, const N: usize>: Truncate<T, N> + Extend<T, N>
         T: ~const Destruct;
 }
 
-impl<T, const N: usize> Resize<T, N> for [T; N]
+impl<T, const N: usize> ArrayResize<T, N> for [T; N]
 {
     fn resize<const M: usize, F>(mut self, mut fill: F) -> [T; M]
     where

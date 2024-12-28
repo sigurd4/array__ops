@@ -2,10 +2,10 @@ use core::ops::DivAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayDivAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayDivAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn div_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

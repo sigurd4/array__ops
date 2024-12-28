@@ -2,10 +2,10 @@ use core::ops::Shr;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayShr<T, const N: usize>: Map<T, N>
+pub trait ArrayShr<T, const N: usize>: ArrayMap<T, N>
 {
     fn shr_all<Rhs>(self, rhs: Rhs) -> [<T as Shr<Rhs>>::Output; N]
     where

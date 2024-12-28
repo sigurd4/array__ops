@@ -26,6 +26,7 @@ impl<A, const N: usize> PartialEmptyGuard<A, {Dir::Right}, N>
 where
     A: ArrayForm<N>
 {
+    #[allow(unused)]
     pub const fn new_right(src: A) -> Self
     where
         A: ~const ArrayForm<N>

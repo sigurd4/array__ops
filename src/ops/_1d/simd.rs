@@ -4,7 +4,7 @@ use array_trait::Array;
 
 use crate::private;
 
-use super::Split;
+use super::ArraySplit;
 
 #[const_trait]
 pub trait ArraySimd<T, const N: usize>: Array<Item = T>

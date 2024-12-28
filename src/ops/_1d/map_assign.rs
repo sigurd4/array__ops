@@ -2,10 +2,10 @@ use core::{ops::AsyncFn, marker::Destruct};
 
 use array_trait::Array;
 
-use super::EnumerateMapAssign;
+use super::ArrayEnumerateMapAssign;
 
 #[const_trait]
-pub trait MapAssign<T, const N: usize>: Array<Item = T>
+pub trait ArrayMapAssign<T, const N: usize>: Array<Item = T>
 {
     fn map_assign<Map>(&mut self, mapper: Map)
     where
@@ -24,7 +24,7 @@ pub trait MapAssign<T, const N: usize>: Array<Item = T>
         Map: AsyncFn(T) -> Result<T, E> + ~const Destruct;
 }
 
-impl<T, const N: usize> MapAssign<T, N> for [T; N]
+impl<T, const N: usize> ArrayMapAssign<T, N> for [T; N]
 {
     fn map_assign<Map>(&mut self, mut mapper: Map)
     where

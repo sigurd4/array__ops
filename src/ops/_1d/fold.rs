@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private::guard::PartialEmptyGuard;
 
 #[const_trait]
-pub trait Fold<T, const N: usize>: Array<Item = T>
+pub trait ArrayFold<T, const N: usize>: Array<Item = T>
 {
     fn fold<F, O>(self, default: O, fold: F) -> O
     where
@@ -28,7 +28,7 @@ pub trait Fold<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Fold<T, N> for [T; N]
+impl<T, const N: usize> ArrayFold<T, N> for [T; N]
 {
     fn fold<F, O>(self, default: O, fold: F) -> O
     where

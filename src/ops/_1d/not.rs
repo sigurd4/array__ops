@@ -1,9 +1,9 @@
 use core::ops::Not;
 
-use super::Map;
+use super::ArrayMap;
 
 #[const_trait]
-pub trait ArrayNot<T, const N: usize>: Map<T, N>
+pub trait ArrayNot<T, const N: usize>: ArrayMap<T, N>
 {
     fn not_all(self) -> [<T as Not>::Output; N]
     where

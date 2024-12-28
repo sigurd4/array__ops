@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private;
 
 #[const_trait]
-pub trait FromCollumn<T, const N: usize>: Array<Item = T>
+pub trait ArrayFromCollumn<T, const N: usize>: Array<Item = T>
 {
     fn from_collumn(collumn: [[T; 1]; N]) -> Self;
     fn from_collumn_ref(collumn: &[[T; 1]; N]) -> &Self;
@@ -20,7 +20,7 @@ pub trait FromCollumn<T, const N: usize>: Array<Item = T>
     fn as_collumn_pin_mut(self: Pin<&mut Self>) -> Pin<&mut [[T; 1]; N]>;
 }
 
-impl<T, const N: usize> const FromCollumn<T, N> for [T; N]
+impl<T, const N: usize> const ArrayFromCollumn<T, N> for [T; N]
 {
     fn from_collumn(collumn: [[T; 1]; N]) -> Self
     {

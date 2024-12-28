@@ -2,10 +2,10 @@ use core::ops::BitAnd;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayBitAnd<T, const N: usize>: Map<T, N>
+pub trait ArrayBitAnd<T, const N: usize>: ArrayMap<T, N>
 {
     fn bitand_all<Rhs>(self, rhs: Rhs) -> [<T as BitAnd<Rhs>>::Output; N]
     where

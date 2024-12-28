@@ -1,4 +1,4 @@
-use core::{marker::Destruct, mem::MaybeUninit};
+use core::mem::MaybeUninit;
 
 use crate::form::ArrayForm;
 
@@ -22,6 +22,7 @@ impl<T, const N: usize> PartialDivideAndConquerGuard<T, {Dir::Left}, N>
 }
 impl<T, const N: usize> PartialDivideAndConquerGuard<T, {Dir::Right}, N>
 {
+    #[allow(unused)]
     pub const fn new_right<A>(src: A) -> Self
     where
         A: ~const ArrayForm<N, Elem = T>

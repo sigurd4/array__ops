@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
-use super::EnumerateZipWith;
+use super::ArrayEnumerateZipWith;
 
 #[const_trait]
-pub trait ZipWith<T, const N: usize>: Array<Item = T>
+pub trait ArrayZipWith<T, const N: usize>: Array<Item = T>
 {
     fn zip_with<Zip, Rhs>(self, rhs: Rhs, zipper: Zip) -> [Zip::Output; N]
     where
@@ -106,7 +106,7 @@ pub trait ZipWith<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> ZipWith<T, N> for [T; N]
+impl<T, const N: usize> ArrayZipWith<T, N> for [T; N]
 {
     fn zip_with<Zip, Rhs>(self, rhs: Rhs, mut zipper: Zip) -> [Zip::Output; N]
     where

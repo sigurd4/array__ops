@@ -2,10 +2,10 @@ use core::ops::ShlAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayShlAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayShlAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn shl_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

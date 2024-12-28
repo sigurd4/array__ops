@@ -2,10 +2,10 @@ use core::ops::Add;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayAdd<T, const N: usize>: Map<T, N>
+pub trait ArrayAdd<T, const N: usize>: ArrayMap<T, N>
 {
     fn add_all<Rhs>(self, rhs: Rhs) -> [<T as Add<Rhs>>::Output; N]
     where

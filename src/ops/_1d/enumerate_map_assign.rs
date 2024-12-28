@@ -1,9 +1,9 @@
 use core::{ops::AsyncFn, marker::Destruct};
 
-use super::{Enumerate, EnumerateVisit, MapAssign};
+use super::{ArrayEnumerate, ArrayEnumerateVisit, ArrayMapAssign};
 
 #[const_trait]
-pub trait EnumerateMapAssign<T, const N: usize>: Enumerate<T, N> + MapAssign<T, N>
+pub trait ArrayEnumerateMapAssign<T, const N: usize>: ArrayEnumerate<T, N> + ArrayMapAssign<T, N>
 {
     fn enumerate_map_assign<Map>(&mut self, mapper: Map)
     where
@@ -22,7 +22,7 @@ pub trait EnumerateMapAssign<T, const N: usize>: Enumerate<T, N> + MapAssign<T, 
         Map: AsyncFn(usize, T) -> Result<T, E> + ~const Destruct;
 }
 
-impl<T, const N: usize> EnumerateMapAssign<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateMapAssign<T, N> for [T; N]
 {
     fn enumerate_map_assign<Map>(&mut self, mut mapper: Map)
     where

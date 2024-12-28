@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ZipAssignWith<T, const N: usize>: Array<Item = T>
+pub trait ArrayZipAssignWith<T, const N: usize>: Array<Item = T>
 {
     fn zip_assign_with<Rhs, Zip>(&mut self, rhs: Rhs, map: Zip)
     where
@@ -30,7 +30,7 @@ pub trait ZipAssignWith<T, const N: usize>: Array<Item = T>
         Zip: AsyncFn(T, Rhs::Elem) -> Result<T, E> + ~const Destruct;
 }
 
-impl<T, const N: usize> ZipAssignWith<T, N> for [T; N]
+impl<T, const N: usize> ArrayZipAssignWith<T, N> for [T; N]
 {
     fn zip_assign_with<Rhs, Zip>(&mut self, rhs: Rhs, mut zip: Zip)
     where

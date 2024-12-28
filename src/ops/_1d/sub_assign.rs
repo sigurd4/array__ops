@@ -2,10 +2,10 @@ use core::ops::SubAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArraySubAssign<T, const N: usize>: Meet<T, N>
+pub trait ArraySubAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn sub_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

@@ -3,7 +3,7 @@ use core::ops::SubAssign;
 use array_trait::Array;
 
 #[const_trait]
-pub trait Differentiate<T, const N: usize>: Array<Item = T>
+pub trait ArrayDifferentiate<T, const N: usize>: Array<Item = T>
 {
     /// Differentiates array (discrete calculus)
     /// 
@@ -23,7 +23,7 @@ pub trait Differentiate<T, const N: usize>: Array<Item = T>
         T: SubAssign<T> + Copy;
 }
 
-impl<T, const N: usize> Differentiate<T, N> for [T; N]
+impl<T, const N: usize> ArrayDifferentiate<T, N> for [T; N]
 {
     fn differentiate(&mut self)
     where

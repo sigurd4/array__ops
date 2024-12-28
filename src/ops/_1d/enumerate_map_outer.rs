@@ -1,9 +1,9 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
-use super::{Enumerate, EnumerateZipOuterWith, MapOuter};
+use super::{ArrayEnumerate, ArrayEnumerateZipOuterWith, ArrayMapOuter};
 
 #[const_trait]
-pub trait EnumerateMapOuter<T, const N: usize>: Enumerate<T, N> + MapOuter<T, N>
+pub trait ArrayEnumerateMapOuter<T, const N: usize>: ArrayEnumerate<T, N> + ArrayMapOuter<T, N>
 {
     fn enumerate_map_outer<Map>(&self, mapper: Map) -> [[Map::Output; N]; N]
     where
@@ -56,7 +56,7 @@ pub trait EnumerateMapOuter<T, const N: usize>: Enumerate<T, N> + MapOuter<T, N>
         T: 'a;
 }
 
-impl<T, const N: usize> EnumerateMapOuter<T, N> for [T; N]
+impl<T, const N: usize> ArrayEnumerateMapOuter<T, N> for [T; N]
 {
     fn enumerate_map_outer<Map>(&self, mapper: Map) -> [[Map::Output; N]; N]
     where

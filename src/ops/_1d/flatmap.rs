@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use super::EnumerateFlatmap;
+use super::ArrayEnumerateFlatmap;
 
 #[const_trait]
-pub trait Flatmap<T, const N: usize>: Array<Item = T>
+pub trait ArrayFlatmap<T, const N: usize>: Array<Item = T>
 {
     /// Maps all values of an array with a given function.
     /// 
@@ -160,7 +160,7 @@ pub trait Flatmap<T, const N: usize>: Array<Item = T>
         [(); N*M]:;
 }
 
-impl<T, const N: usize> Flatmap<T, N> for [T; N]
+impl<T, const N: usize> ArrayFlatmap<T, N> for [T; N]
 {
     fn flatmap<Map, U, const M: usize>(self, mut mapper: Map) -> [U; N*M]
     where

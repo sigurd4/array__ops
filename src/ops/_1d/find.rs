@@ -5,10 +5,10 @@ use core::ops::AsyncFn;
 
 use crate::join::TryActions;
 
-use super::EnumerateMap;
+use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait Find<T, const N: usize>: Array<Item = T>
+pub trait ArrayFind<T, const N: usize>: Array<Item = T>
 {
     /// Performs a linear search for the first value that equals `x`.
     /// 
@@ -144,7 +144,7 @@ pub trait Find<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Find<T, N> for [T; N]
+impl<T, const N: usize> ArrayFind<T, N> for [T; N]
 {
     fn find(&self, x: &T) -> Option<usize>
     where

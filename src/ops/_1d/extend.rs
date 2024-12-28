@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private;
 
 #[const_trait]
-pub trait Extend<T, const N: usize>: Array<Item = T>
+pub trait ArrayExtend<T, const N: usize>: Array<Item = T>
 {
     fn extend<const M: usize, F>(self, fill: F) -> [T; M]
     where
@@ -26,7 +26,7 @@ pub trait Extend<T, const N: usize>: Array<Item = T>
         [(); M - N]:;
 }
 
-impl<T, const N: usize> Extend<T, N> for [T; N]
+impl<T, const N: usize> ArrayExtend<T, N> for [T; N]
 {
     fn extend<const M: usize, F>(self, mut fill: F) -> [T; M]
     where

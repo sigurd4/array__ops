@@ -2,7 +2,7 @@ use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
 
-use crate::{ops::Isolate, private::guard::PartialEmptyGuard};
+use crate::{ops::ArrayIsolate, private::guard::PartialEmptyGuard};
 
 #[const_trait]
 pub trait ArrayDiagonal<T, const M: usize, const N: usize>: Array<Item = [T; N]>

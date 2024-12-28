@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use super::EnumerateMapOuter;
+use super::ArrayEnumerateMapOuter;
 
 #[const_trait]
-pub trait MapOuter<T, const N: usize>: Array<Item = T>
+pub trait ArrayMapOuter<T, const N: usize>: Array<Item = T>
 {
     fn map_outer<Map>(&self, mapper: Map) -> [[Map::Output; N]; N]
     where
@@ -58,7 +58,7 @@ pub trait MapOuter<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> MapOuter<T, N> for [T; N]
+impl<T, const N: usize> ArrayMapOuter<T, N> for [T; N]
 {
     fn map_outer<Map>(&self, mut mapper: Map) -> [[Map::Output; N]; N]
     where

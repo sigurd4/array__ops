@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
-use super::EnumerateMeet;
+use super::ArrayEnumerateMeet;
 
 #[const_trait]
-pub trait Meet<T, const N: usize>: Array<Item = T>
+pub trait ArrayMeet<T, const N: usize>: Array<Item = T>
 {
     /// Visits each element once, from left to right.
     /// 
@@ -509,7 +509,7 @@ pub trait Meet<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Meet<T, N> for [T; N]
+impl<T, const N: usize> ArrayMeet<T, N> for [T; N]
 {
     fn meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, mut visitor: F)
     where
@@ -911,7 +911,7 @@ impl<T, const N: usize> Meet<T, N> for [T; N]
 #[cfg(test)]
 mod test
 {
-    use crate::ops::Meet;
+    use crate::ops::ArrayMeet;
 
     #[test]
     fn it_works()

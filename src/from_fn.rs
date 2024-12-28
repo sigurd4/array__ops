@@ -1,27 +1,24 @@
-use crate::ops::FromFn;
+use crate::ops::ArrayFromFn;
 
 use core::{marker::Destruct, ops::AsyncFn};
-
-#[cfg(feature = "alloc")]
-use crate::private;
 
 #[cfg(feature = "alloc")]
 use core::alloc::Allocator;
 
 #[cfg(feature = "alloc")]
-use alloc::{boxed::Box, alloc::Global};
+use alloc::boxed::Box;
 
 pub const fn from_fn<T, const N: usize, F>(fill: F) -> [T; N]
 where
     F: FnMut(usize) -> T + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::from_fn(fill)
 }
 pub const fn rfrom_fn<T, const N: usize, F>(fill: F) -> [T; N]
 where
     F: FnMut(usize) -> T + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::rfrom_fn(fill)
 }
@@ -29,7 +26,7 @@ where
 pub const fn from_fn_boxed<T, const N: usize, F>(fill: F) -> Box<[T; N]>
 where
     F: FnMut(usize) -> T + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::from_fn_boxed(fill)
 }
@@ -37,7 +34,7 @@ where
 pub const fn rfrom_fn_boxed<T, const N: usize, F>(fill: F) -> Box<[T; N]>
 where
     F: FnMut(usize) -> T + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::rfrom_fn_boxed(fill)
 }
@@ -46,16 +43,16 @@ pub const fn from_fn_boxed_in<T, const N: usize, F, A>(fill: F, alloc: A) -> Box
 where
     F: FnMut(usize) -> T + ~const Destruct,
     A: Allocator,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::from_fn_boxed_in(fill, alloc)
 }
 #[cfg(feature = "alloc")]
-pub const fn rfrom_fn_boxed_in<T, const N: usize, F, A>(mut fill: F, alloc: A) -> Box<[T; N], A>
+pub const fn rfrom_fn_boxed_in<T, const N: usize, F, A>(fill: F, alloc: A) -> Box<[T; N], A>
 where
     F: FnMut(usize) -> T + ~const Destruct,
     A: Allocator,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::rfrom_fn_boxed_in(fill, alloc)
 }
@@ -63,14 +60,14 @@ where
 pub const fn try_from_fn<T, const N: usize, F, E>(fill: F) -> Result<[T; N], E>
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_from_fn(fill)
 }
 pub const fn try_rfrom_fn<T, const N: usize, F, E>(fill: F) -> Result<[T; N], E>
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_rfrom_fn(fill)
 }
@@ -78,7 +75,7 @@ where
 pub const fn try_from_fn_boxed<T, const N: usize, F, E>(fill: F) -> Result<Box<[T; N]>, E>
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_from_fn_boxed(fill)
 }
@@ -86,7 +83,7 @@ where
 pub const fn try_rfrom_fn_boxed<T, const N: usize, F, E>(fill: F) -> Result<Box<[T; N]>, E>
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_rfrom_fn_boxed(fill)
 }
@@ -95,16 +92,16 @@ pub const fn try_from_fn_boxed_in<T, const N: usize, F, E, A>(fill: F, alloc: A)
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
     A: Allocator,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_from_fn_boxed_in(fill, alloc)
 }
 #[cfg(feature = "alloc")]
-pub const fn try_rfrom_fn_boxed_in<T, const N: usize, F, E, A>(mut fill: F, alloc: A) -> Result<Box<[T; N], A>, E>
+pub const fn try_rfrom_fn_boxed_in<T, const N: usize, F, E, A>(fill: F, alloc: A) -> Result<Box<[T; N], A>, E>
 where
     F: FnMut(usize) -> Result<T, E> + ~const Destruct,
     A: Allocator,
-    [T; N]: ~const FromFn<T, N>
+    [T; N]: ~const ArrayFromFn<T, N>
 {
     <[T; N]>::try_rfrom_fn_boxed_in(fill, alloc)
 }

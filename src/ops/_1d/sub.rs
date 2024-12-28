@@ -2,10 +2,10 @@ use core::ops::Sub;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArraySub<T, const N: usize>: Map<T, N>
+pub trait ArraySub<T, const N: usize>: ArrayMap<T, N>
 {
     fn sub_all<Rhs>(self, rhs: Rhs) -> [<T as Sub<Rhs>>::Output; N]
     where

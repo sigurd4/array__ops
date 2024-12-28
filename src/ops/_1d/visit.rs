@@ -2,10 +2,10 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use super::EnumerateVisit;
+use super::ArrayEnumerateVisit;
 
 #[const_trait]
-pub trait Visit<T, const N: usize>: Array<Item = T>
+pub trait ArrayVisit<T, const N: usize>: Array<Item = T>
 {
     /// Visits each element once, from left to right.
     /// 
@@ -364,7 +364,7 @@ pub trait Visit<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Visit<T, N> for [T; N]
+impl<T, const N: usize> ArrayVisit<T, N> for [T; N]
 {
     fn visit<'a, F>(&'a self, mut visitor: F)
     where

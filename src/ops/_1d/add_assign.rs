@@ -2,10 +2,10 @@ use core::ops::AddAssign;
 
 use crate::form::ArrayForm;
 
-use super::Meet;
+use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayAddAssign<T, const N: usize>: Meet<T, N>
+pub trait ArrayAddAssign<T, const N: usize>: ArrayMeet<T, N>
 {
     fn add_assign_all<Rhs>(&mut self, rhs: Rhs)
     where

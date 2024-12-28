@@ -1,6 +1,6 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
-use crate::ops::Map;
+use crate::ops::ArrayMap;
 
 use super::MaybeDone;
 
@@ -18,7 +18,7 @@ where
     pub(crate) fn new(tasks: [[T; N]; M]) -> Self
     {
         Self {
-            tasks: Map::map(tasks, |tasks| Map::map(tasks, |task| MaybeDone::Future(task)))
+            tasks: ArrayMap::map(tasks, |tasks| ArrayMap::map(tasks, |task| MaybeDone::Future(task)))
         }
     }
 }

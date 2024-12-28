@@ -4,10 +4,10 @@ use array_trait::Array;
 
 use crate::{join::FutureReduce, private::guard::PartialEmptyGuard};
 
-use super::Each;
+use super::ArrayEach;
 
 #[const_trait]
-pub trait Reduce<T, const N: usize>: Array<Item = T>
+pub trait ArrayReduce<T, const N: usize>: Array<Item = T>
 {
     /// Reduces elements in array into one element, using a given operand
     /// 
@@ -59,7 +59,7 @@ pub trait Reduce<T, const N: usize>: Array<Item = T>
         T: 'a;
 }
 
-impl<T, const N: usize> Reduce<T, N> for [T; N]
+impl<T, const N: usize> ArrayReduce<T, N> for [T; N]
 {
     fn reduce<F>(self, reduce: F) -> Option<T>
     where

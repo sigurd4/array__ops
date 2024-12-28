@@ -2,10 +2,10 @@ use core::ops::Rem;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayRem<T, const N: usize>: Map<T, N>
+pub trait ArrayRem<T, const N: usize>: ArrayMap<T, N>
 {
     fn rem_all<Rhs>(self, rhs: Rhs) -> [<T as Rem<Rhs>>::Output; N]
     where

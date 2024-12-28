@@ -2,10 +2,10 @@ use core::ops::{AddAssign, Div, Mul};
 
 use crate::private;
 
-use super::{ArrayMagnitude, ArrayMul, ArrayMulDot};
+use super::{ArrayPartialMagnitude, ArrayMul, ArrayPartialMulDot};
 
 #[const_trait]
-pub trait ArrayProj<T, const N: usize>: ArrayMulDot<T, N>
+pub trait ArrayProj<T, const N: usize>: ArrayPartialMulDot<T, N>
 {
     fn proj<Rhs>(self, rhs: [Rhs; N]) -> [<T as Mul<<<T as Mul<Rhs>>::Output as Div<<T as Mul<T>>::Output>>::Output>>::Output; N]
     where

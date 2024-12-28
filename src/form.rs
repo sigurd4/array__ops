@@ -28,7 +28,7 @@ mod private
 {
     use core::{marker::Destruct, mem::MaybeUninit, pin::Pin, slice::SliceIndex};
 
-    use crate::{ops::{Each, Map}, private};
+    use crate::{ops::{ArrayEach, ArrayMap}, private};
 
     #[const_trait]
     pub trait _MutForm<'a, T>

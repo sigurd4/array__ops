@@ -2,10 +2,10 @@ use core::ops::Mul;
 
 use crate::form::ArrayForm;
 
-use super::{Map, ZipWith};
+use super::{ArrayMap, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayMul<T, const N: usize>: Map<T, N>
+pub trait ArrayMul<T, const N: usize>: ArrayMap<T, N>
 {
     fn mul_all<Rhs>(self, rhs: Rhs) -> [<T as Mul<Rhs>>::Output; N]
     where

@@ -34,6 +34,7 @@ where
     A: ArrayForm<N>,
     B: ArrayForm<N>
 {
+    #[allow(unused)]
     pub const fn new_right(lhs: A, rhs: B, dst: &'a mut [MaybeUninit<U>; N]) -> Self
     where
         A: ~const ArrayForm<N>,
@@ -75,11 +76,19 @@ where
         }
     }
 
+    #[allow(unused)]
     pub fn zip<F>(&mut self, zipper: F)
     where
         F: FnOnce(A::Elem, B::Elem) -> U
     {
         self.enumerate_zip(|_, x, y| zipper(x, y));
+    }
+    #[allow(unused)]
+    pub fn try_zip<F, E>(&mut self, zipper: F) -> Result<(), E>
+    where
+        F: FnOnce(A::Elem, B::Elem) -> Result<U, E>
+    {
+        self.try_enumerate_zip(|_, x, y| zipper(x, y))
     }
     pub fn enumerate_zip<F>(&mut self, zipper: F)
     where
@@ -107,12 +116,6 @@ where
                 self.i = j;
             }
         }
-    }
-    pub fn try_zip<F, E>(&mut self, zipper: F) -> Result<(), E>
-    where
-        F: FnOnce(A::Elem, B::Elem) -> Result<U, E>
-    {
-        self.try_enumerate_zip(|_, x, y| zipper(x, y))
     }
     pub fn try_enumerate_zip<F, E>(&mut self, zipper: F) -> Result<(), E>
     where

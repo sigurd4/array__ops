@@ -5,7 +5,7 @@ use array_trait::Array;
 use crate::private;
 
 #[const_trait]
-pub trait Split<T, const N: usize>: Array<Item = T>
+pub trait ArraySplit<T, const N: usize>: Array<Item = T>
 {
     fn split_len(n: usize) -> (usize, usize);
     fn rsplit_len(n: usize) -> (usize, usize);
@@ -55,7 +55,7 @@ pub trait Split<T, const N: usize>: Array<Item = T>
         [(); N - M]:;
 }
 
-impl<T, const N: usize> const Split<T, N> for [T; N]
+impl<T, const N: usize> const ArraySplit<T, N> for [T; N]
 {
     fn split_len(mid: usize) -> (usize, usize)
     {
@@ -171,7 +171,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        let (left, right) = Split::rsplit_array_ref(self.get_ref());
+        let (left, right) = ArraySplit::rsplit_array_ref(self.get_ref());
         unsafe {(
             Pin::new_unchecked(left),
             Pin::new_unchecked(right)
@@ -182,7 +182,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
         [(); N - M]:
     {
         let (left, right) = unsafe {
-            Split::rsplit_array_mut(self.get_unchecked_mut())
+            ArraySplit::rsplit_array_mut(self.get_unchecked_mut())
         };
         unsafe {(
             Pin::new_unchecked(left),
