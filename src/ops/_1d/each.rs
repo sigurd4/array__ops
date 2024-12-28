@@ -1,4 +1,4 @@
-use core::pin::Pin;
+use core::{mem::MaybeUninit, pin::Pin};
 
 use array_trait::Array;
 

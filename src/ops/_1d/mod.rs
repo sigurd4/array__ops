@@ -34,6 +34,7 @@ moddef::moddef!(
         from_collumn,
         from_fn,
         from_item,
+        initialize,
         integrate,
         into_matrix,
         isolate,

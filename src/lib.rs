@@ -115,7 +115,13 @@ pub mod asm
     }
 
     #[inline(never)]
-    pub fn argmin(a: [i32; N]) -> Option<usize>
+    pub fn find(a: &[i32; N]) -> Option<usize>
+    {
+        a.find(&1)
+    }
+
+    #[inline(never)]
+    pub fn argmin(a: &[i32; N]) -> Option<usize>
     {
         a.argmin()
     }
