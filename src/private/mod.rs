@@ -61,7 +61,8 @@ impl<L, R> Pair<L, R>
     
     pub(crate) const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
     {
-        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        if const {core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>()}
+            && const {core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()}
         {
             unsafe {
                 return transmute(self)
@@ -111,17 +112,41 @@ pub(crate) const fn empty<T, const N: usize>() -> [T; N]
 
 pub(crate) const unsafe fn split_transmute<A, B, C>(a: A) -> (B, C)
 {
+    // Doesn't help
+    /*if const {core::mem::size_of::<A>() == core::mem::size_of::<(B, C)>()}
+        && const {core::mem::align_of::<A>() == core::mem::align_of::<(B, C)>()}
+    {
+        unsafe {
+            return transmute(a)
+        }
+    }*/
     transmute::<_, Pair<_, _>>(a).unpack()
 }
 
 pub(crate) const unsafe fn merge_transmute<A, B, C>(a: A, b: B) -> C
 {
+    // Doesn't help
+    /*if const {core::mem::size_of::<(A, B)>() == core::mem::size_of::<C>()}
+        && const {core::mem::align_of::<(A, B)>() == core::mem::align_of::<C>()}
+    {
+        unsafe {
+            return transmute((a, b))
+        }
+    }*/
     transmute(Pair::new(a, b))
 }
 
 pub(crate) const unsafe fn overlap_swap_transmute<A, B>(a: A, b: B) -> (B, A)
 {
-    split_transmute(Pair::new(a, b))
+    // Doesn't help
+    /*if const {core::mem::size_of::<(A, B)>() == core::mem::size_of::<(B, A)>()}
+        && const {core::mem::align_of::<(A, B)>() == core::mem::align_of::<(B, A)>()}
+    {
+        unsafe {
+            return transmute((a, b))
+        }
+    }*/
+    merge_transmute::<_, _, Pair<_, _>>(a, b).unpack()
 }
 
 pub(crate) const unsafe fn transmute<A, B>(from: A) -> B

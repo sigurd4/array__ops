@@ -80,12 +80,51 @@ pub const fn max_len(a: usize, b: usize) -> usize
 
 pub mod asm
 {
+    use slice_ops::Padded;
+
     use crate::ops::*;
 
     const I: usize = 2;
     const N: usize = 4;
     const M: usize = 3;
+    const S: usize = 2;
     const MN: (usize, usize) = (3, 2);
+    
+    #[inline(never)]
+    pub fn visit(a: &mut [i32; N])
+    {
+        a.visit_mut(|x| *x = 0)
+    }
+
+    #[inline(never)]
+    pub fn truncate(a: [i32; N]) -> [i32; N - S]
+    {
+        a.truncate()
+    }
+
+    #[inline(never)]
+    pub fn spread_into(a: [i32; N]) -> ([[i32; N / M]; M], [i32; N % M])
+    {
+        a.spread()
+    }
+
+    #[inline(never)]
+    pub fn spread_ref(a: &[i32; N]) -> ([&[Padded<i32, M>; N / M]; M], &[i32; N % M])
+    {
+        a.spread_ref()
+    }
+
+    #[inline(never)]
+    pub fn split_into(a: [i32; N]) -> ([i32; S], [i32; N - S])
+    {
+        a.split_array2()
+    }
+
+    #[inline(never)]
+    pub fn split_ref(a: &[i32; N]) -> (&[i32; S], &[i32; N - S])
+    {
+        a.split_array_ref2()
+    }
 
     #[inline(never)]
     pub fn into_shift(a: [i32; N], b: [i32; M]) -> ([i32; M], [i32; N])
@@ -195,7 +234,7 @@ pub mod asm
     }
 
     #[inline(never)]
-    pub fn map(a: [i32; N]) -> [i32; N]
+    pub fn map_(a: [i32; N]) -> [i32; N]
     {
         a.map(|x| x)
     }

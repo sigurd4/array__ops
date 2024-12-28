@@ -64,14 +64,18 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         T: Destruct,
         [(); N - M]:
     {
-        self.try_truncate().unwrap()
+        unsafe {
+            self.try_truncate().unwrap_unchecked()
+        }
     }
     fn rtruncate<const M: usize>(self) -> [T; M]
     where
         T: Destruct,
         [(); N - M]:
     {
-        self.try_rtruncate().unwrap()
+        unsafe {
+            self.try_rtruncate().unwrap_unchecked()
+        }
     }
     fn try_truncate<const M: usize>(mut self) -> Option<[T; M]>
     {
@@ -79,7 +83,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         {
             return None
         }
-        if M < N
+        if M < N && const {core::mem::needs_drop::<T>()}
         {
             unsafe {
                 core::ptr::drop_in_place(&mut self[M..N]);
@@ -97,7 +101,7 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
         {
             return None
         }
-        if M < N
+        if M < N && const {core::mem::needs_drop::<T>()}
         {
             unsafe {
                 core::ptr::drop_in_place(&mut self[0..N - M]);
@@ -114,13 +118,17 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        self.try_truncate_ref().unwrap()
+        unsafe {
+            self.try_truncate_ref().unwrap_unchecked()
+        }
     }
     fn rtruncate_ref<const M: usize>(&self) -> &[T; M]
     where
         [(); N - M]:
     {
-        self.try_rtruncate_ref().unwrap()
+        unsafe {
+            self.try_rtruncate_ref().unwrap_unchecked()
+        }
     }
     fn try_truncate_ref<const M: usize>(&self) -> Option<&[T; M]>
     {
@@ -147,13 +155,17 @@ impl<T, const N: usize> /*const*/ Truncate<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        self.try_truncate_mut().unwrap()
+        unsafe {
+            self.try_truncate_mut().unwrap_unchecked()
+        }
     }
     fn rtruncate_mut<const M: usize>(&mut self) -> &mut [T; M]
     where
         [(); N - M]:
     {
-        self.try_rtruncate_mut().unwrap()
+        unsafe {
+            self.try_rtruncate_mut().unwrap_unchecked()
+        }
     }
     fn try_truncate_mut<const M: usize>(&mut self) -> Option<&mut [T; M]>
     {

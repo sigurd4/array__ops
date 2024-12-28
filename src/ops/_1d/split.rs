@@ -1,4 +1,4 @@
-use core::{mem::MaybeUninit, pin::Pin};
+use core::pin::Pin;
 
 use array_trait::Array;
 
@@ -17,15 +17,15 @@ pub trait Split<T, const N: usize>: Array<Item = T>
     fn rsplit_mut_ptr(&mut self, n: usize) -> (*mut T, *mut T);
     
     /// Splits an array at a chosen index.
-    fn split_array<const M: usize>(self) -> ([T; M], [T; N - M])
+    fn split_array2<const M: usize>(self) -> ([T; M], [T; N - M])
     where
         [(); N - M]:;
     /// Splits an array at a chosen index as array-slices.
-    fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T; N - M])
+    fn split_array_ref2<const M: usize>(&self) -> (&[T; M], &[T; N - M])
     where
         [(); N - M]:;
     /// Splits an array at a chosen index as mutable array-slices.
-    fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T; N - M])
+    fn split_array_mut2<const M: usize>(&mut self) -> (&mut [T; M], &mut [T; N - M])
     where
         [(); N - M]:;
     fn split_array_pin_ref<const M: usize>(self: Pin<&Self>) -> (Pin<&[T; M]>, Pin<&[T; N - M]>)
@@ -88,7 +88,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
         (ptr, unsafe {ptr.add(slice_ops::rsplit_len(N, mid).0)})
     }
     
-    fn split_array<const M: usize>(self) -> ([T; M], [T; N - M])
+    fn split_array2<const M: usize>(self) -> ([T; M], [T; N - M])
     where
         [(); N - M]:
     {
@@ -96,7 +96,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
             private::split_transmute(self)
         }
     }
-    fn split_array_ref<const M: usize>(&self) -> (&[T; M], &[T; N - M])
+    fn split_array_ref2<const M: usize>(&self) -> (&[T; M], &[T; N - M])
     where
         [(); N - M]:
     {
@@ -106,7 +106,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
             ptr_right.cast::<[T; N - M]>().as_ref_unchecked()
         )}
     }
-    fn split_array_mut<const M: usize>(&mut self) -> (&mut [T; M], &mut [T; N - M])
+    fn split_array_mut2<const M: usize>(&mut self) -> (&mut [T; M], &mut [T; N - M])
     where
         [(); N - M]:
     {
@@ -120,7 +120,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
     where
         [(); N - M]:
     {
-        let (left, right) = Split::split_array_ref(self.get_ref());
+        let (left, right) = self.get_ref().split_array_ref2();
         unsafe {(
             Pin::new_unchecked(left),
             Pin::new_unchecked(right)
@@ -131,7 +131,7 @@ impl<T, const N: usize> const Split<T, N> for [T; N]
         [(); N - M]:
     {
         let (left, right) = unsafe {
-            Split::split_array_mut(self.get_unchecked_mut())
+            self.get_unchecked_mut().split_array_mut2()
         };
         unsafe {(
             Pin::new_unchecked(left),
