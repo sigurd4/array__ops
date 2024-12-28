@@ -32,6 +32,7 @@
 
 /// TODO:
 /// - for_each_zip
+/// - simd versions of map, zip, visit, meet, for_each etc.
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -88,7 +89,8 @@ pub mod asm
     const N: usize = 4;
     const M: usize = 3;
     const S: usize = 2;
-    const MN: (usize, usize) = (3, 2);
+    const MN: (usize, usize) = (4, 3);
+    const HW: (usize, usize) = (2, 2);
     
     #[inline(never)]
     pub fn visit(a: &mut [i32; N])
@@ -180,6 +182,11 @@ pub mod asm
         a.mul_outer(b)
     }
     #[inline(never)]
+    pub fn mul_kronecker(a: &[[i32; MN.1]; MN.0], b: &[[i32; HW.1]; HW.0]) -> [[i32; MN.1*HW.1]; MN.0*HW.0]
+    {
+        a.mul_kronecker(b)
+    }
+    #[inline(never)]
     pub fn proj(a: [f32; N], b: [f32; N]) -> [f32; N]
     {
         a.proj(b)
@@ -195,6 +202,12 @@ pub mod asm
     pub fn isolate(a: [i32; N]) -> Option<i32>
     {
         a.isolate(0)
+    }
+
+    #[inline(never)]
+    pub fn into_diagonal(a: [[i32; MN.1]; MN.0]) -> [i32; crate::min_len(MN.0, MN.1)]
+    {
+        a.diagonal()
     }
 
     #[inline(never)]
@@ -267,6 +280,20 @@ pub mod asm
     pub fn argmin(a: &[i32; N]) -> Option<usize>
     {
         a.argmin()
+    }
+
+    #[inline(never)]
+    pub fn add_simd(mut a: [i32; N], b: [i32; N]) -> [i32; N]
+    {
+        const SIMD: usize = 4;
+
+        let (a1, a2) = a.array_simd_mut::<SIMD>();
+        let (b1, b2) = b.array_simd::<SIMD>();
+
+        a1.add_assign_each(b1);
+        a2.add_assign_each(b2);
+
+        a
     }
 
     #[inline(never)]

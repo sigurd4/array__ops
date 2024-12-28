@@ -4,6 +4,8 @@ use array_trait::Array;
 
 use crate::form::ArrayForm;
 
+use super::ArrayZipKroneckerWith;
+
 #[const_trait]
 pub trait ArrayMulKronecker<T, const M: usize, const N: usize>: Array<Item = [T; N]>
 {
@@ -22,6 +24,6 @@ impl<T, const M: usize, const N: usize> ArrayMulKronecker<T, M, N> for [[T; N]; 
         U: Copy,
         Rhs: ArrayForm<H, Elem: ArrayForm<W, Elem = U>>
     {
-        crate::from_fn(|r| crate::from_fn(|c| self[r % M][c % N]*rhs.copy_elem_2d(r / M, c / N)))
+        self.zip_kronecker_with(rhs, |x, y| x * y)
     }
 }

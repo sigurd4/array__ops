@@ -1,5 +1,3 @@
-use core::mem::MaybeUninit;
-
 use array_trait::Array;
 
 use crate::private;

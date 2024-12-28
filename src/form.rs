@@ -28,7 +28,7 @@ mod private
 {
     use core::{marker::Destruct, mem::MaybeUninit, pin::Pin, slice::SliceIndex};
 
-    use crate::{ops::Each, private};
+    use crate::{ops::{Each, Map}, private};
 
     #[const_trait]
     pub trait _MutForm<'a, T>
@@ -74,6 +74,9 @@ mod private
 
         fn as_ptr(&self) -> *const Self::_T;
         fn each_elem(self) -> [Self::_Elem; N];
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>;
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem;
         fn copy_elem(&self, i: usize) -> Self::_Elem
         where
@@ -108,6 +111,19 @@ mod private
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self
+        }
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>
+        {
+            if const {private::is_same::<Self::_Elem, [<Self::_Elem as _ArrayForm<M>>::_Elem; M]>()}
+            {
+                return unsafe {
+                    private::transmute(self)
+                }
+            }
+
+            self.map(|x| x.each_elem())
         }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
@@ -157,7 +173,7 @@ mod private
             core::ptr::drop_in_place(MaybeUninit::slice_assume_init_mut(&mut maybe_uninit[i]));
         }
     }
-    impl<'a, T, const N: usize> const _ArrayForm<N> for &'a [T; N]
+    impl<'a, T, const N: usize> /*const*/ _ArrayForm<N> for &'a [T; N]
     where
         T: 'a
     {
@@ -173,6 +189,12 @@ mod private
         {
             self.each_ref()
         }
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>
+        {
+            self.map_ref(|x| x.each_elem())
+        }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
             self.copy_elem(i)
@@ -183,14 +205,14 @@ mod private
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
         where
-            Self::_Elem: ~const _ArrayForm<M, _Elem = U>,
+            Self::_Elem: _ArrayForm<M, _Elem = U>,
             U: Copy
         {
             self.copy_elem(i).copy_elem(j)
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
-            R: /*~const*/ SliceIndex<[Self::_T], Output = [Self::_T]> + ~const Destruct
+            R: /*~const*/ SliceIndex<[Self::_T], Output = [Self::_T]> + Destruct
         {
 
         }
@@ -216,12 +238,12 @@ mod private
         }
         unsafe fn drop_elems_assume_init<R>(_: &mut Self::_MaybeUninit, _: R)
         where
-            R: /*~const*/ SliceIndex<[MaybeUninit<Self::_T>], Output = [MaybeUninit<Self::_T>]> + ~const Destruct
+            R: /*~const*/ SliceIndex<[MaybeUninit<Self::_T>], Output = [MaybeUninit<Self::_T>]>
         {
 
         }
     }
-    impl<'a, T, const N: usize> const _ArrayForm<N> for &'a mut [T; N]
+    impl<'a, T, const N: usize> /*const*/ _ArrayForm<N> for &'a mut [T; N]
     where
         T: 'a
     {
@@ -237,6 +259,12 @@ mod private
         {
             self.each_mut()
         }
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>
+        {
+            self.map_mut(|x| x.each_elem())
+        }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
             (&self[i] as *const T).cast_mut().as_mut_unchecked()
@@ -251,7 +279,7 @@ mod private
         }
         fn copy_elem_2d<const M: usize, U>(&self, i: usize, j: usize) -> U
         where
-            Self::_Elem: ~const _ArrayForm<M, _Elem = U>,
+            Self::_Elem: _ArrayForm<M, _Elem = U>,
             U: Copy
         {
             unsafe {
@@ -260,7 +288,7 @@ mod private
         }
         unsafe fn drop_elems<R>(&mut self, _: R)
         where
-            R: /*~const*/ SliceIndex<[Self::_T], Output = [Self::_T]> + ~const Destruct
+            R: /*~const*/ SliceIndex<[Self::_T], Output = [Self::_T]>
         {
 
         }
@@ -286,7 +314,7 @@ mod private
         }
         unsafe fn drop_elems_assume_init<R>(_: &mut Self::_MaybeUninit, _: R)
         where
-            R: /*~const*/ SliceIndex<[MaybeUninit<Self::_T>], Output = [MaybeUninit<Self::_T>]> + ~const Destruct
+            R: /*~const*/ SliceIndex<[MaybeUninit<Self::_T>], Output = [MaybeUninit<Self::_T>]>
         {
 
         }
@@ -306,6 +334,12 @@ mod private
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_pin_ref()
+        }
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>
+        {
+            self.map_pin_ref(|x| x.each_elem())
         }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {
@@ -374,6 +408,12 @@ mod private
         fn each_elem(self) -> [Self::_Elem; N]
         {
             self.each_pin_mut()
+        }
+        fn each_elem_2d<const M: usize>(self) -> [[<Self::_Elem as _ArrayForm<M>>::_Elem; M]; N]
+        where
+            Self::_Elem: _ArrayForm<M>
+        {
+            self.map_pin_mut(|x| x.each_elem())
         }
         unsafe fn read_elem(&self, i: usize) -> Self::_Elem
         {

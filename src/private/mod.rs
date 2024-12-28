@@ -5,6 +5,24 @@ moddef::moddef!(
     }
 );
 
+trait _SameSpec<T>
+{
+    const IS_SAME: bool;
+}
+impl<T, U> _SameSpec<U> for T
+{
+    default const IS_SAME: bool = false;
+}
+impl<T> _SameSpec<T> for T
+{
+    const IS_SAME: bool = true;
+}
+
+pub(crate) const fn is_same<T, U>() -> bool
+{
+    <T as _SameSpec<U>>::IS_SAME
+}
+
 #[repr(C)]
 pub(crate) struct Pair<L, R>
 {
@@ -21,7 +39,7 @@ impl<L, R> Pair<L, R>
 
     pub(crate) const fn unpack(self) -> (L, R)
     {
-        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        if const {fits::<(L, R), Pair<L, R>>()}
         {
             unsafe {
                 return transmute(self)
@@ -40,7 +58,7 @@ impl<L, R> Pair<L, R>
 
     pub(crate) const fn pack(left_right: (L, R)) -> Self
     {
-        if core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>() && core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()
+        if const {fits::<(L, R), Pair<L, R>>()}
         {
             unsafe {
                 return transmute(left_right)
@@ -61,8 +79,7 @@ impl<L, R> Pair<L, R>
     
     pub(crate) const fn unpack_mandrop(self) -> (ManuallyDrop<L>, ManuallyDrop<R>)
     {
-        if const {core::mem::size_of::<(L, R)>() == core::mem::size_of::<Pair<L, R>>()}
-            && const {core::mem::align_of::<(L, R)>() == core::mem::align_of::<Pair<L, R>>()}
+        if const {fits::<(L, R), Pair<L, R>>()}
         {
             unsafe {
                 return transmute(self)
@@ -113,8 +130,7 @@ pub(crate) const fn empty<T, const N: usize>() -> [T; N]
 pub(crate) const unsafe fn split_transmute<A, B, C>(a: A) -> (B, C)
 {
     // Doesn't help
-    /*if const {core::mem::size_of::<A>() == core::mem::size_of::<(B, C)>()}
-        && const {core::mem::align_of::<A>() == core::mem::align_of::<(B, C)>()}
+    /*if const {fits::<A, (B, C)>()}
     {
         unsafe {
             return transmute(a)
@@ -126,8 +142,7 @@ pub(crate) const unsafe fn split_transmute<A, B, C>(a: A) -> (B, C)
 pub(crate) const unsafe fn merge_transmute<A, B, C>(a: A, b: B) -> C
 {
     // Doesn't help
-    /*if const {core::mem::size_of::<(A, B)>() == core::mem::size_of::<C>()}
-        && const {core::mem::align_of::<(A, B)>() == core::mem::align_of::<C>()}
+    /*if const {fits::<(A, B), C>()}
     {
         unsafe {
             return transmute((a, b))
@@ -153,7 +168,7 @@ pub(crate) const unsafe fn transmute<A, B>(from: A) -> B
 {
     #[cfg(test)]
     assert!(
-        const {core::mem::size_of::<A>() == core::mem::size_of::<B>()} && const {core::mem::align_of::<A>() == core::mem::align_of::<B>()},
+        const {fits::<A, B>()},
         "Cannot transmute due to unequal size or alignment"
     );
     core::intrinsics::transmute_unchecked(from)
@@ -170,4 +185,15 @@ pub(crate) const unsafe fn uninit_extend_transmute<A, B>(from: A) -> MaybeUninit
     unsafe {
         ManuallyDrop::into_inner(AB {from: ManuallyDrop::new(from)}.to)
     }
+}
+
+pub(crate) const fn fits<A, B>() -> bool
+{
+    core::mem::size_of::<A>() == core::mem::size_of::<B>()
+        && core::mem::align_of::<A>() == core::mem::align_of::<B>()
+}
+pub(crate) const fn fits_in<A, B>() -> bool
+{
+    core::mem::size_of::<A>() <= core::mem::size_of::<B>()
+        && core::mem::align_of::<A>() <= core::mem::align_of::<B>()
 }
