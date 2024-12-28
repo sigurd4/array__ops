@@ -4,6 +4,7 @@
 #![allow(internal_features)]
 #![allow(async_fn_in_trait)]
 #![allow(refining_impl_trait)]
+#![allow(clippy::type_complexity)]
 #![feature(associated_type_defaults)]
 #![feature(const_trait_impl)]
 #![feature(unboxed_closures)]
@@ -33,9 +34,9 @@
 #![feature(const_closures)]
 #![feature(generic_const_exprs)]
 
-/// TODO:
-/// - for_each_zip
-/// - simd versions of map, zip, visit, meet, for_each etc.
+//! TODO:
+//! - for_each_zip
+//! - simd versions of map, zip, visit, meet, for_each etc.
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -95,7 +96,7 @@ pub mod asm
     const S: usize = 2;
     const MN: (usize, usize) = (4, 3);
     const HW: (usize, usize) = (2, 2);
-    
+
     #[inline(never)]
     pub fn visit(a: &mut [i32; N])
     {
@@ -186,7 +187,7 @@ pub mod asm
         a.mul_outer(b)
     }
     #[inline(never)]
-    pub fn mul_kronecker(a: &[[i32; MN.1]; MN.0], b: &[[i32; HW.1]; HW.0]) -> [[i32; MN.1*HW.1]; MN.0*HW.0]
+    pub fn mul_kronecker(a: &[[i32; MN.1]; MN.0], b: &[[i32; HW.1]; HW.0]) -> [[i32; MN.1 * HW.1]; MN.0 * HW.0]
     {
         a.mul_kronecker(b)
     }
@@ -245,7 +246,7 @@ pub mod asm
     }
 
     #[inline(never)]
-    pub fn flatmap(a: [[i32; M]; N]) -> [i32; N*M]
+    pub fn flatmap(a: [[i32; M]; N]) -> [i32; N * M]
     {
         a.flatmap(|x| x)
     }
@@ -315,15 +316,14 @@ pub mod asm
     #[inline(never)]
     pub fn transpose(a: [[i32; MN.1]; MN.0]) -> [[i32; MN.0]; MN.1]
     {
-        let a_t = a.transpose();
-    
-        return a_t
+        a.transpose()
     }
 }
 
 #[cfg(test)]
 #[warn(non_snake_case)]
-mod tests {
+mod tests
+{
     use slice_ops::Padded;
 
     use crate::ops::*;
@@ -372,27 +372,27 @@ mod tests {
         }
 
         const GRADES_UNI: [(u8, Grade); 21] = [
-            (5, Grade::C), // Ingeniørrollen
-            (5, Grade::A), // Programmering for beregning
-            (5, Grade::B), // Elektrisitetslære
-            (5, Grade::D), // Digitalteknikk
+            (5, Grade::C),  // Ingeniørrollen
+            (5, Grade::A),  // Programmering for beregning
+            (5, Grade::B),  // Elektrisitetslære
+            (5, Grade::D),  // Digitalteknikk
             (10, Grade::A), // Programmering og mikrokontrollere
             (10, Grade::A), // Matematikk 1
-            (5, Grade::C), // Fysikk 1 - Mekanikk
-            (5, Grade::A), // Elektrisitetslære 2
-            (5, Grade::A), // Programmerbare logiske kretser
+            (5, Grade::C),  // Fysikk 1 - Mekanikk
+            (5, Grade::A),  // Elektrisitetslære 2
+            (5, Grade::A),  // Programmerbare logiske kretser
             (10, Grade::A), // Matematikk 2
-            (5, Grade::C), // Kommunikasjon
+            (5, Grade::C),  // Kommunikasjon
             (10, Grade::B), // Analog elektronikk
             (10, Grade::B), // Systems design and engineering
-            (5, Grade::C), // Statistikk
+            (5, Grade::C),  // Statistikk
             (10, Grade::E), // Signalbehandling
             (10, Grade::C), // Reguleringsteknikk 1
-            (5, Grade::B), // Fysikk 2 - Elektromagnetisme
+            (5, Grade::B),  // Fysikk 2 - Elektromagnetisme
             (10, Grade::C), // Reguleringsteknikk 2
             (10, Grade::C), // Matematikk 3
             (10, Grade::C), // Instrumentering og styring
-            (20, Grade::B) // Bacheloroppgave - Automatisk gir-system for Lone Wolf ATV
+            (20, Grade::B)  // Bacheloroppgave - Automatisk gir-system for Lone Wolf ATV
         ];
         const GRADES_VGS: [u8; 23] = [
             5, // Engelsk
@@ -417,20 +417,15 @@ mod tests {
             5, // Informasjonsteknologi 2
             4, // Teknologi og forskningslære 1
             3, // Matematikk R1
-            4, // Matematikk R2
+            4  // Matematikk R2
         ];
 
-        let gpa_uni: f32 = GRADES_UNI.map(|(pts, grade)| (pts*grade as u8) as u16)
-            .sum_from(0) as f32
-            /GRADES_UNI.map(const |(pts, _)| pts as u16)
-            .sum_from(0) as f32;
+        let gpa_uni: f32 = GRADES_UNI.map(|(pts, grade)| (pts * grade as u8) as u16).sum_from(0) as f32 / GRADES_UNI.map(const |(pts, _)| pts as u16).sum_from(0) as f32;
 
         println!("{}", gpa_uni);
 
-        let gpa_vgs: f32 = GRADES_VGS.map(|grade| grade as u16)
-            .sum_from(0) as f32
-            /GRADES_VGS.len() as f32;
-            
+        let gpa_vgs: f32 = GRADES_VGS.map(|grade| grade as u16).sum_from(0) as f32 / GRADES_VGS.len() as f32;
+
         println!("{}", gpa_vgs);
     }
 
@@ -439,7 +434,7 @@ mod tests {
     {
         const N: usize = 64;
         const M: usize = 256;
-        
+
         assert_eq!(<[[[u8; 2]; N]; M]>::DIMENSIONS, [M, N, 2]);
 
         let a: [[[u8; 2]; N]; M] = ArrayNdOps::fill_nd(|i| i.map(|i| i as u8));
@@ -471,9 +466,9 @@ mod tests {
             [(0, 0), (0, 1), (0, 2)],
             [(1, 0), (1, 1), (1, 2)]
         ];
-        
+
         let r: (u8, u8) = A.reduce_nd(|(a1, a2), (b1, b2)| (a1 + b1, a2 + b2)).unwrap();
-        
+
         assert_eq!(r, (3, 6));*/
     }
 
@@ -490,10 +485,10 @@ mod tests {
     fn test_spread_align()
     {
         let str = b"abcdefghijklmnopqrstuvwxyz".map(|c| c as char);
-        
+
         println!("Alignment char = {}", core::mem::align_of::<char>());
         println!("Alignment padded x3 char = {}", core::mem::align_of::<Padded<char, 3>>());
-        
+
         println!("Alignment String = {}", core::mem::align_of::<String>());
         println!("Alignment padded x3 String = {}", core::mem::align_of::<Padded<String, 3>>());
 

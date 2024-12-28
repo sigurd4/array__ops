@@ -82,7 +82,6 @@ impl<T, const N: usize> const ArrayRotate<T, N> for [T; N]
                 dst_right.cast(),
                 left
             );
-            core::mem::forget(buffer);
         }
     }
     fn rotate_right(&mut self, n: usize)
@@ -110,7 +109,6 @@ impl<T, const N: usize> const ArrayRotate<T, N> for [T; N]
                 dst_right.cast(),
                 left
             );
-            core::mem::forget(buffer);
         }
     }
 }

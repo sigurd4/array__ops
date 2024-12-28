@@ -119,7 +119,7 @@ impl<'a, T, const D: Dir, const N: usize> PartialInitGuard<'a, T, D, N>
     }
 }
 
-impl<'a, T, const D: Dir, const N: usize> /*const*/ Drop for PartialInitGuard<'a, T, D, N>
+impl<T, const D: Dir, const N: usize> /*const*/ Drop for PartialInitGuard<'_, T, D, N>
 {
     fn drop(&mut self)
     {

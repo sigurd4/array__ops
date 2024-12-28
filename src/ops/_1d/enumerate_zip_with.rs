@@ -292,6 +292,7 @@ mod r#impl
         Rhs: ArrayForm<N>,
         Zip: AsyncFn<(usize, Lhs::Elem, Rhs::Elem)>
     {
+        #[allow(clippy::redundant_closure)]
         enumerate_zip_with(lhs, rhs, |i, x, y| zipper(i, x, y)).join_runs().await
     }
     fn enumerate_dzip_with<const D: Dir, const N: usize, Zip, Lhs, Rhs>(lhs: Lhs, rhs: Rhs, mut zipper: Zip) -> [Zip::Output; N]
@@ -340,6 +341,7 @@ mod r#impl
         Rhs: ArrayForm<N>,
         Zip: AsyncFn(usize, Lhs::Elem, Rhs::Elem) -> Result<U, E>
     {
+        #[allow(clippy::redundant_closure)]
         enumerate_zip_with(lhs, rhs, |i, x, y| zipper(i, x, y)).try_join_runs().await
     }
     fn try_enumerate_dzip_with<const D: Dir, const N: usize, Zip, Lhs, Rhs, U, E>(lhs: Lhs, rhs: Rhs, mut zipper: Zip) -> Result<[U; N], E>

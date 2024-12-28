@@ -211,6 +211,7 @@ impl<T, const N: usize> ArrayFind<T, N> for [T; N]
                 Ok(())
             }
         };
+        #[allow(clippy::redundant_closure)]
         TryActions::new(self.enumerate_map_ref(|i, x| ff(i, x))).await.err()
     }
     async fn find_by_key_async<'a, B, F>(&'a self, b: &B, f: F) -> Option<usize>
@@ -229,6 +230,7 @@ impl<T, const N: usize> ArrayFind<T, N> for [T; N]
                 Ok(())
             }
         };
+        #[allow(clippy::redundant_closure)]
         TryActions::new(self.enumerate_map_ref(|i, x| ff(i, x))).await.err()
     }
 }

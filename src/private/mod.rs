@@ -105,12 +105,11 @@ impl<L, R> From<(L, R)> for Pair<L, R>
         Self::pack(left_right)
     }
 }
-
-impl<L, R> Into<(L, R)> for Pair<L, R>
+impl<L, R> From<Pair<L, R>> for (L, R)
 {
-    fn into(self) -> (L, R)
+    fn from(pair: Pair<L, R>) -> Self
     {
-        self.unpack()
+        pair.unpack()
     }
 }
 

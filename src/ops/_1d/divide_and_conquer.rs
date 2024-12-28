@@ -83,6 +83,7 @@ impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
     where
         F: AsyncFn(T, T) -> T
     {
+        #[allow(clippy::redundant_closure)]
         FutureDivideAndConquer::new(self, |x, y| reduce(x, y)).await
     }
     async fn divide_and_conquer_ref_async<'a, F>(&'a self, reduce: F) -> Option<&'a T>
@@ -90,6 +91,7 @@ impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
         F: AsyncFn(&'a T, &'a T) -> &'a T,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         FutureDivideAndConquer::new(self.each_ref(), |x, y| reduce(x, y)).await
     }
     async fn divide_and_conquer_mut_async<'a, F>(&'a mut self, reduce: F) -> Option<&'a mut T>
@@ -97,6 +99,7 @@ impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
         F: AsyncFn(&'a mut T, &'a mut T) -> &'a mut T,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         FutureDivideAndConquer::new(self.each_mut(), |x, y| reduce(x, y)).await
     }
     async fn divide_and_conquer_pin_ref_async<'a, F>(self: Pin<&'a Self>, reduce: F) -> Option<Pin<&'a T>>
@@ -104,6 +107,7 @@ impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
         F: AsyncFn(Pin<&'a T>, Pin<&'a T>) -> Pin<&'a T>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         FutureDivideAndConquer::new(self.each_pin_ref(), |x, y| reduce(x, y)).await
     }
     async fn divide_and_conquer_pin_mut_async<'a, F>(self: Pin<&'a mut Self>, reduce: F) -> Option<Pin<&'a mut T>>
@@ -111,6 +115,7 @@ impl<T, const N: usize> ArrayDivideAndConquer<T, N> for [T; N]
         F: AsyncFn(Pin<&'a mut T>, Pin<&'a mut T>) -> Pin<&'a mut T>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         FutureDivideAndConquer::new(self.each_pin_mut(), |x, y| reduce(x, y)).await
     }
 }

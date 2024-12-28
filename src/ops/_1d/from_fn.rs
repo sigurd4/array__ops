@@ -135,7 +135,7 @@ impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
         A: Allocator
     {
         let mut array = private::boxed_array::new_uninit_in(alloc);
-        let mut guard = PartialInitGuard::new_left(&mut *array);
+        let mut guard = PartialInitGuard::new_left(&mut array);
 
         while guard.more()
         {
@@ -155,7 +155,7 @@ impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
         A: Allocator
     {
         let mut array = private::boxed_array::new_uninit_in(alloc);
-        let mut guard = PartialInitGuard::new_right(&mut *array);
+        let mut guard = PartialInitGuard::new_right(&mut array);
 
         while guard.more()
         {
@@ -226,7 +226,7 @@ impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
         A: Allocator
     {
         let mut array = private::boxed_array::new_uninit_in(alloc);
-        let mut guard = PartialInitGuard::new_left(&mut *array);
+        let mut guard = PartialInitGuard::new_left(&mut array);
 
         while guard.more()
         {
@@ -246,7 +246,7 @@ impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
         A: Allocator
     {
         let mut array = private::boxed_array::new_uninit_in(alloc);
-        let mut guard = PartialInitGuard::new_right(&mut *array);
+        let mut guard = PartialInitGuard::new_right(&mut array);
 
         while guard.more()
         {
@@ -264,12 +264,14 @@ impl<T, const N: usize> ArrayFromFn<T, N> for [T; N]
     where
         F: AsyncFn(usize) -> T
     {
+        #[allow(clippy::redundant_closure)]
         crate::from_fn(|i| fill(i)).join_runs().await
     }
     async fn try_from_fn_async<F, E>(fill: F) -> Result<Self, E>
     where
         F: AsyncFn(usize) -> Result<T, E>
     {
+        #[allow(clippy::redundant_closure)]
         crate::from_fn(|i| fill(i)).try_join_runs().await
     }
 }

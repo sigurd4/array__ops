@@ -19,7 +19,7 @@ where
     pub(crate) fn new(data: [T; N], reduce: F) -> Self
     {
         Self {
-            tasks: ArrayMap::map(data, |x| MaybeDone::Done(x)),
+            tasks: ArrayMap::map(data, MaybeDone::Done),
             reduce
         }
     }
@@ -33,7 +33,7 @@ where
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>
     {
-        if N <= 0
+        if N == 0
         {
             return Poll::Ready(None)    
         }

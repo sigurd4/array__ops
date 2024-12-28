@@ -97,7 +97,7 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
     {
         let f = #[inline] |this: &Self, i| {
             unsafe {
-                (MaybeUninit::assume_init_ref(&this.src.get_unchecked(i)) as *const T).cast_mut().as_mut_unchecked()
+                (MaybeUninit::assume_init_ref(this.src.get_unchecked(i)) as *const T).cast_mut().as_mut_unchecked()
             }
         };
         
@@ -109,7 +109,7 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
     {
         let f = #[inline] |this: &Self, i| {
             unsafe {
-                MaybeUninit::assume_init_read(&this.src.get_unchecked(i))
+                MaybeUninit::assume_init_read(this.src.get_unchecked(i))
             }
         };
         
@@ -122,7 +122,7 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
     where
         F: FnMut(T, T) -> T
     {
-        if N <= 0
+        if N == 0
         {
             return None
         }
@@ -135,7 +135,7 @@ impl<T, const D: Dir, const N: usize> PartialDivideAndConquerGuard<T, D, N>
             }
         }
         let value = unsafe {
-            MaybeUninit::assume_init_read(&self.src.get_unchecked(self.i))
+            MaybeUninit::assume_init_read(self.src.get_unchecked(self.i))
         };
         self.done();
 

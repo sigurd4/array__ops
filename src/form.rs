@@ -13,13 +13,13 @@ where
 }
 
 #[const_trait]
-pub trait MutForm<'a, T>: ~const private::_MutForm<'a, T>
+pub trait MutForm<T>: ~const private::_MutForm<T>
 {
 
 }
-impl<'a, T, U> const MutForm<'a, T> for U
+impl<T, U> const MutForm<T> for U
 where
-    U: ~const private::_MutForm<'a, T>
+    U: ~const private::_MutForm<T>
 {
     
 }
@@ -31,18 +31,18 @@ mod private
     use crate::{ops::{ArrayEach, ArrayMap}, private};
 
     #[const_trait]
-    pub trait _MutForm<'a, T>
+    pub trait _MutForm<T>
     {
         const IS_MUT: bool;
 
-        fn as_mut<'b>(&'b mut self) -> &'b mut T;
+        fn as_mut(&mut self) -> &mut T;
         unsafe fn read(self) -> T;
     }
-    impl<'a, T> const _MutForm<'a, T> for T
+    impl<T> const _MutForm<T> for T
     {
         const IS_MUT: bool = false;
         
-        fn as_mut<'b>(&'b mut self) -> &'b mut T
+        fn as_mut(&mut self) -> &mut T
         {
             self
         }
@@ -51,13 +51,13 @@ mod private
             self
         }
     }
-    impl<'a, T> const _MutForm<'a, T> for &'a mut T
+    impl<T> const _MutForm<T> for &mut T
     {
         const IS_MUT: bool = true;
         
-        fn as_mut<'b>(&'b mut self) -> &'b mut T
+        fn as_mut(&mut self) -> &mut T
         {
-            *self
+            self
         }
         unsafe fn read(self) -> T
         {

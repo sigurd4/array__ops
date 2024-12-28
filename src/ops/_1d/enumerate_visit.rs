@@ -233,6 +233,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, &'a T),
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_ref(|i, x| visitor(i, x)).join_actions().await
     }
     async fn enumerate_visit_mut_async<'a, F>(&'a mut self, visitor: F)
@@ -240,6 +241,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, &'a mut T),
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_mut(|i, x| visitor(i, x)).join_actions().await
     }
     async fn enumerate_visit_pin_async<'a, F>(self: Pin<&'a Self>, visitor: F)
@@ -247,6 +249,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, Pin<&'a T>),
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_ref(|i, x| visitor(i, x)).join_actions().await
     }
     async fn enumerate_visit_pin_mut_async<'a, F>(self: Pin<&'a mut Self>, visitor: F)
@@ -254,6 +257,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, Pin<&'a mut T>),
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_mut(|i, x| visitor(i, x)).join_actions().await
     }
 
@@ -262,6 +266,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, &'a T) -> Result<(), E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_ref(|i, x| visitor(i, x)).try_join_actions().await
     }
     async fn try_enumerate_visit_mut_async<'a, E, F>(&'a mut self, visitor: F) -> Result<(), E>
@@ -269,6 +274,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, &'a mut T) -> Result<(), E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_mut(|i, x| visitor(i, x)).try_join_actions().await
     }
     async fn try_enumerate_visit_pin_async<'a, E, F>(self: Pin<&'a Self>, visitor: F) -> Result<(), E>
@@ -276,6 +282,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, Pin<&'a T>) -> Result<(), E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_ref(|i, x| visitor(i, x)).try_join_actions().await
     }
     async fn try_enumerate_visit_pin_mut_async<'a, E, F>(self: Pin<&'a mut Self>, visitor: F) -> Result<(), E>
@@ -283,6 +290,7 @@ impl<T, const N: usize> ArrayEnumerateVisit<T, N> for [T; N]
         F: AsyncFn(usize, Pin<&'a mut T>) -> Result<(), E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_mut(|i, x| visitor(i, x)).try_join_actions().await
     }
 }

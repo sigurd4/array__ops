@@ -187,6 +187,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
     where
         Map: AsyncFn<(usize, T)>
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map(|i, x| mapper(i, x)).join_runs().await
     }
     async fn enumerate_map_ref_async<'a, Map>(&'a self, mapper: Map) -> [Map::Output; N]
@@ -194,6 +195,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn<(usize, &'a T)>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_ref(|i, x| mapper(i, x)).join_runs().await
     }
     async fn enumerate_map_mut_async<'a, Map>(&'a mut self, mapper: Map) -> [Map::Output; N]
@@ -201,6 +203,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn<(usize, &'a mut T)>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_mut(|i, x| mapper(i, x)).join_runs().await
     }
     async fn enumerate_map_pin_ref_async<'a, Map>(self: Pin<&'a Self>, mapper: Map) -> [Map::Output; N]
@@ -208,6 +211,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn<(usize, Pin<&'a T>)>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_ref(|i, x| mapper(i, x)).join_runs().await
     }
     async fn enumerate_map_pin_mut_async<'a, Map>(self: Pin<&'a mut Self>, mapper: Map) -> [Map::Output; N]
@@ -215,6 +219,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn<(usize, Pin<&'a mut T>)>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_mut(|i, x| mapper(i, x)).join_runs().await
     }
         
@@ -293,6 +298,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
     where
         Map: AsyncFn(usize, T) -> Result<U, E>
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map(|i, x| mapper(i, x)).try_join_runs().await
     }
     async fn try_enumerate_map_ref_async<'a, Map, U, E>(&'a self, mapper: Map) -> Result<[U; N], E>
@@ -300,6 +306,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn(usize, &'a T) -> Result<U, E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_ref(|i, x| mapper(i, x)).try_join_runs().await
     }
     async fn try_enumerate_map_mut_async<'a, Map, U, E>(&'a mut self, mapper: Map) -> Result<[U; N], E>
@@ -307,6 +314,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn(usize, &'a mut T) -> Result<U, E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_mut(|i, x| mapper(i, x)).try_join_runs().await
     }
     async fn try_enumerate_map_pin_ref_async<'a, Map, U, E>(self: Pin<&'a Self>, mapper: Map) -> Result<[U; N], E>
@@ -314,6 +322,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn(usize, Pin<&'a T>) -> Result<U, E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_ref(|i, x| mapper(i, x)).try_join_runs().await
     }
     async fn try_enumerate_map_pin_mut_async<'a, Map, U, E>(self: Pin<&'a mut Self>, mapper: Map) -> Result<[U; N], E>
@@ -321,6 +330,7 @@ impl<T, const N: usize> ArrayEnumerateMap<T, N> for [T; N]
         Map: AsyncFn(usize, Pin<&'a mut T>) -> Result<U, E>,
         T: 'a
     {
+        #[allow(clippy::redundant_closure)]
         self.enumerate_map_pin_mut(|i, x| mapper(i, x)).try_join_runs().await
     }
 }

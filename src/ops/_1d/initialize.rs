@@ -7,24 +7,24 @@ use super::ArrayEnumerateVisit;
 #[const_trait]
 pub trait ArrayInitialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
 {
-    fn initialize<F>(self: &mut Self, fill: F) -> &mut [T; N]
+    fn initialize<F>(&mut self, fill: F) -> &mut [T; N]
     where
         F: FnMut(usize) -> T;
-    fn rinitialize<F>(self: &mut Self, fill: F) -> &mut [T; N]
+    fn rinitialize<F>(&mut self, fill: F) -> &mut [T; N]
     where
         F: FnMut(usize) -> T;
-    async fn initialize_async<'a, F>(self: &'a mut Self, fill: F) -> &'a mut [T; N]
+    async fn initialize_async<'a, F>(&'a mut self, fill: F) -> &'a mut [T; N]
     where
         F: AsyncFn(usize) -> T,
         T: 'a;
 
-    fn try_initialize<F, E>(self: &mut Self, fill: F) -> Result<&mut [T; N], E>
+    fn try_initialize<F, E>(&mut self, fill: F) -> Result<&mut [T; N], E>
     where
         F: FnMut(usize) -> Result<T, E>;
-    fn try_rinitialize<F, E>(self: &mut Self, fill: F) -> Result<&mut [T; N], E>
+    fn try_rinitialize<F, E>(&mut self, fill: F) -> Result<&mut [T; N], E>
     where
         F: FnMut(usize) -> Result<T, E>;
-    async fn try_initialize_async<'a, F, E>(self: &'a mut Self, fill: F) -> Result<&'a mut [T; N], E>
+    async fn try_initialize_async<'a, F, E>(&'a mut self, fill: F) -> Result<&'a mut [T; N], E>
     where
         F: AsyncFn(usize) -> Result<T, E>,
         T: 'a;
@@ -32,7 +32,7 @@ pub trait ArrayInitialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
 
 impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
 {
-    fn initialize<F>(self: &mut Self, mut fill: F) -> &mut [T; N]
+    fn initialize<F>(&mut self, mut fill: F) -> &mut [T; N]
     where
         F: FnMut(usize) -> T
     {
@@ -43,7 +43,7 @@ impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
             (self as *mut Self).cast::<[T; N]>().as_mut_unchecked()
         }
     }
-    fn rinitialize<F>(self: &mut Self, mut fill: F) -> &mut [T; N]
+    fn rinitialize<F>(&mut self, mut fill: F) -> &mut [T; N]
     where
         F: FnMut(usize) -> T
     {
@@ -54,7 +54,7 @@ impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
             (self as *mut Self).cast::<[T; N]>().as_mut_unchecked()
         }
     }
-    async fn initialize_async<'a, F>(self: &'a mut Self, fill: F) -> &'a mut [T; N]
+    async fn initialize_async<'a, F>(&'a mut self, fill: F) -> &'a mut [T; N]
     where
         F: AsyncFn(usize) -> T,
         T: 'a
@@ -67,7 +67,7 @@ impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
         }
     }
 
-    fn try_initialize<F, E>(self: &mut Self, mut fill: F) -> Result<&mut [T; N], E>
+    fn try_initialize<F, E>(&mut self, mut fill: F) -> Result<&mut [T; N], E>
     where
         F: FnMut(usize) -> Result<T, E>
     {
@@ -79,7 +79,7 @@ impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
             Ok((self as *mut Self).cast::<[T; N]>().as_mut_unchecked())
         }
     }
-    fn try_rinitialize<F, E>(self: &mut Self, mut fill: F) -> Result<&mut [T; N], E>
+    fn try_rinitialize<F, E>(&mut self, mut fill: F) -> Result<&mut [T; N], E>
     where
         F: FnMut(usize) -> Result<T, E>
     {
@@ -91,7 +91,7 @@ impl<T, const N: usize> ArrayInitialize<T, N> for [MaybeUninit<T>; N]
             Ok((self as *mut Self).cast::<[T; N]>().as_mut_unchecked())
         }
     }
-    async fn try_initialize_async<'a, F, E>(self: &'a mut Self, fill: F) -> Result<&'a mut [T; N], E>
+    async fn try_initialize_async<'a, F, E>(&'a mut self, fill: F) -> Result<&'a mut [T; N], E>
     where
         F: AsyncFn(usize) -> Result<T, E>,
         T: 'a

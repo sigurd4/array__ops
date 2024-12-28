@@ -169,7 +169,7 @@ where
     }
 }
 
-impl<'a, A, B, U, const D: Dir, const N: usize> /*const*/ Drop for PartialZipGuard<'a, A, B, U, D, N>
+impl<A, B, U, const D: Dir, const N: usize> /*const*/ Drop for PartialZipGuard<'_, A, B, U, D, N>
 where
     A: ArrayForm<N>,
     B: ArrayForm<N>

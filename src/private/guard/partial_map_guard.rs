@@ -88,7 +88,7 @@ where
     {
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
-            core::ptr::write(dst, MaybeUninit::new(mapper(j, A::read_assume_init_elem(&mut self.src, j))))
+            core::ptr::write(dst, MaybeUninit::new(mapper(j, A::read_assume_init_elem(&self.src, j))))
         };
         match D
         {
@@ -112,7 +112,7 @@ where
         assert!(!self.err);
         let f = |j| unsafe {
             let dst = &mut self.dst[j];
-            let result = mapper(j, A::read_assume_init_elem(&mut self.src, j));
+            let result = mapper(j, A::read_assume_init_elem(&self.src, j));
             match result
             {
                 Err(error) => {
@@ -153,7 +153,7 @@ where
     }
 }
 
-impl<'a, A, U, const D: Dir, const N: usize> /*const*/ Drop for PartialMapGuard<'a, A, U, D, N>
+impl<A, U, const D: Dir, const N: usize> /*const*/ Drop for PartialMapGuard<'_, A, U, D, N>
 where
     A: ArrayForm<N>
 {

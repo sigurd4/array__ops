@@ -119,7 +119,7 @@ where
         while self.more()
         {
             unsafe {
-                core::ptr::write(&mut default, fold(core::ptr::read(&mut default), self.pop()));
+                core::ptr::write(&mut default, fold(core::ptr::read(&default), self.pop()));
             }
         }
         self.done();

@@ -183,6 +183,7 @@ mod r#impl
         Rhs: ArrayForm<M, Elem: Copy>,
         Zip: AsyncFn<(usize, usize, Lhs::Elem, Rhs::Elem)>
     {
+        #[allow(clippy::redundant_closure)]
         enumerate_zip_outer_with(lhs, rhs, |i, j, x, y| zipper(i, j, x, y)).join_runs_2d().await
     }
     pub(super) fn enumerate_zip_outer_with<Zip, Lhs, Rhs, const N: usize, const M: usize>(lhs: &Lhs, rhs: &Rhs, mut zipper: Zip) -> [[Zip::Output; M]; N]
@@ -199,6 +200,7 @@ mod r#impl
         Rhs: ArrayForm<M, Elem: Copy>,
         Zip: AsyncFn(usize, usize, Lhs::Elem, Rhs::Elem) -> Result<U, E>
     {
+        #[allow(clippy::redundant_closure)]
         enumerate_zip_outer_with(lhs, rhs, |i, j, x, y| zipper(i, j, x, y)).try_join_runs_2d().await
     }
     pub(super) fn try_enumerate_zip_outer_with<Zip, Lhs, Rhs, const N: usize, const M: usize, U, E>(lhs: &Lhs, rhs: &Rhs, mut zipper: Zip) -> Result<[[U; M]; N], E>

@@ -63,12 +63,14 @@ impl<T, const N: usize> ArrayEnumerateForEach<T, N> for [T; N]
     where
         F: AsyncFn(usize, T)
     {
+        #[allow(clippy::redundant_closure)]
         Actions::new(self.enumerate_map(|i, x| action(i, x))).await
     }
     async fn try_enumerate_for_each_async<F, E>(self, action: F) -> Result<(), E>
     where
         F: AsyncFn(usize, T) -> Result<(), E>
     {
+        #[allow(clippy::redundant_closure)]
         TryActions::new(self.enumerate_map(|i, x| action(i, x))).await
     }
 }
