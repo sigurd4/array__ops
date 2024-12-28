@@ -5,6 +5,7 @@ moddef::moddef!(
         actions_2d,
         actions,
         divide_and_conquer,
+        reduce,
         runs,
         try_actions_2d,
         runs_2d,
@@ -38,6 +39,10 @@ impl<F: Future> MaybeDone<F>
     pub fn cancel(&mut self)
     {
         *self = Self::Taken
+    }
+    pub fn is_taken(&self) -> bool
+    {
+        core::matches!(self, MaybeDone::Taken)
     }
 }
 

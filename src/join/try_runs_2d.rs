@@ -18,7 +18,7 @@ where
     pub(crate) fn new(tasks: [[T; N]; M]) -> Self
     {
         Self {
-            tasks: tasks.map(|tasks| tasks.map(|task| MaybeDone::Future(task)))
+            tasks: Map::map(tasks, |tasks| Map::map(tasks, |task| MaybeDone::Future(task)))
         }
     }
 }

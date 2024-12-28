@@ -123,10 +123,16 @@ mod test
     #[test]
     fn it_works()
     {
-        let a = [1, 2, 3];
+        let a = [1, 2, 3, 4, 5];
 
         let s = a.divide_and_conquer(|x, y| x + y).unwrap();
 
-        println!("{}", s)
+        println!("{}", s);
+
+        tokio_test::block_on(async {
+            let s = a.divide_and_conquer_async(async |x, y| x + y).await.unwrap();
+
+            println!("{}", s);
+        });
     }
 }

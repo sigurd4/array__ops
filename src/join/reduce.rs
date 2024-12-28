@@ -4,7 +4,7 @@ use crate::ops::Map;
 
 use super::MaybeDone;
 
-pub struct FutureDivideAndConquer<T, F, const N: usize>
+pub struct FutureReduce<T, F, const N: usize>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {
@@ -12,7 +12,7 @@ where
     reduce: F
 }
 
-impl<T, F, const N: usize> FutureDivideAndConquer<T, F, N>
+impl<T, F, const N: usize> FutureReduce<T, F, N>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {
@@ -25,7 +25,7 @@ where
     }
 }
 
-impl<T, F, const N: usize> Future for FutureDivideAndConquer<T, F, N>
+impl<T, F, const N: usize> Future for FutureReduce<T, F, N>
 where
     F: FnMut<(T, T), Output: Future<Output = T>>
 {

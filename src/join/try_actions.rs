@@ -1,5 +1,7 @@
 use core::{future::Future, pin::Pin, task::{Context, Poll}};
 
+use crate::ops::Map;
+
 use super::MaybeDone;
 
 pub struct TryActions<T, E, const N: usize>
@@ -16,7 +18,7 @@ where
     pub(crate) fn new(tasks: [T; N]) -> Self
     {
         Self {
-            tasks: tasks.map(|task| MaybeDone::Future(task))
+            tasks: Map::map(tasks, |task| MaybeDone::Future(task))
         }
     }
 }
