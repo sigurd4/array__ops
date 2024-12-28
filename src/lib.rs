@@ -8,6 +8,7 @@
 #![feature(generic_arg_infer)]
 #![feature(maybe_uninit_uninit_array)]
 #![feature(maybe_uninit_array_assume_init)]
+#![feature(specialization)]
 #![feature(const_destruct)]
 #![feature(associated_const_equality)]
 #![feature(const_swap_nonoverlapping)]
@@ -30,7 +31,7 @@
 #![feature(generic_const_exprs)]
 
 /// TODO:
-/// - do transmute in-place, transmuted
+/// - for_each_zip
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -81,14 +82,128 @@ pub mod asm
 {
     use crate::ops::*;
 
+    const I: usize = 2;
     const N: usize = 4;
-    const M: usize = 2;
+    const M: usize = 3;
     const MN: (usize, usize) = (3, 2);
 
     #[inline(never)]
-    pub fn chunks(a: [i32; N]) -> [[i32; M]; N / M]
+    pub fn into_shift(a: [i32; N], b: [i32; M]) -> ([i32; M], [i32; N])
     {
-        a.chunks_exact()
+        a.into_shift_many_left(b)
+    }
+    #[inline(never)]
+    pub fn shift_mut(a: &mut [i32; N], b: &mut [i32; M])
+    {
+        a.shift_many_left(b);
+    }
+    #[inline(never)]
+    pub fn shift_drop(a: &mut [i32; N], b: [i32; M])
+    {
+        a.shift_many_left(b);
+    }
+
+    #[inline(never)]
+    pub fn into_rotate(a: [i32; N]) -> [i32; N]
+    {
+        a.into_rotate_left(1)
+    }
+    #[inline(never)]
+    pub fn rotate_mut(a: &mut [i32; N])
+    {
+        a.rotate_left(1)
+    }
+
+    #[inline(never)]
+    pub fn grey_code_permutation(a: &mut [i32; 1 << I])
+    {
+        a.grey_code_permutation()
+    }
+    #[inline(never)]
+    pub fn bit_rev_permutation(a: &mut [i32; 1 << I])
+    {
+        a.bit_rev_permutation()
+    }
+
+    #[inline(never)]
+    pub fn mul_cross(a: &[i32; 3], b: &[i32; 3]) -> [i32; 3]
+    {
+        a.mul_cross([b])
+    }
+    #[inline(never)]
+    pub fn mul_dot(a: [i32; N], b: [i32; N]) -> i32
+    {
+        a.mul_dot_bias(b, 0)
+    }
+    #[inline(never)]
+    pub fn mul_outer(a: &[i32; N], b: &[i32; N]) -> [[i32; N]; N]
+    {
+        a.mul_outer(b)
+    }
+    #[inline(never)]
+    pub fn proj(a: [f32; N], b: [f32; N]) -> [f32; N]
+    {
+        a.proj(b)
+    }
+
+    #[inline(never)]
+    pub fn magnitude(a: [i32; N]) -> Option<i32>
+    {
+        a.try_magnitude_squared()
+    }
+
+    #[inline(never)]
+    pub fn isolate(a: [i32; N]) -> Option<i32>
+    {
+        a.isolate(0)
+    }
+
+    #[inline(never)]
+    pub fn diagonal_matrix(a: [i32; N]) -> [[i32; N]; N]
+    {
+        a.diagonal_matrix_exact()
+    }
+
+    #[inline(never)]
+    pub fn from_fn() -> [i32; N]
+    {
+        crate::from_fn(|i| i as i32)
+    }
+
+    #[inline(never)]
+    pub fn fold(o: i32, a: [i32; N]) -> i32
+    {
+        a.fold(o, |o, x| o + x)
+    }
+
+    #[inline(never)]
+    pub fn reduce(a: [i32; N]) -> Option<i32>
+    {
+        a.reduce(|x, y| x + y)
+    }
+
+    #[inline(never)]
+    pub fn divide_and_conquer(a: [i32; N]) -> Option<i32>
+    {
+        a.divide_and_conquer(|x, y| x + y)
+    }
+
+    #[inline(never)]
+    pub fn flatmap(a: [[i32; M]; N]) -> [i32; N*M]
+    {
+        a.flatmap(|x| x)
+    }
+
+    #[inline(never)]
+    pub fn map(a: [i32; N]) -> [i32; N]
+    {
+        a.map(|x| x)
+    }
+
+    #[inline(never)]
+    pub fn chunks(a: [i32; N]) -> ([[i32; M]; N / M], [i32; N % M])
+    {
+        a.chunks()
     }
 
     #[inline(never)]
@@ -101,17 +216,6 @@ pub mod asm
     pub fn integrate(a: &mut [i32; N])
     {
         a.integrate();
-    }
-
-    #[inline(never)]
-    pub fn sum_dac(a: [i32; N]) -> Option<i32>
-    {
-        a.divide_and_conquer(|x, y| x + y)
-    }
-    #[inline(never)]
-    pub fn sum_reduce(a: [i32; N]) -> Option<i32>
-    {
-        a.reduce(|x, y| x + y)
     }
 
     #[inline(never)]

@@ -21,7 +21,9 @@ impl<T, const M: usize, const N: usize> ArrayDiagonal<T, M, N> for [[T; N]; M]
     fn diagonal(self) -> [T; crate::min_len(M, N)]
     {
         let mut guard = PartialEmptyGuard::new_left(self);
-        crate::from_fn(move |n| guard.pop().isolate(n))
+        crate::from_fn(move |n| unsafe {
+            guard.pop().isolate(n).unwrap_unchecked()
+        })
     }
     fn diagonal_ref(&self) -> [&T; crate::min_len(M, N)]
     {

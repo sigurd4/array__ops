@@ -2,8 +2,6 @@ use core::{mem::MaybeUninit, ops::AsyncFn};
 
 use array_trait::Array;
 
-use crate::private;
-
 use super::EnumerateVisit;
 
 #[const_trait]

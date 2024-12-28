@@ -361,18 +361,57 @@ mod r#impl
 
     use super::PartialEmptyGuard;
 
+    #[const_trait]
+    trait Spec<const N: usize>: ArrayForm<N, Elem: Default>
+    {
+        fn diagonal<const H: usize, const W: usize>(self) -> [[Self::Elem; W]; H];
+    }
+    impl<const N: usize, A> Spec<N> for A
+    where
+        A: ArrayForm<N, Elem: Default>
+    {
+        default fn diagonal<const H: usize, const W: usize>(self) -> [[Self::Elem; W]; H]
+        {
+            diagonal_or_else_matrix_truncate(self, |_, _| Default::default())
+        }
+    }
+    impl<const N: usize, A> Spec<N> for A
+    where
+        A: ArrayForm<N, Elem: Default + Copy>
+    {
+        fn diagonal<const H: usize, const W: usize>(self) -> [[Self::Elem; W]; H]
+        {
+            diagonal_or_matrix_truncate(self, Default::default())
+        }
+    }
+
     pub(super) fn diagonal_matrix_truncate<A, const N: usize, const H: usize, const W: usize>(array: A) -> [[A::Elem; W]; H]
     where
         A: ArrayForm<N, Elem: Default>
     {
-        diagonal_or_else_matrix_truncate(array, |_, _| Default::default())
+        Spec::diagonal(array)
     }
     
     pub(super) fn diagonal_or_matrix_truncate<A, const N: usize, const H: usize, const W: usize>(array: A, default: A::Elem) -> [[A::Elem; W]; H]
     where
         A: ArrayForm<N, Elem: Copy>
     {
-        diagonal_or_else_matrix_truncate(array, |_, _| default)
+        let mut guard = PartialEmptyGuard::new_left(array);
+
+        let mut dst = [[default; W]; H];
+
+        while guard.more()
+        {
+            let i = guard.index();
+            dst[i][i] = guard.pop();
+        }
+
+        if N <= W && N <= H
+        {
+            guard.done();
+        }
+
+        dst
     }
 
     pub(super) fn diagonal_or_else_matrix_truncate<A, const N: usize, const H: usize, const W: usize, F>(array: A, mut default: F) -> [[A::Elem; W]; H]
@@ -392,7 +431,10 @@ mod r#impl
             }
         ));
 
-        guard.done();
+        if N <= W && N <= H
+        {
+            guard.done();
+        }
     
         dst
     }
