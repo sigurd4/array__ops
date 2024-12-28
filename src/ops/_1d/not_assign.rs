@@ -3,7 +3,7 @@ use core::ops::Not;
 use super::MapAssign;
 
 #[const_trait]
-pub trait ArrayShrAssign<T, const N: usize>: MapAssign<T, N>
+pub trait ArrayNotAssign<T, const N: usize>: MapAssign<T, N>
 {
     fn not_assign_all(&mut self)
     where
@@ -14,7 +14,7 @@ pub trait ArrayShrAssign<T, const N: usize>: MapAssign<T, N>
         T: Not<Output = T>;
 }
 
-impl<T, const N: usize> ArrayShrAssign<T, N> for [T; N]
+impl<T, const N: usize> ArrayNotAssign<T, N> for [T; N]
 {
     fn not_assign_all(&mut self)
     where
