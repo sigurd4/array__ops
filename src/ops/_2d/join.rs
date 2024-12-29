@@ -2,7 +2,7 @@ use core::future::Future;
 
 use array_trait::Array;
 
-use crate::join::{Actions2D, Runs2D, TryActions2D, TryRuns2D};
+use crate::future::{Actions2D, Runs2D, TryActions2D, TryRuns2D};
 
 pub trait ArrayJoin2D<T, const M: usize, const N: usize>: Array<Item = [T; N]>
 {

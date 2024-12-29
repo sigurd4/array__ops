@@ -2,7 +2,7 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use crate::{join::FutureReduce, private::guard::PartialEmptyGuard};
+use crate::{future::FutureReduce, private::guard::PartialEmptyGuard};
 
 use super::ArrayEach;
 

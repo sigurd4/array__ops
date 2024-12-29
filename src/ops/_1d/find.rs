@@ -1,9 +1,9 @@
 use array_trait::Array;
-use slice_ops::SliceOps;
+use slice_ops::ops::SliceFind;
 
 use core::ops::AsyncFn;
 
-use crate::join::TryActions;
+use crate::future::TryActions;
 
 use super::ArrayEnumerateMap;
 

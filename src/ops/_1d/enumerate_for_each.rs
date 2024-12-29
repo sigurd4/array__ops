@@ -2,7 +2,7 @@ use core::{marker::Destruct, ops::AsyncFn};
 
 use array_trait::Array;
 
-use crate::{join::{Actions, TryActions}, private::guard::PartialEmptyGuard};
+use crate::{future::{Actions, TryActions}, private::guard::PartialEmptyGuard};
 
 use super::ArrayEnumerateMap;
 

@@ -7,14 +7,14 @@ use crate::private;
 #[const_trait]
 pub trait ArraySplit<T, const N: usize>: Array<Item = T>
 {
-    fn split_len(n: usize) -> (usize, usize);
-    fn rsplit_len(n: usize) -> (usize, usize);
+    fn split_len(mid: usize) -> (usize, usize);
+    fn rsplit_len(mid: usize) -> (usize, usize);
         
-    fn split_ptr(&self, n: usize) -> (*const T, *const T);
-    fn split_mut_ptr(&mut self, n: usize) -> (*mut T, *mut T);
+    fn split_ptr(&self, mid: usize) -> (*const T, *const T);
+    fn split_mut_ptr(&mut self, mid: usize) -> (*mut T, *mut T);
 
-    fn rsplit_ptr(&self, n: usize) -> (*const T, *const T);
-    fn rsplit_mut_ptr(&mut self, n: usize) -> (*mut T, *mut T);
+    fn rsplit_ptr(&self, mid: usize) -> (*const T, *const T);
+    fn rsplit_mut_ptr(&mut self, mid: usize) -> (*mut T, *mut T);
     
     /// Splits an array at a chosen index.
     fn split_array2<const M: usize>(self) -> ([T; M], [T; N - M])
@@ -69,23 +69,23 @@ impl<T, const N: usize> const ArraySplit<T, N> for [T; N]
     fn split_ptr(&self, mid: usize) -> (*const T, *const T)
     {
         let ptr = self.as_ptr();
-        (ptr, unsafe {ptr.add(slice_ops::split_len(N, mid).0)})
+        (ptr, unsafe {ptr.add(Self::split_len(mid).0)})
     }
     fn split_mut_ptr(&mut self, mid: usize) -> (*mut T, *mut T)
     {
         let ptr = self.as_mut_ptr();
-        (ptr, unsafe {ptr.add(slice_ops::split_len(N, mid).0)})
+        (ptr, unsafe {ptr.add(Self::split_len(mid).0)})
     }
 
     fn rsplit_ptr(&self, mid: usize) -> (*const T, *const T)
     {
         let ptr = self.as_ptr();
-        (ptr, unsafe {ptr.add(slice_ops::rsplit_len(N, mid).0)})
+        (ptr, unsafe {ptr.add(Self::rsplit_len(mid).0)})
     }
     fn rsplit_mut_ptr(&mut self, mid: usize) -> (*mut T, *mut T)
     {
         let ptr = self.as_mut_ptr();
-        (ptr, unsafe {ptr.add(slice_ops::rsplit_len(N, mid).0)})
+        (ptr, unsafe {ptr.add(Self::rsplit_len(mid).0)})
     }
     
     fn split_array2<const M: usize>(self) -> ([T; M], [T; N - M])

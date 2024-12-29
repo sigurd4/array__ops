@@ -36,6 +36,8 @@
 
 //! Provides many useful utility methods for arrays.
 //! 
+//! This crate is a superset of the crate [`slice_ops`].
+//! 
 //! I had to name it `array__ops` because `array_ops` was taken.
 //! 
 //! # Todo
@@ -52,7 +54,7 @@ moddef::moddef!(
         from_fn for warn(non_snake_case)
     },
     pub mod {
-        join for warn(non_snake_case),
+        future for warn(non_snake_case),
         ops for warn(non_snake_case),
         form for warn(non_snake_case)
     },
@@ -60,11 +62,7 @@ moddef::moddef!(
 );
 
 pub use array_trait::*;
-pub use slice_ops;
-pub use slice_ops::Padded;
-pub use slice_ops::Slice;
-pub use slice_ops::SliceOps;
-pub use slice_ops::SlicePrereq;
+pub use slice_ops::padded;
 
 pub const fn min_len(a: usize, b: usize) -> usize
 {
@@ -92,9 +90,7 @@ pub const fn max_len(a: usize, b: usize) -> usize
 #[warn(non_snake_case)]
 pub mod asm
 {
-    use slice_ops::Padded;
-
-    use crate::ops::*;
+    use crate::{ops::*, padded::Padded};
 
     const I: usize = 2;
     const N: usize = 4;
@@ -330,9 +326,7 @@ pub mod asm
 #[warn(non_snake_case)]
 mod tests
 {
-    use slice_ops::Padded;
-
-    use crate::ops::*;
+    use crate::{ops::*, padded::Padded};
 
     #[test]
     fn kronecker()

@@ -2,7 +2,7 @@ use core::future::Future;
 
 use array_trait::Array;
 
-use crate::join::{Actions, Runs, TryActions, TryRuns};
+use crate::future::{Actions, Runs, TryActions, TryRuns};
 
 #[const_trait]
 pub trait ArrayJoin<T, const N: usize>: Array<Item = T>

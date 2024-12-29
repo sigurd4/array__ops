@@ -2,7 +2,7 @@ use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
 
-use crate::{private::guard::PartialDivideAndConquerGuard, join::FutureDivideAndConquer};
+use crate::{private::guard::PartialDivideAndConquerGuard, future::FutureDivideAndConquer};
 
 use super::ArrayEach;
 

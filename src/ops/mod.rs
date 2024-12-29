@@ -5,3 +5,5 @@ moddef::moddef!(
         nd
     }
 );
+
+pub use slice_ops::ops::*;

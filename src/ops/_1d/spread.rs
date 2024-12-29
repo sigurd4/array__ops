@@ -1,9 +1,8 @@
 use core::pin::Pin;
 
 use array_trait::Array;
-use slice_ops::Padded;
 
-use crate::{ops::{ArrayChunks, ArrayTranspose}, private};
+use crate::{ops::{ArrayChunks, ArrayTranspose}, padded::Padded, private};
 
 use super::ArraySplit;
 

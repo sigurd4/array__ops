@@ -17,7 +17,7 @@ alloc = ["slice_ops/alloc"]
 [dependencies]
 moddef = "0.2.6"
 array_trait = "1.0.2"
-slice_ops = "0.2.1"
+slice_ops = "1.0.3"
 
 [dev-dependencies]
 tokio-test = "0.4.4"
