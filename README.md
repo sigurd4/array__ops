@@ -19,9 +19,3 @@ Provides many useful utility methods for arrays.
 This crate is a superset of the crate [`slice_ops`](https://crates.io/crates/slice_ops).
 
 I had to name it `array__ops` because `array_ops` was taken.
-
-# Todo
-
-- for_each_zip
-- nd-ops(?)
-- Document more
