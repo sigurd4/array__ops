@@ -16,7 +16,6 @@
 #![feature(associated_const_equality)]
 #![feature(const_swap_nonoverlapping)]
 #![feature(portable_simd)]
-#![feature(const_swap)]
 #![feature(allocator_api)]
 #![feature(let_chains)]
 #![feature(const_array_each_ref)]
