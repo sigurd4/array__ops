@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait ArrayEnumerate<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Enumerates each element in the array.
     /// 

@@ -1,11 +1,12 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 use super::ArrayTransposeAssign;
 
 #[const_trait]
-pub trait ArrayTranspose<T, const M: usize, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayTranspose<T, const M: usize, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     /// Transposes a two-dimensional array (as if it were a matrix)
     /// 

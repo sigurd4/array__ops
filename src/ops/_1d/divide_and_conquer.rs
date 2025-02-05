@@ -1,13 +1,14 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{private::guard::PartialDivideAndConquerGuard, future::FutureDivideAndConquer};
 
 use super::ArrayEach;
 
 #[const_trait]
-pub trait ArrayDivideAndConquer<T, const N: usize>: Array<Item = T>
+pub trait ArrayDivideAndConquer<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn divide_and_conquer<F>(self, reduce: F) -> Option<T>
     where

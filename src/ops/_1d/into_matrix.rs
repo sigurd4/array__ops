@@ -1,11 +1,12 @@
 use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private::guard::PartialEmptyGuard;
 
 #[const_trait]
-pub trait ArrayIntoMatrix<T, const N: usize>: Array<Item = T>
+pub trait ArrayIntoMatrix<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn diagonal_matrix<const H: usize, const W: usize>(self) -> [[T; W]; H]
     where

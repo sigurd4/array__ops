@@ -1,9 +1,10 @@
 use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait Truncate<T, const N: usize>: Array<Item = T>
+pub trait Truncate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn truncate<const M: usize>(self) -> [T; M]
     where

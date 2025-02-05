@@ -1,13 +1,14 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayZipOuterWith;
 
 #[const_trait]
-pub trait ArrayZipOuter<T, const N: usize>: Array<Item = T>
+pub trait ArrayZipOuter<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn zip_outer<Z, const M: usize>(&self, other: &Z) -> [[(T, Z::Elem); M]; N]
     where

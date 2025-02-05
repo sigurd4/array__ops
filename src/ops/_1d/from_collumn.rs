@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayFromCollumn<T, const N: usize>: Array<Item = T>
+pub trait ArrayFromCollumn<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn from_collumn(collumn: [[T; 1]; N]) -> Self;
     fn from_collumn_ref(collumn: &[[T; 1]; N]) -> &Self;

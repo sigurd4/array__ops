@@ -1,13 +1,14 @@
 use core::{marker::Destruct, ops::AsyncFn};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{future::{Actions, TryActions}, private::guard::PartialEmptyGuard};
 
 use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait ArrayEnumerateForEach<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerateForEach<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn enumerate_for_each<F>(self, action: F)
     where

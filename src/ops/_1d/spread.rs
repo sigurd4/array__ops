@@ -1,13 +1,14 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{ops::{ArrayChunks, ArrayTranspose}, padded::Padded, private};
 
 use super::ArraySplit;
 
 #[const_trait]
-pub trait ArraySpread<T, const N: usize>: Array<Item = T>
+pub trait ArraySpread<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Distributes items of an array equally across a given width, then provides the rest as a separate array.
     /// 

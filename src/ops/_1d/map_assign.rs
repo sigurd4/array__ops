@@ -1,11 +1,12 @@
 use core::{ops::AsyncFn, marker::Destruct};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateMapAssign;
 
 #[const_trait]
-pub trait ArrayMapAssign<T, const N: usize>: Array<Item = T>
+pub trait ArrayMapAssign<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn map_assign<Map>(&mut self, mapper: Map)
     where

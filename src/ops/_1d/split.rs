@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArraySplit<T, const N: usize>: Array<Item = T>
+pub trait ArraySplit<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn split_len(mid: usize) -> (usize, usize);
     fn rsplit_len(mid: usize) -> (usize, usize);

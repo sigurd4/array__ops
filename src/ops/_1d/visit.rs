@@ -1,11 +1,12 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateVisit;
 
 #[const_trait]
-pub trait ArrayVisit<T, const N: usize>: Array<Item = T>
+pub trait ArrayVisit<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Visits each element once, from left to right.
     /// 

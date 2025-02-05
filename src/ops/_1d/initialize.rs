@@ -1,11 +1,12 @@
 use core::{mem::MaybeUninit, ops::AsyncFn};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateVisit;
 
 #[const_trait]
-pub trait ArrayInitialize<T, const N: usize>: Array<Item = MaybeUninit<T>>
+pub trait ArrayInitialize<T, const N: usize>: Array + AsSlice<Item = MaybeUninit<T>>
 {
     fn initialize<F>(&mut self, fill: F) -> &mut [T; N]
     where

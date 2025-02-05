@@ -1,11 +1,12 @@
 use core::ops::AddAssign;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::{ArrayDivideAndConquer, ArrayFold, ArrayReduce};
 
 #[const_trait]
-pub trait ArrayPartialSum<T, const N: usize>: Array<Item = T>
+pub trait ArrayPartialSum<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn partial_sum(self) -> Option<T>
     where

@@ -1,11 +1,12 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayZipKroneckerWith;
 
 #[const_trait]
-pub trait ArrayZipKronecker<T, const M: usize, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayZipKronecker<T, const M: usize, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     fn zip_kronecker<Rhs, const H: usize, const W: usize>(&self, rhs: &Rhs) -> [[(T, <Rhs::Elem as ArrayForm<W>>::Elem); N*W]; M*H]
     where

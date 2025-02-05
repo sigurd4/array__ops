@@ -1,12 +1,13 @@
 use core::ops::{MulAssign, Sub};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 // TODO: Add mul_cross_all in MxN matrix
 #[const_trait]
-pub trait ArrayMulCross<T, const N: usize>: Array<Item = T>
+pub trait ArrayMulCross<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Computes the general cross-product of the two arrays (as if vectors, in the mathematical sense).
     /// 

@@ -1,13 +1,14 @@
 use core::ops::{AddAssign, Mul};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{private::guard::PartialZipEmptyGuard, form::ArrayForm};
 
 use super::{sum::ArrayPartialSum, ArrayZipWith};
 
 #[const_trait]
-pub trait ArrayPartialMulDot<T, const N: usize>: Array<Item = T>
+pub trait ArrayPartialMulDot<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn try_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where

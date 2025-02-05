@@ -1,13 +1,14 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayEnumerateMeet;
 
 #[const_trait]
-pub trait ArrayMeet<T, const N: usize>: Array<Item = T>
+pub trait ArrayMeet<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Visits each element once, from left to right.
     /// 

@@ -1,11 +1,12 @@
 use core::ops::MulAssign;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::{ArrayDivideAndConquer, ArrayFold, ArrayReduce};
 
 #[const_trait]
-pub trait ArrayPartialProduct<T, const N: usize>: Array<Item = T>
+pub trait ArrayPartialProduct<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn try_product(self) -> Option<T>
     where

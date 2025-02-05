@@ -1,13 +1,14 @@
 use core::{ops::AsyncFn, marker::Destruct};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayMeet;
 
 #[const_trait]
-pub trait ArrayZipAssignWith<T, const N: usize>: Array<Item = T>
+pub trait ArrayZipAssignWith<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn zip_assign_with<Rhs, Zip>(&mut self, rhs: Rhs, map: Zip)
     where

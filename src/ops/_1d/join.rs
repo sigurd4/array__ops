@@ -1,11 +1,12 @@
 use core::future::Future;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::future::{Actions, Runs, TryActions, TryRuns};
 
 #[const_trait]
-pub trait ArrayJoin<T, const N: usize>: Array<Item = T>
+pub trait ArrayJoin<T, const N: usize>: Array + AsSlice<Item = T>
 {
     async fn join_actions(self)
     where

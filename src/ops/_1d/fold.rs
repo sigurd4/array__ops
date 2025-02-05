@@ -1,11 +1,12 @@
 use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private::guard::PartialEmptyGuard;
 
 #[const_trait]
-pub trait ArrayFold<T, const N: usize>: Array<Item = T>
+pub trait ArrayFold<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn fold<F, O>(self, default: O, fold: F) -> O
     where

@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayFromItem<T>: Array<Item = T, LENGTH = 1>
+pub trait ArrayFromItem<T>: Array<LENGTH = 1> + AsSlice<Item = T>
 {
     fn from_item(value: T) -> Self;
     fn from_item_ref(value: &T) -> &Self;

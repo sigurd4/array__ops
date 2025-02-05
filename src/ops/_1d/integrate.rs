@@ -1,9 +1,10 @@
 use core::ops::AddAssign;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait ArrayIntegrate<T, const N: usize>: Array<Item = T>
+pub trait ArrayIntegrate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Integrates array (discrete calculus)
     /// 

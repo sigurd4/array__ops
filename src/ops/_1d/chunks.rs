@@ -1,13 +1,14 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 use super::ArraySplit;
 
 #[const_trait]
-pub trait ArrayChunks<T, const N: usize>: Array<Item = T>
+pub trait ArrayChunks<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Divides an array into chunks, then yielding the rest in a separate array.
     /// 

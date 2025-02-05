@@ -1,9 +1,10 @@
 use core::ops::SubAssign;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait ArrayDifferentiate<T, const N: usize>: Array<Item = T>
+pub trait ArrayDifferentiate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Differentiates array (discrete calculus)
     /// 

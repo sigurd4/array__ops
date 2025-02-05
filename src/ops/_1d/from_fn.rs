@@ -1,6 +1,7 @@
 use core::{marker::Destruct, mem::MaybeUninit, ops::AsyncFn};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private::guard::PartialInitGuard;
 
@@ -16,7 +17,7 @@ use core::alloc::Allocator;
 use alloc::{boxed::Box, alloc::Global};
 
 #[const_trait]
-pub trait ArrayFromFn<T, const N: usize>: Array<Item = T>
+pub trait ArrayFromFn<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn from_fn<F>(fill: F) -> Self
     where

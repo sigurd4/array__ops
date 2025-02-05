@@ -1,10 +1,11 @@
 use core::{pin::Pin, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
-pub trait ArrayUnsimd<T, const N: usize, const M: usize>: Array<Item = Simd<T, M>>
+pub trait ArrayUnsimd<T, const N: usize, const M: usize>: Array + AsSlice<Item = Simd<T, M>>
 where
     T: SimdElement,
     LaneCount<M>: SupportedLaneCount

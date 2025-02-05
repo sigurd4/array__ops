@@ -1,11 +1,12 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::{ArrayJoin, ArrayEnumerateMap};
 
 #[const_trait]
-pub trait ArrayEnumerateVisit<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerateVisit<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn enumerate_visit<'a, F>(&'a self, visitor: F)
     where

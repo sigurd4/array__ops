@@ -1,11 +1,12 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateMapOuter;
 
 #[const_trait]
-pub trait ArrayMapOuter<T, const N: usize>: Array<Item = T>
+pub trait ArrayMapOuter<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn map_outer<Map>(&self, mapper: Map) -> [[Map::Output; N]; N]
     where

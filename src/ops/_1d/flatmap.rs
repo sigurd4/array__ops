@@ -1,11 +1,12 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateFlatmap;
 
 #[const_trait]
-pub trait ArrayFlatmap<T, const N: usize>: Array<Item = T>
+pub trait ArrayFlatmap<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Maps all values of an array with a given function.
     /// 

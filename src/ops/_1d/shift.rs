@@ -1,9 +1,10 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{form::MutForm, private};
 
 #[const_trait]
-pub trait ArrayShift<T, const N: usize>: Array<Item = T>
+pub trait ArrayShift<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn into_shift_many_left<const M: usize>(self, items: [T; M]) -> ([T; M], [T; N]);
     fn into_shift_many_right<const M: usize>(self, items: [T; M]) -> ([T; N], [T; M]);

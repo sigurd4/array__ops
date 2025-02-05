@@ -1,13 +1,14 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayEnumerateZipOuterWith;
 
 #[const_trait]
-pub trait ArrayZipOuterWith<T, const N: usize>: Array<Item = T>
+pub trait ArrayZipOuterWith<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn zip_outer_with<Zip, Rhs, const M: usize>(&self, rhs: &Rhs, zipper: Zip) -> [[Zip::Output; M]; N]
     where

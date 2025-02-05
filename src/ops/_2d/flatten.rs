@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayFlatten<T, const M: usize, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayFlatten<T, const M: usize, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     fn flatten(self) -> [T; M*N];
     fn flatten_ref(&self) -> &[T; M*N];

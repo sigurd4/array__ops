@@ -1,7 +1,8 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait ArrayTransposeAssign<T, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayTransposeAssign<T, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     /// Transposes a square matrix in-place.
     /// 

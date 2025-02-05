@@ -1,9 +1,10 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayChain<T, const N: usize>: Array<Item = T>
+pub trait ArrayChain<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Chains two arrays with the same item together.
     /// 

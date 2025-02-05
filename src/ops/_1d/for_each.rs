@@ -1,11 +1,12 @@
 use core::{marker::Destruct, ops::AsyncFn};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArrayEnumerateForEach;
 
 #[const_trait]
-pub trait ArrayForEach<T, const N: usize>: Array<Item = T>
+pub trait ArrayForEach<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn for_each<F>(self, action: F)
     where

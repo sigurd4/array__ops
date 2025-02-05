@@ -1,7 +1,8 @@
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait ArrayPermute<T, const N: usize>: Array<Item = T>
+pub trait ArrayPermute<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Performs the bit-reverse permutation. Length must be a power of 2.
     /// 

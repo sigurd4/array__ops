@@ -1,5 +1,5 @@
 use array_trait::Array;
-use slice_ops::ops::SliceFind;
+use slice_ops::{ops::SliceFind, AsSlice};
 
 use core::ops::AsyncFn;
 
@@ -8,7 +8,7 @@ use crate::future::TryActions;
 use super::ArrayEnumerateMap;
 
 #[const_trait]
-pub trait ArrayFind<T, const N: usize>: Array<Item = T>
+pub trait ArrayFind<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Performs a linear search for the first value that equals `x`.
     /// 

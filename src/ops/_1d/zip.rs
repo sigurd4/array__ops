@@ -1,13 +1,14 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayZipWith;
 
 #[const_trait]
-pub trait ArrayZip<T, const N: usize>: Array<Item = T>
+pub trait ArrayZip<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Combines two arrays with possibly different items into parallel, where each element lines up in the same position.
     /// 

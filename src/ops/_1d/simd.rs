@@ -1,13 +1,14 @@
 use core::{pin::Pin, simd::{LaneCount, Simd, SimdElement, SupportedLaneCount}};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 use super::ArraySplit;
 
 #[const_trait]
-pub trait ArraySimd<T, const N: usize>: Array<Item = T>
+pub trait ArraySimd<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn array_simd<const M: usize>(self) -> ([Simd<T, M>; N / M], [T; N % M])
     where

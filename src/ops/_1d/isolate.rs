@@ -1,9 +1,10 @@
 use core::ops::Bound;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 #[const_trait]
-pub trait ArrayIsolate<T, const N: usize>: Array<Item = T>
+pub trait ArrayIsolate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn isolate(self, i: usize) -> Option<T>;
 }

@@ -1,11 +1,12 @@
 use core::pin::Pin;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayUncollumn<T, const N: usize>: Array<Item = [T; 1]>
+pub trait ArrayUncollumn<T, const N: usize>: Array + AsSlice<Item = [T; 1]>
 {
     fn uncollumn(self) -> [T; N];
     fn uncollumn_ref(&self) -> &[T; N];

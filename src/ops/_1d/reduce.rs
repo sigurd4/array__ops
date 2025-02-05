@@ -1,13 +1,14 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{future::FutureReduce, private::guard::PartialEmptyGuard};
 
 use super::ArrayEach;
 
 #[const_trait]
-pub trait ArrayReduce<T, const N: usize>: Array<Item = T>
+pub trait ArrayReduce<T, const N: usize>: Array + AsSlice<Item = T>
 {
     /// Reduces elements in array into one element, using a given operand
     /// 

@@ -1,13 +1,14 @@
 use core::ops::Mul;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::form::ArrayForm;
 
 use super::ArrayZipKroneckerWith;
 
 #[const_trait]
-pub trait ArrayMulKronecker<T, const M: usize, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayMulKronecker<T, const M: usize, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     fn mul_kronecker<Rhs, U, const H: usize, const W: usize>(&self, rhs: &Rhs) -> [[<T as Mul<U>>::Output; N*W]; M*H]
     where

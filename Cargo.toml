@@ -12,13 +12,13 @@ repository = "https://github.com/sigurd4/array__ops"
 
 [features]
 default = ["alloc"]
-alloc = ["slice_ops/alloc"]
+alloc = ["slice_ops/alloc", "array_trait/alloc"]
 #std = ["alloc"]
 
 [dependencies]
 moddef = "0.2.6"
-array_trait = "1.0.3"
-slice_ops = "1.0.6"
+array_trait = "1.0.7"
+slice_ops = "1.0.7"
 
 [dev-dependencies]
 tokio-test = "0.4.4"

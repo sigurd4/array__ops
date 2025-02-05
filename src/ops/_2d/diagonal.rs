@@ -1,11 +1,12 @@
 use core::{marker::Destruct, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{ops::ArrayIsolate, private::guard::PartialEmptyGuard};
 
 #[const_trait]
-pub trait ArrayDiagonal<T, const M: usize, const N: usize>: Array<Item = [T; N]>
+pub trait ArrayDiagonal<T, const M: usize, const N: usize>: Array + AsSlice<Item = [T; N]>
 {
     fn diagonal(self) -> [T; crate::min_len(M, N)]
     where

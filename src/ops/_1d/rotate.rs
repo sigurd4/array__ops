@@ -1,11 +1,12 @@
 use core::mem::MaybeUninit;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use super::ArraySplit;
 
 #[const_trait]
-pub trait ArrayRotate<T, const N: usize>: Array<Item = T>
+pub trait ArrayRotate<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn into_rotate_left(self, n: usize) -> [T; N];
     fn into_rotate_right(self, n: usize) -> [T; N];

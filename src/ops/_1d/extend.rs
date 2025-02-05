@@ -1,11 +1,12 @@
 use core::marker::Destruct;
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::private;
 
 #[const_trait]
-pub trait ArrayExtend<T, const N: usize>: Array<Item = T>
+pub trait ArrayExtend<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn extend<const M: usize, F>(self, fill: F) -> [T; M]
     where

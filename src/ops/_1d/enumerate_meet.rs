@@ -1,6 +1,7 @@
 use core::{marker::Destruct, ops::AsyncFn, pin::Pin};
 
 use array_trait::Array;
+use slice_ops::AsSlice;
 
 use crate::{private::guard, form::ArrayForm};
 
@@ -9,7 +10,7 @@ use self::guard::PartialEmptyGuard;
 use super::{ArrayJoin, ArrayEnumerateVisit, ArrayEnumerateZipWith};
 
 #[const_trait]
-pub trait ArrayEnumerateMeet<T, const N: usize>: Array<Item = T>
+pub trait ArrayEnumerateMeet<T, const N: usize>: Array + AsSlice<Item = T>
 {
     fn enumerate_meet_each<'a, F, Rhs>(&'a self, rhs: Rhs, visitor: F)
     where
