@@ -8,20 +8,20 @@ use super::{ArrayDivideAndConquer, ArrayFold, ArrayReduce};
 #[const_trait]
 pub trait ArrayPartialProduct<T, const N: usize>: Array + AsSlice<Item = T>
 {
-    fn try_product(self) -> Option<T>
+    fn partial_product(self) -> Option<T>
     where
         T: MulAssign;
     fn product_from<P>(self, from: P) -> P
     where
         P: MulAssign<T>;
-    async fn try_product_async(self) -> Option<T>
+    async fn partial_product_async(self) -> Option<T>
     where
         T: MulAssign;
 }
 
 impl<T, const N: usize> ArrayPartialProduct<T, N> for [T; N]
 {
-    fn try_product(self) -> Option<T>
+    fn partial_product(self) -> Option<T>
     where
         T: MulAssign
     {
@@ -39,7 +39,7 @@ impl<T, const N: usize> ArrayPartialProduct<T, N> for [T; N]
             x
         })
     }
-    async fn try_product_async(self) -> Option<T>
+    async fn partial_product_async(self) -> Option<T>
     where
         T: MulAssign
     {

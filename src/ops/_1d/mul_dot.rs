@@ -10,12 +10,12 @@ use super::{sum::ArrayPartialSum, ArrayZipWith};
 #[const_trait]
 pub trait ArrayPartialMulDot<T, const N: usize>: Array + AsSlice<Item = T>
 {
-    fn try_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
+    fn partial_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
         Rhs: ArrayForm<N>,
         T: Mul<Rhs::Elem, Output: AddAssign>;
 
-    async fn try_mul_dot_async<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
+    async fn partial_mul_dot_async<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
         Rhs: ArrayForm<N>,
         T: Mul<Rhs::Elem, Output: AddAssign>;
@@ -35,7 +35,7 @@ pub trait ArrayPartialMulDot<T, const N: usize>: Array + AsSlice<Item = T>
 
 impl<T, const N: usize> ArrayPartialMulDot<T, N> for [T; N]
 {
-    fn try_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
+    fn partial_mul_dot<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
         Rhs: ArrayForm<N>,
         T: Mul<Rhs::Elem, Output: AddAssign>
@@ -63,7 +63,7 @@ impl<T, const N: usize> ArrayPartialMulDot<T, N> for [T; N]
         value
     }
     
-    async fn try_mul_dot_async<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
+    async fn partial_mul_dot_async<Rhs>(self, rhs: Rhs) -> Option<<T as Mul<Rhs::Elem>>::Output>
     where
         Rhs: ArrayForm<N>,
         T: Mul<Rhs::Elem, Output: AddAssign>
@@ -103,7 +103,7 @@ impl<T, const N: usize> ArrayPartialMulDot<T, N> for [T; N]
         T: Mul<Rhs::Elem, Output = U>,
         U: AddAssign
     {
-        if let Some(x) = self.try_mul_dot_async(rhs).await
+        if let Some(x) = self.partial_mul_dot_async(rhs).await
         {
             bias += x
         }

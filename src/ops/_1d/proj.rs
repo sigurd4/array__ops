@@ -25,8 +25,8 @@ impl<T, const N: usize> ArrayProj<T, N> for [T; N]
         {
             return private::empty()
         }
-        let uv = self.try_mul_dot(rhs);
-        let uu = self.try_magnitude_squared();
+        let uv = self.partial_mul_dot(rhs);
+        let uu = self.partial_magnitude_squared();
         let a = unsafe {
             uv.unwrap_unchecked()/uu.unwrap_unchecked()
         };
@@ -41,8 +41,8 @@ impl<T, const N: usize> ArrayProj<T, N> for [T; N]
             return private::empty()
         }
         let (uv, uu) = core::future::join!(
-            self.try_mul_dot_async(rhs),
-            self.try_magnitude_squared_async()
+            self.partial_mul_dot_async(rhs),
+            self.partial_magnitude_squared_async()
         ).await;
         let a = unsafe {
             uv.unwrap_unchecked()/uu.unwrap_unchecked()

@@ -201,7 +201,7 @@ pub mod asm
     #[inline(never)]
     pub fn magnitude(a: [i32; N]) -> Option<i32>
     {
-        a.try_magnitude_squared()
+        a.partial_magnitude_squared()
     }
 
     #[inline(never)]
