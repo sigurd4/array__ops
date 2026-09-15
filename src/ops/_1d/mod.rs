@@ -44,6 +44,7 @@ moddef::moddef!(
         magnitude,
         map_assign,
         map_outer,
+        map_reduce,
         map,
         meet,
         minmax,

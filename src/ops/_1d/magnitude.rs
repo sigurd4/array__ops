@@ -1,7 +1,5 @@
 use core::ops::{AddAssign, Mul};
 
-use slice_ops::ops::SliceVisit;
-
 use super::{ArrayPartialMulDot, ArrayVisit};
 
 #[const_trait]

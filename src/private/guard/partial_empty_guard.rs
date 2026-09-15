@@ -92,18 +92,19 @@ where
         }
     }
 
-    pub fn reduce<F>(mut self, mut reduce: F) -> Option<A::Elem>
+    pub fn map_reduce<F1, F2>(mut self, mut mapper: F1, mut reduce: F2) -> Option<F1::Output>
     where
-        F: FnMut(A::Elem, A::Elem) -> A::Elem
+        F1: FnMut<(A::Elem,)>,
+        F2: FnMut(F1::Output, F1::Output) -> F1::Output
     {
         let mut value = None;
         if self.more()
         {
-            let value = value.insert(self.pop());
+            let value = value.insert(mapper(self.pop()));
             while self.more()
             {
                 unsafe {
-                    core::ptr::write(value, reduce(core::ptr::read(value), self.pop()));
+                    core::ptr::write(value, reduce(core::ptr::read(value), mapper(self.pop())));
                 }
             }
         }
@@ -112,19 +113,34 @@ where
         value
     }
 
-    pub fn fold<U, F>(mut self, mut default: U, mut fold: F) -> U
+    pub fn map_fold<U, F1, F2>(mut self, mut mapper: F1, mut default: U, mut fold: F2) -> U
     where
-        F: FnMut(U, A::Elem) -> U
+        F1: FnMut<(A::Elem,)>,
+        F2: FnMut(U, F1::Output) -> U
     {
         while self.more()
         {
             unsafe {
-                core::ptr::write(&mut default, fold(core::ptr::read(&default), self.pop()));
+                core::ptr::write(&mut default, fold(core::ptr::read(&default), mapper(self.pop())));
             }
         }
         self.done();
 
         default
+    }
+
+    pub fn reduce<F>(self, reduce: F) -> Option<A::Elem>
+    where
+        F: FnMut(A::Elem, A::Elem) -> A::Elem
+    {
+        self.map_reduce(|z| z, reduce)
+    }
+
+    pub fn fold<U, F>(self, default: U, fold: F) -> U
+    where
+        F: FnMut(U, A::Elem) -> U
+    {
+        self.map_fold(|z| z, default, fold)
     }
 
     pub const fn done(self)
